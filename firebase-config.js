@@ -109,11 +109,10 @@ async function saveToFirebase(d) {
     const user = await ensureAuth();
     const ts = Date.now();
     const uid = user ? user.uid : null;
-    const ktpUrl = d.ktp ? await uploadDataURL("ktp/" + d.docNo + "_" + ts + ".jpg", d.ktp) : null;
     const sigUrl = d.signature ? await uploadDataURL("sig/" + d.docNo + "_" + ts + ".png", d.signature) : null;
     const doc = {
       cat: d.cat, catName: d.catName, docNo: d.docNo, date: d.date, nama: d.nama, nik: d.nik,
-      perusahaan: d.perusahaan, ktpName: d.ktpName, ktpUrl: ktpUrl, signatureUrl: sigUrl,
+      perusahaan: d.perusahaan, signatureUrl: sigUrl,
       rows: d.rows || [], rowsText: rowsToText(d), status: "Menunggu verifikasi",
       uid: uid || null, createdAt: ts,            // epoch ms -> orderByChild("createdAt")
     };
@@ -207,8 +206,8 @@ async function saveToSheet(d) {
     }).join(NL);
     const payload = {
       docId: SHEET_DOC_ID, cat: d.cat, catName: d.catName, docNo: d.docNo, date: d.date,
-      nama: d.nama, nik: d.nik, perusahaan: d.perusahaan, ktpName: d.ktpName,
-      ktp: d.ktp, signature: d.signature, rows: rowsText, status: "Menunggu verifikasi"
+      nama: d.nama, nik: d.nik, perusahaan: d.perusahaan,
+      signature: d.signature, rows: rowsText, status: "Menunggu verifikasi"
     };
     const res = await fetch(SHEET_ENDPOINT, {
       method: "POST", mode: "cors", redirect: "follow",
