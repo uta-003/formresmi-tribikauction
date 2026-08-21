@@ -2,6 +2,7 @@
 """Generator untuk tiga form Tribik Auction (Pelelangan Mobil)."""
 BASE_DIR = r"C:\Users\User\.cline\data\workspaces\chat\tribik-auction-forms"
 
+WA_NUMBER = '628111454507'  # <-- ganti ke nomor WhatsApp Tribik Auction (format internasional, tanpa +, tanpa spasi)
 CSS = """
 :root {
     --primary: #6366f1; --primary-light: #818cf8; --secondary: #a855f7;
@@ -46,8 +47,8 @@ body { font-family: 'Poppins', sans-serif; background: var(--background); color:
 .btn-cancel:hover { background: #e2e8f0; }
 .status-notice { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin: 20px 0; color: var(--success); font-size: 14px; }
 .error-message { color: var(--danger); font-size: 12px; margin-bottom: 10px; text-align: center; }
-.signature-box { border: 1px solid #e2e8f0; border-radius: 8px; min-height: 130px; background: #f8fafc; display: flex; align-items: center; justify-content: center; margin: 12px 0; text-align: center; cursor: pointer; }
-.signature-box canvas { width: 100%; height: 130px; cursor: crosshair; border-radius: 8px; }
+.signature-box { border: 1px solid #e2e8f0; border-radius: 8px; min-height: 140px; background: #f8fafc; display: flex; align-items: center; justify-content: center; margin: 12px auto; max-width: 560px; text-align: center; cursor: pointer; }
+.signature-box canvas { width: 100%; max-width: 560px; height: auto; max-height: 140px; cursor: crosshair; border-radius: 8px; }
 .signature-actions { display: flex; gap: 10px; margin-top: 8px; }
 .signature-actions button { flex: 1; padding: 10px; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 13px; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: var(--text); }
 .signature-actions button:hover { background: #f1f5f9; }
@@ -101,7 +102,7 @@ html { scroll-behavior: smooth; }
 .checkbox-option:hover { transform: scale(1.03); }
 .camera-preview { border-radius: 14px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 8px 28px rgba(0,0,0,.2); }
 .camera-feed { display: block; transform: scale(1); transition: transform .1s; }
-#overlay-ktp, #overlay-sim { pointer-events: none; }
+#overlay-sim { pointer-events: none; }
 .frame-overlay { display: block; }
 .btn-open, .btn-capture, .btn-cancel-cam, .btn-file {
     font-weight: 500; position: relative; overflow: hidden;
@@ -175,9 +176,32 @@ html.dark .theme-toggle { background: rgba(255,255,255,.08); border-color: rgba(
     .status-notice { font-size: 13px; padding: 10px 12px; }
     .camera-frame { min-height: 110px; }
     .camera-preview { border-radius: 12px; }
-    .signature-box, .signature-box canvas { min-height: 118px; height: 118px; }
+    .signature-box { min-height: 140px; }
     .container { max-width: 100%; }
 }
+/* ===== Precision & UX refinements (PC + Mobile) ===== */
+body { background: radial-gradient(900px 700px at 88% -10%, rgba(168,85,247,.10), transparent 55%), radial-gradient(800px 620px at -8% 6%, rgba(99,102,241,.12), transparent 55%), var(--background); }
+.req { color: var(--danger); font-weight: 700; margin-left: 3px; }
+.form-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.form-actions .btn-submit, .form-actions .btn-cancel { margin-top: 0; }
+.form-group select[multiple] { padding: 6px; }
+.form-group select[multiple] option { padding: 8px 10px; border-radius: 6px; }
+.form-group select[multiple] option:checked { background: var(--primary); color: #fff; }
+html.dark .form-group select[multiple] option:checked { background: var(--primary); }
+.error-message { color: var(--danger); font-size: 13px; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.28); border-radius: 8px; padding: 11px 14px; margin-bottom: 12px; text-align: left; display: flex; align-items: center; gap: 9px; }
+html.dark .error-message { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.42); }
+.btn-submit:focus-visible, .btn-cancel:focus-visible, .btn-open:focus-visible, .btn-capture:focus-visible, .btn-cancel-cam:focus-visible, .btn-file:focus-visible, .signature-actions button:focus-visible { outline: 3px solid rgba(99,102,241,.5); outline-offset: 2px; }
+@media (min-width: 641px){
+    .form-actions { flex-direction: row; justify-content: center; align-items: center; }
+    .form-actions .btn-submit, .form-actions .btn-cancel { width: auto; min-width: 230px; }
+}
+@media (max-width: 640px){
+    .header { border-radius: 14px; background: rgba(255,255,255,.6); border: 1px solid rgba(99,102,241,.12); padding: 20px 14px 15px; box-shadow: 0 4px 18px rgba(0,0,0,.04); }
+    .form-actions { position: sticky; bottom: 0; z-index: 9; background: rgba(248,250,252,.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 12px 12px 16px; margin: 22px -12px -12px; border-radius: 16px 16px 0 0; border-top: 1px solid rgba(99,102,241,.16); box-shadow: 0 -6px 22px rgba(0,0,0,.08); }
+    html.dark .header { background: rgba(21,30,51,.65); border-color: rgba(99,102,241,.2); }
+    html.dark .form-actions { background: rgba(11,18,32,.9); border-top-color: rgba(99,102,241,.25); }
+}
+
 """
 
 
@@ -207,12 +231,12 @@ def applicant_section():
     return ('''        <div class="form-section">
             <h2>Data Pemohon</h2>
             <div class="field-row">
-                <div class="form-group"><label>Nama Lengkap</label><input type="text" name="nama-lengkap" required placeholder="Masukkan nama lengkap"></div>
+                <div class="form-group"><label>Nama Lengkap<span class="req">*</span></label><input type="text" name="nama-lengkap" required placeholder="Masukkan nama lengkap"></div>
                 <div class="form-group"><label>No. Identitas</label><input type="text" name="no-identitas" placeholder="KTP/Sim/Paspor"></div>
             </div>
             <div class="field-row">
-                <div class="form-group"><label>No. Telepon</label><input type="tel" name="no-telepon" required placeholder="Nomor telepon"></div>
-                <div class="form-group"><label>Email</label><input type="email" name="email" required placeholder="contoh@email.com"></div>
+                <div class="form-group"><label>No. Telepon<span class="req">*</span></label><input type="tel" name="no-telepon" required placeholder="Nomor telepon"></div>
+                <div class="form-group"><label>Email<span class="req">*</span></label><input type="email" name="email" required placeholder="contoh@email.com"></div>
             </div>
         </div>
 ''')
@@ -220,22 +244,6 @@ def applicant_section():
 def upload_section():
     return ('''        <div class="form-section">
             <h2>Upload Dokumen Identitas</h2>
-            <!-- KTP -->
-            <div class="form-group">
-                <label>Dokumen KTP</label>
-                <button type="button" class="btn-open" data-doc="ktp"><i class="fas fa-camera"></i> Buka Kamera</button>
-                <div class="camera-preview" id="preview-ktp">
-                    <video class="camera-feed" id="video-ktp" autoplay playsinline></video>
-                    <canvas class="frame-overlay" id="overlay-ktp"></canvas>
-                </div>
-                <div class="camera-controls" id="controls-ktp" style="display:none;">
-                    <button type="button" class="btn-capture" data-doc="ktp"><i class="fas fa-camera-retro"></i> Ambil Foto</button>
-                    <button type="button" class="btn-cancel-cam" data-doc="ktp"><i class="fas fa-times"></i> Batal</button>
-                </div>
-                <div class="camera-frame" id="ktpFrame"><div class="frame-guide">KTP akan tampil di sini</div></div>
-                <label class="btn-file" for="ktpFile"><i class="fas fa-folder-open"></i> Pilih dari Galeri</label>
-                <input type="file" name="ktp-document" accept="image/*" class="file-input" id="ktpFile">
-            </div>
             <!-- SIM -->
             <div class="form-group">
                 <label>Dokumen SIM</label>
@@ -269,7 +277,7 @@ def signature_section():
 ''')
 
 def buttons_section():
-    return ('''        <div style="text-align: center; margin-top: 30px;">
+    return ('''        <div class="form-actions">
             <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Kirim ke WhatsApp</button>
             <button type="button" class="btn-cancel" onclick="window.history.back()"><i class="fas fa-times"></i> Batal</button>
         </div>
@@ -331,6 +339,7 @@ COMMON_JS = '''
 
         // --- Camera capture with KTP/SIM frame overlay ---
         var cameraState = {};
+        var sigDrawn = false;
         function drawCardFrame(canvas, docType) {
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
@@ -360,7 +369,7 @@ COMMON_JS = '''
             ctx.font = 'bold 13px Poppins, sans-serif';
             ctx.fillStyle = '#fff';
             ctx.textAlign = 'center';
-            ctx.fillText(docType === 'ktp' ? 'SCAN KTP' : 'SCAN SIM', w / 2, cy - 8);
+            ctx.fillText('SCAN SIM', w / 2, cy - 8);
             ctx.fillText('Letakkan dokumen di dalam bingkai', w / 2, cy + ch + 24);
         }
 
@@ -425,16 +434,45 @@ COMMON_JS = '''
 
         function initSignature() {
             const canvas = document.getElementById('sigCanvas');
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+            // Backing tetap 4:1 (560x140) supaya tanda tangan tajam & tak terdistorsi di semua lebar.
+            canvas.width = 560; canvas.height = 140;
+            ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
             let drawing = false;
-            canvas.addEventListener('mousedown', function(e){ drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-            canvas.addEventListener('mousemove', function(e){ if(drawing){ ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
-            canvas.addEventListener('mouseup', function(){ drawing = false; });
-            canvas.addEventListener('touchstart', function(e){ e.preventDefault(); drawing = true; ctx.beginPath(); const t = e.touches[0]; ctx.moveTo(t.clientX, t.clientY); });
-            canvas.addEventListener('touchmove', function(e){ e.preventDefault(); if(drawing){ const t = e.touches[0]; ctx.lineTo(t.clientX, t.clientY); ctx.stroke(); } });
+            function toCanvas(pt) {
+                const r = canvas.getBoundingClientRect();
+                const sx = canvas.width / r.width;
+                const sy = canvas.height / r.height;
+                return { x: (pt.clientX - r.left) * sx, y: (pt.clientY - r.top) * sy };
+            }
+            function start(e){ const p = toCanvas(e.touches ? e.touches[0] : e); drawing = true; ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+            function draw(e){ if (e && e.touches) e.preventDefault(); if (!drawing) return; const p = toCanvas(e.touches ? e.touches[0] : e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', function(){ drawing = false; ctx.closePath(); });
+            canvas.addEventListener('mouseleave', function(){ drawing = false; });
+            canvas.addEventListener('touchstart', function(e){ e.preventDefault(); start(e); });
+            canvas.addEventListener('touchmove', function(e){ e.preventDefault(); draw(e); });
             canvas.addEventListener('touchend', function(){ drawing = false; });
-            document.getElementById('sigClear').addEventListener('click', function(){ ctx.clearRect(0, 0, canvas.width, canvas.height); });
+            document.getElementById('sigClear').addEventListener('click', function(){ ctx.clearRect(0, 0, canvas.width, canvas.height); sigDrawn = false; });
+            var saveBtn = document.getElementById('sigSave');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function(){
+                    try { localStorage.setItem('tribik_sig_'+document.title, canvas.toDataURL('image/png')); } catch(err){}
+                    sigDrawn = true;
+                    showNotice(document.querySelector('.signature-box'), 'Tanda tangan tersimpan.');
+                });
+            }
+            // pulihkan tanda tangan yang pernah disimpan (jika ada)
+            try {
+                var _saved = localStorage.getItem('tribik_sig_'+document.title);
+                if (_saved) {
+                    var _img = new Image();
+                    _img.onload = function(){ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(_img,0,0,canvas.width,canvas.height); sigDrawn = true; };
+                    _img.src = _saved;
+                }
+            } catch(err){}
         }
 
         function showNotice(formEl, msg) {
@@ -449,24 +487,48 @@ COMMON_JS = '''
     </script>
 '''
 
-def submit_js(form_id, wa_number='628111454507'):
+def submit_js(form_id, wa_number=WA_NUMBER):
     return ("""    <script>
         document.getElementById('autoForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
-            const name = formData.get('nama-lengkap') || 'Unknown';
             const selected = formData.getAll('select-list') || [];
+            const required = ['nama-lengkap', 'no-telepon', 'email'];
+            const labels = {
+              'nama-lengkap': 'Nama Lengkap',
+              'no-identitas': 'No. Identitas',
+              'no-telepon': 'No. Telepon',
+              'email': 'Email',
+              'perusahaan': 'Perusahaan',
+              'no-rm': 'No. RM',
+              'no-polisi': 'No. Polisi',
+              'tipe-unit': 'Tipe Unit',
+              'tanggal-pelaksanaan': 'Tanggal Pelaksanaan',
+              'tanggal-pengambilan': 'Tanggal Pengambilan',
+              'waktu-pengambilan': 'Waktu Pengambilan',
+              'estimasi-harga': 'Estimasi Harga'
+            };
             let isValid = true;
             if (selected.length === 0) { showError('Mohon pilih minimal satu item'); isValid = false; }
-            const requiredFields = ['nama-lengkap', 'no-telepon', 'email'];
-            requiredFields.forEach(function(fn){
+            required.forEach(function(fn){
                 const v = formData.get(fn);
-                if(!v || v.trim()===''){ showError('Field '+fn+' wajib diisi'); isValid=false; }
+                if (!v || v.trim() === '') { showError('Field ' + fn + ' wajib diisi'); isValid = false; }
             });
             if (!isValid) return;
-            const waUrl = 'https://wa.me/""" + wa_number + """?text=';
-            const text = '*""" + form_id + """ - Tribik Auction*\\n*Nama:* '+name+'\\n*Terpilih:* '+(selected.join(', '))+'\\n*Status:* Form dikirim';
-            window.open(waUrl+encodeURIComponent(text), '_blank');
+            const NL = String.fromCharCode(10);
+            const lines = [];
+            lines.push('*' + form_id + ' - Tribik Auction*');
+            lines.push('*Nama:* ' + (formData.get('nama-lengkap') || '-'));
+            for (const key in labels) {
+                const val = formData.get(key);
+                if (val && val.trim() !== '') lines.push('*' + labels[key] + ':* ' + val);
+            }
+            lines.push('*Terpilih:* ' + (selected.join(', ') || '-'));
+            lines.push('*Tanda Tangan:* ' + (sigDrawn ? 'telah ditandatangani' : 'belum'));
+            lines.push('*Status:* Form dikirim');
+            const text = lines.join(NL);
+            const waUrl = 'https://wa.me/' + wa_number + '?text=' + encodeURIComponent(text);
+            window.open(waUrl, '_blank');
             showNotice(document.getElementById('autoForm'), 'Form berhasil dikirim ke WhatsApp Tribik Auction.');
         });
         function showError(msg) {
@@ -475,13 +537,15 @@ def submit_js(form_id, wa_number='628111454507'):
             errs.forEach(function(el){ el.remove(); });
             const el = document.createElement('div');
             el.className = 'error-message';
-            el.innerHTML = '<i class="fas fa-exclamation-circle"></i> '+msg;
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-exclamation-circle';
+            el.appendChild(icon);
+            el.appendChild(document.createTextNode(' ' + msg));
             const fg = document.querySelector('form .form-group');
             if (fg) fg.insertBefore(el, fg.firstElementChild); else document.querySelector('form').prepend(el);
         }
     </script>
 """)
-
 
 # --- Form 1: Pengajuan Cek Unit ---
 def build_form_cek_unit():
@@ -489,7 +553,7 @@ def build_form_cek_unit():
     select_block = '''        <div class="form-section">
             <h2>Pilih Unit</h2>
             <div class="form-group">
-                <label>Pilih Unit (Bisa lebih dari satu):</label>
+                <label>Pilih Unit (Bisa lebih dari satu):<span class="req">*</span></label>
                 <select multiple name="select-list" required size="5">
                     <option value="Unit 001 - Mazda CX-5">Unit 001 - Mazda CX-5</option>
                     <option value="Unit 002 - Toyota Fortuner">Unit 002 - Toyota Fortuner</option>
@@ -504,7 +568,7 @@ def build_form_cek_unit():
             <h2>Data Unit/Mobil</h2>
             <div class="field-row">
                 <div class="form-group"><label>No. RM (Rekening Modal)</label><input type="text" name="no-rm" placeholder="Nomor Rekening Modal"></div>
-                <div class="form-group"><label>Tanggal Pelaksanaan</label><input type="date" name="tanggal-pelaksanaan" required></div>
+                <div class="form-group"><label>Tanggal Pelaksanaan<span class="req">*</span></label><input type="date" name="tanggal-pelaksanaan" required></div>
             </div>
             <div class="form-group"><label>Estimasi Harga</label><input type="number" name="estimasi-harga" placeholder="Rp"></div>
         </div>
@@ -513,7 +577,6 @@ def build_form_cek_unit():
     html += COMMON_JS + '''
     <script>
         document.addEventListener('DOMContentLoaded', function(){
-            bindUpload('ktpFile','ktpFrame');
             bindUpload('simFile','simFrame');
             initSignature();
         });
@@ -527,7 +590,7 @@ def build_form_pengambilan_barang():
     select_block = '''        <div class="form-section">
             <h2>Pilih Barang</h2>
             <div class="form-group">
-                <label>Pilih Barang (Bisa lebih dari satu):</label>
+                <label>Pilih Barang (Bisa lebih dari satu):<span class="req">*</span></label>
                 <select multiple name="select-list" required size="5">
                     <option value="Barang 001 - Unit Mobil Sedan">Barang 001 - Unit Mobil Sedan</option>
                     <option value="Barang 002 - Unit SUV">Barang 002 - Unit SUV</option>
@@ -545,7 +608,7 @@ def build_form_pengambilan_barang():
                 <div class="form-group"><label>No. Polisi Unit</label><input type="text" name="no-polisi" placeholder="Nomor Polisi"></div>
             </div>
             <div class="field-row">
-                <div class="form-group"><label>Tanggal Pengambilan</label><input type="date" name="tanggal-pengambilan" required></div>
+                <div class="form-group"><label>Tanggal Pengambilan<span class="req">*</span></label><input type="date" name="tanggal-pengambilan" required></div>
                 <div class="form-group"><label>Waktu Pengambilan</label><input type="time" name="waktu-pengambilan" required></div>
             </div>
         </div>
@@ -554,7 +617,6 @@ def build_form_pengambilan_barang():
     html += COMMON_JS + '''
     <script>
         document.addEventListener('DOMContentLoaded', function(){
-            bindUpload('ktpFile','ktpFrame');
             bindUpload('simFile','simFrame');
             initSignature();
         });
@@ -568,7 +630,7 @@ def build_form_pengambilan_unit():
     select_block = '''        <div class="form-section">
             <h2>Pilih Unit</h2>
             <div class="form-group">
-                <label>Pilih Unit (Bisa lebih dari satu):</label>
+                <label>Pilih Unit (Bisa lebih dari satu):<span class="req">*</span></label>
                 <select multiple name="select-list" required size="5">
                     <option value="Unit 001 - Sedan">Unit 001 - Sedan</option>
                     <option value="Unit 002 - SUV">Unit 002 - SUV</option>
@@ -597,7 +659,7 @@ def build_form_pengambilan_unit():
                         <option value="Minivan">Minivan</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Tanggal Pengambilan</label><input type="date" name="tanggal-pengambilan" required></div>
+                <div class="form-group"><label>Tanggal Pengambilan<span class="req">*</span></label><input type="date" name="tanggal-pengambilan" required></div>
             </div>
         </div>
 '''
@@ -605,7 +667,6 @@ def build_form_pengambilan_unit():
     html += COMMON_JS + '''
     <script>
         document.addEventListener('DOMContentLoaded', function(){
-            bindUpload('ktpFile','ktpFrame');
             bindUpload('simFile','simFrame');
             initSignature();
         });
