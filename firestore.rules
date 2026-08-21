@@ -1,0 +1,15 @@
+// DEPRECATED: Firestore tidak lagi dipakai oleh portal.
+// Backend beralih ke Firebase Realtime Database -- lihat database.rules.json.
+// File ini tetap disimpan bila suatu hari proyek kembali memakai Firestore.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /pengajuan/{docId} {
+      // MODE TERBUKA (biar data langsung masuk, tanpa harus aktifkan Anonymous auth)
+      // Semua orang boleh membaca & menambah dokumen pengajuan.
+      // TAMBAHKAN autentikasi di sini nanti untuk keamanan produksi, mis.:
+      //   allow read, create, update, delete: if request.auth != null;
+      allow read, create, update, delete: if true;
+    }
+  }
+}

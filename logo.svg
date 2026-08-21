@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 64" width="200" height="64" role="img" aria-label="Tribik Auction logo">
+  <defs>
+    <linearGradient id="tribikGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="200" height="64" rx="16" fill="url(#tribikGrad)"/>
+  <text x="24" y="42" font-family="Poppins,Arial,Helvetica,sans-serif" font-size="22" font-weight="700" fill="#ffffff">TRIBIK</text>
+  <text x="98" y="42" font-family="Poppins,Arial,Helvetica,sans-serif" font-size="22" font-weight="400" fill="#ffffff">AUCTION</text>
+</svg>

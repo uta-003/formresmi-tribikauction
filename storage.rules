@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // MODE TERBUKA (biar foto KTP & tanda tangan langsung ter-upload tanpa auth)
+    // Folder ktp/ & sig/ boleh dibaca & ditulis siapa saja.
+    match /ktp/{allPaths=**} {
+      allow read, create, update, delete: if true;
+    }
+    match /sig/{allPaths=**} {
+      allow read, create, update, delete: if true;
+    }
+    // Default: semua path lain butuh auth (dikunci)
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
