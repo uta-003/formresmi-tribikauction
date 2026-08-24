@@ -371,7 +371,10 @@ footer b{color:#cbd5e1}
           </div>
           <div class="cam-row">
             <button type="button" class="btn btn-ghost btn-open-cam" id="camOpen">📷 Buka Kamera</button>
-            <label class="filepill" for="fKtp" id="ktpPill">
+            <!-- Upload file/galeri disembunyikan: pengguna hanya memakai fitur kamera.
+                 Elemen dipertahankan (style="display:none") agar seluruh handler JS tetap aman;
+                 untuk mengaktifkan kembali, hapus saja style tersebut. -->
+            <label class="filepill" for="fKtp" id="ktpPill" style="display:none">
               <span class="ic">🪪</span>
               <span class="t"><b id="ktpName">Upload Foto KTP / ID Card...</b><span>Klik untuk memilih file</span></span>
               <input type="file" id="fKtp" accept="image/*">
