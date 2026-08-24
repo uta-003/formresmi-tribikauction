@@ -147,6 +147,8 @@ textarea{resize:vertical;min-height:54px}
 .btn-sm{padding:7px 13px;font-size:12.5px}
 .add-row{width:100%;border:1.5px dashed rgba(255,255,255,.24);color:var(--primary);background:rgba(255,82,82,.06);border-radius:12px;padding:11px;font-weight:700;font-size:13px;transition:.2s}
 .add-row:hover{background:rgba(255,82,82,.14);border-color:var(--primary);color:#ff7b7b}
+.rows-note{font-size:12px;color:var(--muted);margin:-8px 0 12px}
+.rows-note .req{color:var(--err);font-weight:800}
 
 /* signature + terms + actions */
 .sigbox{width:100%;height:190px;border:2px dashed rgba(255,82,82,.45);border-radius:14px;background:#fff;touch-action:none;cursor:crosshair;transition:border-color .2s, box-shadow .2s}
@@ -393,6 +395,7 @@ footer b{color:#cbd5e1}
   <!-- Dynamic rows per category (template dipasang via JS) -->
   <div class="card" id="rowsCard">
     <h2><span class="num" id="rowsNum">3</span> <span id="rowsTitle">Daftar Unit Kendaraan</span></h2>
+    <div class="rows-note">Wajib diisi — minimal satu baris data; kolom bertanda <span class="req">*</span> tidak boleh kosong.</div>
     <div id="rowsArea"></div>
     <button class="add-row" id="addRowBtn">+ Tambah Nopol Kendaraan</button>
   </div>
@@ -504,7 +507,7 @@ const CATS = {
 };
 const state = {
   cat: 'cek',
-  rows: [],
+  rows: [{}],   // point 3 default terbuka: minimal satu baris siap diisi
   ktpName: '',
   ktpData: '',
   draft: null,
@@ -609,9 +612,9 @@ function rowTemplate(cat, data){
   data = data || {};
   if(cat==='barang'){
     return '<div class="row g3">'
-      +'<div><label>Nama / Rincian Barang</label><input type="text" class="r-nama" value="'+(data.nama||'')+'" placeholder="cth: Dokumen STNK, kunci, dll"></div>'
+      +'<div><label>Nama / Rincian Barang <span class="req">*</span></label><input type="text" class="r-nama" value="'+(data.nama||'')+'" placeholder="cth: Dokumen STNK, kunci, dll"></div>'
       +'<div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-      +'<div><label>Jumlah</label><input type="number" min="1" class="r-jml" value="'+(data.jml||1)+'"></div>'
+      +'<div><label>Jumlah <span class="req">*</span></label><input type="number" min="1" class="r-jml" value="'+(data.jml||1)+'"></div>'
       +'<div><label>Satuan</label><input type="text" class="r-sat" value="'+(data.sat||'')+'" placeholder="unit/lbr"></div>'
       +'</div>'
       +'<div><label>Keterangan / Peruntukan</label><input type="text" class="r-ket" value="'+(data.ket||'')+'"></div>'
@@ -619,8 +622,8 @@ function rowTemplate(cat, data){
       +'</div>';
   }
   return '<div class="row g2">'
-    +'<div><label>Nomor Polisi</label><input type="text" class="r-nopol" value="'+(data.nopol||'')+'" placeholder="cth: B 1234 XYZ"></div>'
-    +'<div><label>Merk / Type Kendaraan</label><input type="text" class="r-merk" value="'+(data.merk||'')+'" placeholder="cth: Toyota Fortuner 2.4"></div>'
+    +'<div><label>Nomor Polisi <span class="req">*</span></label><input type="text" class="r-nopol" value="'+(data.nopol||'')+'" placeholder="cth: B 1234 XYZ"></div>'
+    +'<div><label>Merk / Type Kendaraan <span class="req">*</span></label><input type="text" class="r-merk" value="'+(data.merk||'')+'" placeholder="cth: Toyota Fortuner 2.4"></div>'
     +'<div class="rm"><button class="btn btn-danger btn-sm" onclick="delRow(this)">🗑 Hapus</button></div>'
     +'</div>';
 }
@@ -647,7 +650,11 @@ function addRow(){
 function delRow(btn){
   const rows=[...$('rowsArea').querySelectorAll('.row')];
   const idx=rows.indexOf(btn.closest('.row'));
-  if(idx>-1){ state.rows.splice(idx,1); renderRows(); }
+  if(idx>-1){
+    state.rows.splice(idx,1);
+    if(state.rows.length===0) state.rows=[{}];   // point 3 selalu terbuka: minimal satu baris
+    renderRows();
+  }
   snd('click');
 }
 function setCat(cat){
@@ -926,15 +933,16 @@ $('saveDraft').addEventListener('click', ()=>{
 
 /* ============ VALIDASI ============ */
 function validate(d){
+  const sec = rowsTitleOf(state.cat);
   if(!d.nama) return 'Nama Lengkap wajib diisi';
   if(!d.nik) return 'NIK / SIM / ID Karyawan wajib diisi';
   if(!d.perusahaan) return 'Nama Perusahaan wajib diisi';
   if(!d.ktp) return 'Foto KTP / ID Card wajib diunggah';
   if(!sigDrawn) return 'Tanda tangan digital wajib diisi';
-  if(d.rows.length===0) return 'Tambahkan minimal satu baris data (unit/item)';
+  if(d.rows.length===0) return '"'+sec+'" wajib diisi — tambahkan minimal satu baris data';
   for(const r of d.rows){
-    if(state.cat==='barang'){ if(!r.nama||!r.jml) return 'Lengkapi Nama & Jumlah pada setiap item barang'; }
-    else if(!r.nopol) return 'Nomor Polisi wajib diisi pada setiap baris';
+    if(state.cat==='barang'){ if(!r.nama||!r.jml) return '"'+sec+'": lengkapi Nama/Rincian Barang & Jumlah pada setiap baris'; }
+    else if(!r.nopol||!r.merk) return '"'+sec+'": No. Polisi & Merk/Type wajib diisi pada setiap baris';
   }
   return null;
 }
