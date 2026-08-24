@@ -14,7 +14,18 @@ Web app `heinuuu` sudah ada di konsol Firebase:
 - **projectId**       : `heinuuu`
 - **storageBucket**   : `heinuuu.firebasestorage.app`
 - **measurementId**   : `G-WLY8T1197W`
-- **databaseURL**     : `https://heinuuu.firebaseio.com`  (instansi Realtime Database default)
+- **databaseURL**     : SESUAIKAN — lihat catatan di bawah!
+
+> **PENTING (cek dulu!)**: URL `https://heinuuu.firebaseio.com` TIDAK aktif (404 saat dicek).
+> Buka **Konsol Firebase → Build → Realtime Database**, buat database-nya, lalu salin URL asli
+> yang tampil di data viewer. Polanya salah satu dari:
+> - `https://heinuuu-default-rtdb.asia-southeast1.fire.database.app` (region Asia/Singapura)
+> - `https://heinuuu-default-rtdb.firebaseio.com`                    (region US)
+>
+> Kabar baiknya `firebase-config.js` sekarang OTOMATIS mencoba beberapa kandidat host
+> (Asia → Eropa → US) setiap load, jadi begitu RTDB dibuat, koneksi langsung jalan tanpa
+> ubah kode. Host sukses di-cache di localStorage (`tribi_rtdb_host`) dan cache dibuang
+> otomatis kalau ternyata gagal saat menulis.
 
 Jika belum, buat web app baru di konsol -> *Project Settings -> Your apps -> Add app -> Web*.
 

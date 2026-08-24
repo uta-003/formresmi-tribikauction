@@ -1083,6 +1083,46 @@ function downloadPdf(){
 }
 
 
+/* ============ ANTREAN SINKRONISASI (pastikan data masuk Firebase & Sheets) ============ */
+/* Data yang gagal terkirim (koneksi/endpoint down) masuk antrean localStorage dan
+   dikirim ulang OTOMATIS saat halaman dibuka / modul Firebase siap. */
+const PENDING_KEY = 'tribik_pending_sync';
+function loadPending(){
+  try{ return JSON.parse(localStorage.getItem(PENDING_KEY)) || []; }catch(e){ return []; }
+}
+function savePending(q){
+  try{ localStorage.setItem(PENDING_KEY, JSON.stringify(q.slice(-80))); }catch(e){ /* storage penuh */ }
+}
+function queuePending(target, d){
+  const q = loadPending();
+  q.push({ target: target, ts: Date.now(), d: d });
+  savePending(q);
+  toast('Koneksi '+target.toUpperCase()+' gagal — data masuk antrean, dikirim otomatis nanti', 'warn', 6000);
+}
+function unqueuePending(target, d){
+  savePending(loadPending().filter(x => !(x.target === target && x.d && x.d.docNo === d.docNo)));
+}
+async function flushPendingSync(){
+  if(!navigator.onLine) return;
+  const ffcReady = window.ffc && typeof window.ffc.saveToFirebase === 'function';
+  const q = loadPending();
+  if(q.length === 0) return;
+  let sent = 0;
+  for(const item of q){
+    try{
+      if(item.target === 'fb'){
+        if(!ffcReady) continue;                              // tunggu flush berikutnya
+        const ok = await window.ffc.saveToFirebase(item.d);  // true/false
+        if(ok){ unqueuePending('fb', item.d); sent++; }
+      }else if(item.target === 'sheet'){
+        const ok = await saveToSheet(item.d);
+        if(ok){ unqueuePending('sheet', item.d); sent++; }
+      }
+    }catch(e){ /* biarkan di antrean untuk percobaan berikutnya */ }
+  }
+  if(sent > 0) toast('✔ '+sent+' pengajuan tertunda berhasil dikirim ke database', 'ok', 7000);
+}
+
 /* ============ SUBMIT ============ */
 $('submitForm').addEventListener('click', function(){
   const d = collectForm();
@@ -1095,13 +1135,23 @@ $('submitForm').addEventListener('click', function(){
   db.unshift(d);
   saveDB(db);      /* riwayat lokal (database ringan) */
 
-  /* -> kirim PARALEL ke Realtime Database + Storage (Firebase, backend utama) dan ke Google Sheets */
-  if (window.ffc && typeof window.ffc.saveToFirebase === "function") {
-    window.ffc.saveToFirebase(d);              // backend utama: Firebase
-  } else {
-    toast("Firebase belum siap — data tetap tersimpan di localStorage ✔", "warn", 6000);
-  }
-  saveToSheet(d);                               // sinkronisasi paralel ke Google Sheets (gsheet_backend.gs)
+  /* -> kirim PARALEL ke Firebase (Realtime DB + Storage) dan ke Google Sheets.
+     Gagal kirim = otomatis masuk antrean (tribik_pending_sync) dan dikirim ulang
+     saat halaman dibuka berikutnya / modul Firebase siap, jadi data tidak hilang. */
+  (function dispatchSync(){
+    const t0 = Date.now();
+    (function pollFfc(){                       // beri waktu modul firebase-config.js termuat (maks 4 dtk)
+      if(window.ffc && typeof window.ffc.saveToFirebase === 'function'){
+        Promise.resolve(window.ffc.saveToFirebase(d)).then(ok => { if(!ok) queuePending('fb', d); });
+      }else if(Date.now() - t0 < 4000){
+        setTimeout(pollFfc, 150);
+      }else{
+        queuePending('fb', d);
+      }
+    })();
+    Promise.resolve(saveToSheet(d)).then(ok => { if(!ok) queuePending('sheet', d); });
+    setTimeout(flushPendingSync, 10000);       // cek ulang antrean lama setelah submit
+  })();
 
   // 2) Teruskan ke WhatsApp
   const lines = d.rows.map(function(r,i){
@@ -1178,7 +1228,9 @@ async function saveToSheet(d){
     }
   }catch(e){
     toast('Gagal simpan ke Google Sheets: '+(e.message||e), 'err', 7000);
+    return false;
   }
+  return true;
 }
 
 /* ============ RIWAYAT (DAFTAR) ============ */
@@ -1330,6 +1382,10 @@ function renderSummary(){
   refreshDocMeta();
   renderHistory();
   renderSummary();
+
+  // Antrean sinkronisasi: kirim ulang data yang sebelumnya gagal masuk database
+  window.addEventListener('firebase-ready', function(){ setTimeout(flushPendingSync, 1500); });
+  setTimeout(flushPendingSync, 2500);
 })();
 </script>
 </body>

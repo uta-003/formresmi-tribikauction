@@ -35,10 +35,13 @@ async function resolveDbHost() {
     if (ov && ov.indexOf("http") === 0) return ov;   // override / hasil dicek tersimpan
   } catch (e) { /* localStorage unavailable */ }
   var proj = firebaseConfig.projectId;
+  // urutan dicoba: region Asia (umum untuk Indonesia) -> Eropa -> US (lama) -> US klasik
   var cands = [
-    "https://" + proj + ".firebaseio.com",
+    "https://" + proj + "-default-rtdb.asia-southeast1.fire.database.app",
+    "https://" + proj + "-default-rtdb.europe-west1.fire.database.app",
+    "https://" + proj + "-default-rtdb.us-central1.fire.database.app",
     "https://" + proj + "-default-rtdb.firebaseio.com",
-    "https://" + proj + "-default-rtdb.firebasedatabase.app"
+    "https://" + proj + ".firebaseio.com"
   ];
   for (var i = 0; i < cands.length; i++) {
     var base = cands[i];
@@ -120,10 +123,13 @@ async function saveToFirebase(d) {
     const newDocRef = push(ref(db, "pengajuan"));
     await set(newDocRef, doc);
     _toast && _toast("Data tersimpan ke Realtime Database (Firebase) [OK]", "ok");
+    return true;
   } catch (e) {
     const h = hintFor(e);
     _toast && _toast("Gagal simpan ke Firebase: " + ((e && e.message) || String(e)) + (h ? " | " + h : ""), "err", 10000);
     console.error("[firebase] saveToFirebase error:", e);
+    try { localStorage.removeItem("tribi_rtdb_host"); } catch (e2) {}   // host mungkin mati -> resolve ulang di percobaan berikutnya
+    return false;
   }
 }
 
@@ -193,9 +199,9 @@ async function testFirebase() {
 
 // --- Google Sheets (Apps Script) integration ---
 const SHEET_DOC_ID = "1ym6u8evb9PhLvbo6YH3aVFDScGow7KjToj4C7TNO9IM";
-// Endpoint Apps Script (Terbuka → POST JSON). Jika Google membalas 402/403,
-// data tetap tersimpan ke Firebase; ini hanya "kapal ganti" ekspor luar.
-const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbyUgq1Qld1diz-xk5cfWg0OgOKN5_PA0zT-qeaEDBJM3KrLJobCAsBVd6fOTFZn4_y/exec";
+// Endpoint Apps Script (Terbuka → POST JSON). Sudah diverifikasi AKTIF (HTTP 200).
+// Harus SAMA dengan SHEET_ENDPOINT di portal.html.
+const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbyUgq1Qld1diz-xk5cfWg0OgOKN5_PA0zT-qeaEDzBJM3KrLJobCAsBVd6fOTFZn4_y/exec";
 const SHEET_FALLBACK_NOTE = "Google Apps Script endpoint belum merespon (402/403/timeout); data tetap tersimpan ke Firebase.";
 
 async function saveToSheet(d) {
