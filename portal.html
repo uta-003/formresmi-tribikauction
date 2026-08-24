@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="./logo.png?v=3" type="image/png">
+    <link rel="icon" href="./logo.png?v=4" type="image/png">
+  <link rel="icon" href="./favicon.svg?v=4" type="image/svg+xml">
   <meta name="theme-color" content="#6366f1">
 <title>Form Tribik Auction — Portal Pengajuan</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -157,6 +158,30 @@ textarea{resize:vertical;min-height:54px}
 .terms li{margin-bottom:5px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
 
+/* file upload pill */
+.filepill{display:flex;align-items:center;gap:10px;border:1.5px dashed rgba(255,255,255,.25);border-radius:12px;padding:12px 14px;background:rgba(255,255,255,.05);cursor:pointer;transition:.2s;flex:1;min-width:150px}
+.filepill:hover{border-color:var(--primary);background:rgba(255,82,82,.1)}
+.filepill .ic{font-size:22px}
+.filepill .t b{display:block;font-size:13px;color:#e2e8f0}
+.filepill .t span{font-size:11.5px;color:var(--muted)}
+.filepill input{display:none}
+.filepill.has{background:rgba(255,123,123,.12);border-color:rgba(255,123,123,.5)}
+.filepill.has .t span{color:var(--ok)}
+
+/* camera capture KTP / ID card */
+.cam-box{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.cam-preview{position:relative;width:100%;border-radius:13px;overflow:hidden;background:#06080f;display:none;border:1px solid var(--line)}
+.cam-preview video{width:100%;height:auto;display:block;max-height:320px}
+.cam-preview .cam-overlay{position:absolute;inset:0;width:100%;height:100%}
+.cam-controls{display:flex;gap:8px}
+.cam-controls .btn{flex:1;justify-content:center}
+.cam-note{font-size:11.5px;color:var(--muted)}
+.cam-note b{color:var(--primary)}
+.ktp-thumb{max-width:170px;max-height:120px;border:1px solid var(--line);border-radius:9px;display:block;margin-top:9px;object-fit:cover;box-shadow:var(--shadow)}
+.ktp-rm-row{margin-top:8px;text-align:center}
+.cam-row{display:flex;gap:8px;flex-wrap:wrap}
+.cam-row .btn-open-cam{flex:1;min-width:150px}
+
 /* table */
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--line)}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -201,11 +226,10 @@ tr:last-child td{border-bottom:none}
 .paper .kv.zebra{border-radius:3px;padding:5px 8px;background:rgba(238,242,255,.55)}
 .paper .kv b{width:132px;color:#475569;flex:0 0 132px}
 .paper h5{margin:13px 0 7px;font-size:12px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
-.paper .sig-img{display:block;width:150px;max-width:100%;height:auto;margin:6px auto 2px}
+.paper .sig-img{display:block;height:58px;margin:6px 0 2px}
 .sigline{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
 .sigline .s{text-align:center;border-top:1.5px solid #475569;padding-top:7px;font-size:11px;color:#334155}
 .sigline .s small{display:block;color:#64748b;margin-top:3px}
-@media (max-width:520px){.sigline{grid-template-columns:1fr;row-gap:8px}}
 
 footer{padding:26px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid var(--line);background:rgba(255,255,255,.02)}
 footer b{color:#cbd5e1}
@@ -248,6 +272,10 @@ footer b{color:#cbd5e1}
   .cat{padding:15px}
   .row{align-items:stretch}
   .row .rm{justify-self:stretch;text-align:right}
+  .cam-row{flex-direction:column}
+  .cam-row .btn-open-cam{min-width:0;width:100%}
+  .filepill{width:100%}
+  .cam-controls{flex-direction:column}
   .sigline{grid-template-columns:1fr;gap:14px}
   .paper{padding:15px}
   .paper .kv{flex-direction:column;gap:1px}
@@ -284,7 +312,7 @@ footer b{color:#cbd5e1}
 <!-- ================= HEADER ================= -->
 <header class="topbar">
   <div class="topbar-inner">
-        <div class="brand"><img class="logo" src="./logo.png?v=3" alt="Tribik Auction" width="36" height="36">
+        <div class="brand"><img class="logo" src="./logo.png?v=4" alt="Tribik Auction" width="36" height="36">
             <span>Form Tribik Auction<small>PORTAL PENGAJUAN</small></span>
     </div>
     <nav class="tabs">
@@ -332,7 +360,32 @@ footer b{color:#cbd5e1}
     <div style="height:14px"></div>
     <div class="grid g2">
       <div><label>Nama Perusahaan <span class="req">*</span></label><input type="text" id="fPerusahaan" placeholder="Nama perusahaan / instansi"></div>
-      <div></div>
+      <div>
+        <label>Foto KTP / ID Card <span class="req">*</span></label>
+        <div class="cam-box">
+          <div class="cam-preview" id="camPreview">
+            <video id="camVideo" autoplay playsinline></video>
+            <canvas class="cam-overlay" id="camOverlay"></canvas>
+          </div>
+          <div class="cam-row">
+            <button type="button" class="btn btn-ghost btn-open-cam" id="camOpen">📷 Buka Kamera</button>
+            <label class="filepill" for="fKtp" id="ktpPill">
+              <span class="ic">🪪</span>
+              <span class="t"><b id="ktpName">Upload Foto KTP / ID Card...</b><span>Klik untuk memilih file</span></span>
+              <input type="file" id="fKtp" accept="image/*">
+            </label>
+          </div>
+          <div class="cam-controls" id="camControls" style="display:none">
+            <button type="button" class="btn btn-primary" id="camCapture">📸 Ambil Foto</button>
+            <button type="button" class="btn btn-ghost" id="camCancel">🗙 Batal</button>
+          </div>
+          <div class="cam-note">Arahkan kamera ke <b>KTP / ID Card</b> &amp; samakan dengan garis bingkai (ukuran standar ID-1 / 85,60 × 53,98 mm) untuk hasil presisi.</div>
+        </div>
+        <img class="ktp-thumb" id="ktpThumb" alt="Preview KTP" style="display:none">
+        <div class="ktp-rm-row" id="ktpRemoveRow" style="display:none">
+          <button type="button" class="btn btn-danger btn-sm" id="ktpRemove">🗑 Hapus Foto KTP / ID</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -443,6 +496,7 @@ const WA_NUMBER = '628111454507';
 /* ==== Google Sheets (backend Google Apps Script web-app) ==== */
 const SHEET_DOC_ID  = '1ym6u8evb9PhLvbo6YH3aVFDScGow7KjToj4C7TNO9IM';
 const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyUgq1Qld1diz-xk5cfWg0OgOKN5_PA0zT-qeaEDzBJM3KrLJobCAsBVd6fOTFZn4_y/exec'; /* <-- URL Web app (deploy) */
+const SHEET_KTP_FOLDER = ''; /* <-- (opsional) ID folder Drive untuk foto KTP */
 const CATS = {
   cek:    { name:'Form Cek Unit Lelang',      key:'cek',    pdf:'FORMULIR PENGAJUAN CEK UNIT LELANG MOBIL' },
   barang: { name:'Form Pengambilan Barang',    key:'barang', pdf:'FORMULIR PENGAJUAN PENGAMBILAN BARANG' },
@@ -451,6 +505,8 @@ const CATS = {
 const state = {
   cat: 'cek',
   rows: [],
+  ktpName: '',
+  ktpData: '',
   draft: null,
   sound: true,
   filter: 'all',
@@ -631,6 +687,196 @@ function initSig(){
 }
 $('sigReset').addEventListener('click', ()=>{ sigCtx.clearRect(0,0,$('sigCanvas').width,$('sigCanvas').height); sigDrawn=false; snd('click'); });
 
+/* ============ KAMERA KTP / ID CARD (presisi ID-1 = 85.6 x 53.98 mm) ============ */
+const KTP_RATIO = 85.60 / 53.98;   // 1.586 (standar ID-1, KTP/SIM/kartu)
+let camStream = null;
+let camActive = false;
+
+function showThumb(){
+  const th=$('ktpThumb');
+  const rm=$('ktpRemoveRow');
+  if(state.ktpData){ th.src=state.ktpData; th.style.display='block'; if(rm) rm.style.display='block'; }
+  else { th.style.display='none'; if(rm) rm.style.display='none'; }
+}
+
+function drawKtpFrame(canvas){
+  canvas.width=canvas.offsetWidth;
+  canvas.height=canvas.offsetHeight;
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width, h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  // redupkan area luar kartu
+  ctx.fillStyle='rgba(0,0,0,0.5)';
+  ctx.fillRect(0,0,w,h);
+  // kotak kartu = rasio ID-1, 86% dari sisi terkecil
+  const cw=Math.min(w*0.86, h*0.86*KTP_RATIO);
+  const ch=cw/KTP_RATIO;
+  const cx=(w-cw)/2, cy=(h-ch)/2;
+  ctx.globalCompositeOperation='destination-out';
+  ctx.fillRect(cx,cy,cw,ch);
+  ctx.globalCompositeOperation='source-over';
+  // garis putus-putus putih
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1.6; ctx.setLineDash([7,6]);
+  ctx.strokeRect(cx,cy,cw,ch);
+  // sudut siku tegas (corner brackets)
+  ctx.setLineDash([]); ctx.lineWidth=3.4; ctx.strokeStyle='#ff5252';
+  const s=15;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy+s); ctx.lineTo(cx,cy); ctx.lineTo(cx+s,cy);
+  ctx.moveTo(cx+cw-s,cy); ctx.lineTo(cx+cw,cy); ctx.lineTo(cx+cw,cy+s);
+  ctx.moveTo(cx+cw,cy+ch-s); ctx.lineTo(cx+cw,cy+ch); ctx.lineTo(cx+cw-s,cy+ch);
+  ctx.moveTo(cx+s,cy+ch); ctx.lineTo(cx,cy+ch); ctx.lineTo(cx,cy+ch-s);
+  ctx.stroke();
+  // label
+  ctx.fillStyle='#e2e8f0'; ctx.font='bold 13px Segoe UI, sans-serif'; ctx.textAlign='center';
+  ctx.fillText('KTP / ID CARD', w/2, Math.max(15, cy-9));
+  ctx.font='600 10px Segoe UI, sans-serif'; ctx.fillStyle='rgba(255,255,255,0.8)';
+  ctx.fillText('85,60 × 53,98 mm', w/2, Math.max(28, cy+ch+16) > h ? h-10 : Math.max(28, cy+ch+16));
+}
+function redrawFrame(){
+  if(camActive) drawKtpFrame($('camOverlay'));
+}
+async function openCam(){
+  try{
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      toast('Kamera tidak didukung browser ini','err'); return;
+    }
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+    const v=$('camVideo');
+    v.srcObject=camStream;
+    await v.play();
+    camActive=true;
+    $('camPreview').style.display='block';
+    $('camOpen').style.display='none';
+    $('camControls').style.display='flex';
+    setTimeout(redrawFrame, 80);
+    window.addEventListener('resize', redrawFrame);
+    snd('open');
+  }catch(e){
+    toast('Kamera tidak dapat diakses. Pastikan izin diberikan & halaman dibuka via http://localhost','err');
+  }
+}
+function stopCam(){
+  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+  camActive=false;
+  const v=$('camVideo'); if(v) v.srcObject=null;
+  const cv=$('camOverlay'); if(cv){ const c=cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); }
+  $('camPreview').style.display='none';
+  $('camOpen').style.display='inline-flex';
+  $('camControls').style.display='none';
+}
+/* --- Auto-fit kartu (KTP/SIM/ID) : detect card + crop to ID-1 (anti-gepeng) --- */
+function findCardBox(srcW, srcH, grab){
+  // Downscale source to small analysis canvas, read pixels
+  const AW=96, AH=Math.max(1, Math.round(AW*srcH/srcW));
+  const ac=document.createElement('canvas');
+  ac.width=AW; ac.height=AH;
+  const actx=ac.getContext('2d');
+  actx.drawImage(grab, 0,0, srcW, srcH, 0,0, AW, AH);
+  let d;
+  try { d=actx.getImageData(0,0,AW,AH).data; } catch(e){ return null; }
+  // Find the brightest (card is usually lighter than background) bounding box
+  let minX=AW,minY=AH,maxX=-1,maxY=-1,cnt=0;
+  for(let y=0;y<AH;y++) for(let x=0;x<AW;x++){
+    const o=(y*AW+x)*4;
+    const l=0.299*d[o]+0.587*d[o+1]+0.114*d[o+2];
+    if(l>70){
+      cnt++;
+      if(x<minX)minX=x; if(x>maxX)maxX=x;
+      if(y<minY)minY=y; if(y>maxY)maxY=y;
+    }
+  }
+  if(maxX<0 || cnt < AW*AH*0.03) return null;
+  const bw=maxX-minX+1, bh=maxY-minY+1;
+  if(bw<AW*0.15 || bh<AH*0.15 || bw*bh > AW*AH*0.93) return null;
+  return { x: minX*srcW/AW, y: minY*srcH/AH, w: bw*srcW/AW, h: bh*srcH/AH };
+}
+function centerCropBox(srcW, srcH, ratio){
+  let cw=srcW, ch=srcH;
+  if(cw/ch > ratio){ cw=ch*ratio; } else { ch=cw/ratio; }
+  const sx=Math.max(0,(srcW-cw)/2), sy=Math.max(0,(srcH-ch)/2);
+  return {sx,sy,cw,ch};
+}
+function fitCardBox(box, srcW, srcH, ratio){
+  // Make ID-1 crop centered on detected card (with small margin); fallback center crop
+  if(!box) return centerCropBox(srcW,srcH,ratio);
+  const cx=box.x+box.w/2, cy=box.y+box.h/2;
+  let cw=Math.max(box.w, box.h*ratio), ch=cw/ratio;
+  if(ch < box.h){ ch=box.h; cw=ch*ratio; }
+  cw*=1.04; ch*=1.04;
+  let sx=cx-cw/2, sy=cy-ch/2;
+  if(sx<0)sx=0; if(sy<0)sy=0;
+  if(sx+cw>srcW)sx=srcW-cw;
+  if(sy+ch>srcH)sy=srcH-ch;
+  return {sx,sy,cw,ch};
+}
+function captureKtp(){
+  const v=$('camVideo');
+  if(!v || !v.videoWidth) return;
+  const OUT_W=640, OUT_H=Math.round(OUT_W/KTP_RATIO);
+  const vw=v.videoWidth, vh=v.videoHeight;
+  // auto-detect card and fit to ID-1 so result is never stretched ("gepeng")
+  const box=fitCardBox(findCardBox(vw, vh, v), vw, vh, KTP_RATIO);
+  const out=document.createElement('canvas');
+  out.width=OUT_W; out.height=OUT_H;
+  const octx=out.getContext('2d');
+  octx.drawImage(v, box.sx, box.sy, box.cw, box.ch, 0, 0, OUT_W, OUT_H);
+  state.ktpData=out.toDataURL('image/jpeg', 0.92);
+  state.ktpName='Kamera (KTP / ID Card - auto-fit)';
+  $('ktpName').textContent=state.ktpName;
+  $('ktpPill').classList.add('has');
+  showThumb();
+  stopCam();
+  snd('shutter');
+}
+
+$('camOpen').addEventListener('click', openCam);
+$('camCapture').addEventListener('click', captureKtp);
+$('camCancel').addEventListener('click', ()=>{ stopCam(); snd('click'); });
+
+/* Hapus foto KTP / ID Card dari kolom upload (reset thumbnail + tombol) */
+function clearKtp(){
+  state.ktpData='';
+  state.ktpName='';
+  const nameEl=$('ktpName');
+  if(nameEl) nameEl.textContent='Upload Foto KTP / ID Card...';
+  $('ktpPill').classList.remove('has');
+  const f=$('fKtp'); if(f) f.value='';   // biar file yang sama bisa di-upload ulang
+  showThumb();
+  snd('click');
+}
+$('ktpRemove').addEventListener('click', async ()=>{ if(await Modal.confirm('Hapus foto KTP / ID Card?', { danger:true })) clearKtp(); });
+
+/* ============ UPLOAD KTP (di-normalisasi ke JPEG agar konsisten di PDF) ============ */
+$('fKtp').addEventListener('change', function(e){
+  const f=e.target.files[0];
+  if(!f) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const iw=img.naturalWidth||img.width, ih=img.naturalHeight||img.height;
+      const OUT_W=640, OUT_H=Math.round(OUT_W/KTP_RATIO);
+      // auto-detect card + fit to ID-1 → no stretched/gepeng result, even rotated/portrait photo
+      const box=fitCardBox(findCardBox(iw, ih, img), iw, ih, KTP_RATIO);
+      const c=document.createElement('canvas');
+      c.width=OUT_W; c.height=OUT_H;
+      const cx=c.getContext('2d');
+      cx.drawImage(img, box.sx, box.sy, box.cw, box.ch, 0, 0, OUT_W, OUT_H);
+      state.ktpData=c.toDataURL('image/jpeg', 0.92);
+      state.ktpName=f.name;
+      $('ktpName').textContent=f.name;
+      $('ktpPill').classList.add('has');
+      showThumb();
+      snd('shutter');
+    };
+    img.onerror=()=>{ toast('File gambar tidak valid','err'); snd('error'); };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(f);
+});
+
+
 /* ============ RESET & DRAFT ============ */
 function collectRows(){
   return Array.from($('rowsArea').querySelectorAll('.row')).map(r=>{
@@ -644,30 +890,8 @@ function collectRows(){
     return r.nopol||r.merk;
   });
 }
-function cropSignature(){
-  // Potong area transparan & pusatkan goresan ke canvas tetap 500x170 (rasio 50:17 = 2.94:1),
-  // agar tanda tangan selalu tajam + tengah kolom, tak tergopoh lebar di mobile (width:100%).
-  const cv=$('sigCanvas'); if(!cv||!sigDrawn) return '';
-  const ctx=cv.getContext('2d');
-  const w=cv.width, h=cv.height;
-  if(!w||!h) return cv.toDataURL('image/png');
-  const id=ctx.getImageData(0,0,w,h); const d=id.data;
-  let x0=w,y0=h,x1=0,y1=0;
-  for(let y=0;y<h;y++){const py=y*w*4; for(let x=0;x<w;x++){const a=d[py+x*4+3];if(a>0){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}}}
-  if(x1<x0||y1<y0){ return cv.toDataURL('image/png'); }
-  const pad=10;
-  const X0=Math.max(0,x0-pad), Y0=Math.max(0,y0-pad), X1=Math.min(w-1,x1+pad), Y1=Math.min(h-1,y1+pad);
-  const iw=X1-X0+1, ih=Y1-Y0+1;
-  const TW=500, TH=170;                       // rasio pasti 50:17 -> cocok box PDF
-  const out=document.createElement('canvas'); out.width=TW; out.height=TH;
-  const ox=out.getContext('2d'); ox.clearRect(0,0,TW,TH);
-  const s=Math.min(TW/iw, TH/ih);             // scale agar pas fit & nggak kepotong
-  const sw=Math.round(iw*s), sh=Math.round(ih*s);
-  ox.drawImage(cv, X0, Y0, iw, ih, Math.round((TW-sw)/2), Math.round((TH-sh)/2), sw, sh);
-  return out.toDataURL('image/png');
-}
 function getSigData(){
-  try{ return sigDrawn ? cropSignature() : ''; }catch(e){ return ''; }
+  try{ return sigDrawn ? $('sigCanvas').toDataURL('image/png') : ''; }catch(e){ return ''; }
 }
 function collectForm(){
   return {
@@ -678,12 +902,17 @@ function collectForm(){
     nama: $('fNama').value.trim(),
     nik: $('fNik').value.trim(),
     perusahaan: $('fPerusahaan').value.trim(),
+    ktp: state.ktpData,
+    ktpName: state.ktpName,
     signature: getSigData(),
     rows: collectRows(),
   };
 }
 function clearForm(){
   $('fNama').value=''; $('fNik').value=''; $('fPerusahaan').value='';
+  state.ktpData=''; state.ktpName=''; $('ktpName').textContent='Upload Foto KTP / ID Card...';
+  $('ktpPill').classList.remove('has');
+  showThumb(); stopCam();
   sigCtx&&sigCtx.clearRect(0,0,$('sigCanvas').width,$('sigCanvas').height);
   sigDrawn=false;
   state.rows=[{}]; renderRows(); refreshDocMeta();
@@ -700,6 +929,7 @@ function validate(d){
   if(!d.nama) return 'Nama Lengkap wajib diisi';
   if(!d.nik) return 'NIK / SIM / ID Karyawan wajib diisi';
   if(!d.perusahaan) return 'Nama Perusahaan wajib diisi';
+  if(!d.ktp) return 'Foto KTP / ID Card wajib diunggah';
   if(!sigDrawn) return 'Tanda tangan digital wajib diisi';
   if(d.rows.length===0) return 'Tambahkan minimal satu baris data (unit/item)';
   for(const r of d.rows){
@@ -724,6 +954,7 @@ function paperHTML(d){
     +'<div'+zeb(false)+'><b>Nama Lengkap:</b><span>'+esc(d.nama)+'</span></div>'
     +'<div'+zeb(true)+'><b>NIK / SIM / ID:</b><span>'+esc(d.nik)+'</span></div>'
     +'<div'+zeb(false)+'><b>Perusahaan:</b><span>'+esc(d.perusahaan)+'</span></div>'
+    +'<div'+zeb(true)+'><b>KTP / ID:</b><span>'+(d.ktpName?esc(d.ktpName):'-')+(d.ktp?'<img src="'+d.ktp+'" alt="KTP/ID" style="display:block;max-width:210px;max-height:150px;object-fit:contain;border:1px solid #cbd5e1;border-radius:6px;margin-top:4px">':'')+'</span></div>'
     +'<h5>Daftar '+(d.cat==='barang'?'Item Barang':'Unit Kendaraan')+' ('+d.rows.length+')</h5>'+rowsHtml
     +'<h5>Verifikasi</h5>'
     +'<div class="sigline"><div class="s">Pemohon / Pengaju'+(d.signature?'<img class="sig-img" src="'+d.signature+'" alt="Tanda tangan pemohon">':'')+'<small>'+esc(d.nama||'-----------------')+'</small></div>'
@@ -783,6 +1014,17 @@ function buildPdf(d){
   kv('Nama Lengkap:', d.nama);
   kv('NIK / SIM / ID:', d.nik);
   kv('Perusahaan:', d.perusahaan);
+  if(d.ktp){
+    try{
+      if(y + 28 > 250){ doc.addPage(); head(); }
+      kv('Foto KTP / ID:', d.ktpName||'');
+      const imgW=80, imgH=imgW/KTP_RATIO;   // 80 x 50.4 mm -> presisi ID-1 (85.6 x 53.98)
+      doc.addImage(d.ktp, 'JPEG', M, y, imgW, imgH, undefined, 'FAST');
+      doc.setDrawColor(148,163,184); doc.setLineWidth(0.3);
+      doc.rect(M, y, imgW, imgH);          // garis tepi agar terlihat seperti kartu
+      y += imgH + 8;
+    }catch(e){ if(d.ktpName) kv('Foto KTP / ID:', d.ktpName); }
+  } else if(d.ktpName){ kv('Foto KTP / ID:', d.ktpName); }
   y += 4;
   sectionTitle(d.cat==='barang' ? 'DETAIL ITEM BARANG' : 'DAFTAR UNIT KENDARAAN');
   d.rows.forEach((r,i)=>{
@@ -801,8 +1043,7 @@ function buildPdf(d){
   doc.text('Tanda tangan pemohon menandakan data di atas adalah benar dan disetujui untuk diproses.', M, y); y+=4;
   if(d.signature){
     try{
-                        const sigW=50, sigH=17;                       // area goresan tanda tangan (rasio 50:17)
-      // getSigData() sudah crop -> rasio PNG pasti 50:17, jadi addImage tak distorsi & tanda tangan presisi di kolom Pemohon.
+      const sigW=50, sigH=17;                       // area goresan tanda tangan
       doc.addImage(d.signature, 'PNG', M+10, y+28-sigH, sigW, sigH, undefined, 'FAST');
     }catch(e){}
   }
@@ -866,6 +1107,7 @@ $('submitForm').addEventListener('click', function(){
     + '*Nama Lengkap:* '+d.nama+'\n'
     + '*NIK / SIM / ID:* '+d.nik+'\n'
     + '*Nama Perusahaan:* '+d.perusahaan+'\n'
+    + '*Foto KTP / ID:* '+(d.ktpName||'-')+'\n\n'
     + '_'+(d.cat==='barang'?'DAFTAR ITEM BARANG ('+d.rows.length+')':'DAFTAR UNIT KENDARAAN ('+d.rows.length+')')+'_\n'
     + lines.join('\n')
     + '\n\n*Tanda Tangan:* '+(d.signature?'Sudah ditandatangani (digital)':'Belum ditandatangani')
@@ -900,6 +1142,7 @@ async function saveToSheet(d){
     docId: SHEET_DOC_ID, cat: d.cat, catName: d.catName,
     docNo: d.docNo, date: d.date,
     nama: d.nama, nik: d.nik, perusahaan: d.perusahaan,
+    ktp: d.ktp, ktpName: d.ktpName,
     signature: d.signature, rows: rowsText,
     status: 'Menunggu verifikasi'
   };
@@ -1034,6 +1277,8 @@ function renderSummary(){
         cat: x.cat||'cek', catName: x.catName||CATS[x.cat||'cek'].name,
         docNo: x.docNo, date: x.date,
         nama: x.nama, nik: x.nik, perusahaan: x.perusahaan,
+        ktpName: x.ktpName,
+                ktp: x.ktpUrl || '',                 // RTDB: URL download | UI: <img src>
         signature: x.signatureUrl || '',     // sama — <img src="https://firebasestorage…">
         rows: x.rows || [],
       }));
@@ -1053,6 +1298,7 @@ function renderSummary(){
       setCat(d.cat);
       state.rows=d.rows.length?d.rows:[{}];
       $('fNama').value=d.nama; $('fNik').value=d.nik||''; $('fPerusahaan').value=d.perusahaan||'';
+      if(d.ktp){ state.ktpData=d.ktp; state.ktpName=d.ktpName||'Foto KTP terunggah'; $('ktpName').textContent=state.ktpName; $('ktpPill').classList.add('has'); showThumb(); }
       if(d.signature){
         setTimeout(function(){
           const img=new Image();
