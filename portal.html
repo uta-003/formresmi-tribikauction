@@ -239,17 +239,19 @@ tr:last-child td{border-bottom:none}
 .modal-h{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #e2e8f0;position:sticky;top:0;background:rgba(253,253,246,.95);backdrop-filter:blur(8px)}
 .modal-h h3{font-size:15px;flex:1;color:#1e293b}
 .modal-b{padding:20px}
-.paper{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:24px;font-size:12px;color:#1e293b;box-shadow:inset 0 0 0 1px #f8fafc}
-.paper .ph{text-align:center;border-bottom:2.5px solid #1e293b;padding-bottom:11px;margin-bottom:15px}
-.paper .ph h4{font-size:17px;letter-spacing:1px}
-.paper .ph p{font-family:Consolas,monospace;margin-top:4px;font-size:11px}
-.paper .kv{display:flex;gap:9px;margin-bottom:4px;align-items:flex-start;border-radius:3px;padding:5px 8px}
-.paper .kv.zebra{border-radius:3px;padding:5px 8px;background:rgba(238,242,255,.55)}
+.paper{background:repeating-linear-gradient(180deg,#e9edf4 0 11px,#ffffff 11px 22px);border:1px solid #e2e8f0;border-left:6px solid var(--primary);border-radius:12px;padding:20px;font-size:12px;color:#1e293b;box-shadow:0 10px 30px rgba(2,6,23,.12)}
+.paper .ph{position:relative;overflow:hidden;text-align:center;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border-radius:9px;padding:13px 12px;margin-bottom:14px}
+.paper .ph::after{content:"";position:absolute;top:0;bottom:0;right:0;width:56px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 5px,transparent 5px 11px)}
+.paper .ph h4{font-size:16px;letter-spacing:1.2px;color:#fff}
+.paper .ph p{font-family:Consolas,monospace;margin-top:4px;font-size:11px;color:rgba(255,255,255,.88)}
+.paper .kv{display:flex;gap:9px;margin-bottom:5px;align-items:flex-start;background:#fff;border:1px solid #e6ebf2;border-radius:8px;padding:6px 10px;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.paper .kv.zebra{background:#f4f7fb}
 .paper .kv b{width:132px;color:#475569;flex:0 0 132px}
-.paper h5{margin:13px 0 7px;font-size:12px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.paper h5{display:inline-block;margin:14px 0 8px;font-size:11px;background:var(--primary);color:#fff;padding:4px 13px;border-radius:999px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
 .paper .sig-img{display:block;height:58px;margin:6px 0 2px}
 .sigline{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
-.sigline .s{text-align:center;border-top:1.5px solid #475569;padding-top:7px;font-size:11px;color:#334155}
+.sigline .s{background:#fff;border:1px solid #e6ebf2;border-radius:9px;padding:10px 8px 9px;text-align:center;font-size:11px;color:#334155;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.sigline .s::before{content:"";display:block;height:1.5px;background:#cbd5e1;margin:34px 8px 0}
 .sigline .s small{display:block;color:#64748b;margin-top:3px}
 
 footer{padding:26px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid var(--line);background:rgba(255,255,255,.02)}
@@ -981,6 +983,17 @@ function validate(d){
 }
 
 
+/* Logo untuk PDF (dimuat sekali saat halaman dibuka) */
+window.LOGO_PDF = null;
+(function(){ try{
+  const im = new Image();
+  im.onload = function(){ try{
+    const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+    c.getContext('2d').drawImage(im, 0, 0); window.LOGO_PDF = c.toDataURL('image/png');
+  }catch(e){} };
+  im.src = './logo.png?v=6';
+}catch(e){} })();
+
 /* ============ PREVIEW & PDF (jsPDF + fallback print) ============ */
 let pdfWindow = null;
 
@@ -1011,92 +1024,149 @@ function openPdfModal(d){
 }
 function closePdfModal(){ $('pdfModal').classList.remove('show'); pdfWindow=null; }
 
+function pdfTheme(){
+  function v(n){ try{ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }catch(e){ return ''; } }
+  function rgb(h){ h=String(h||'').replace('#','').trim(); if(h.length===3){ h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; }
+    return /^([0-9a-fA-F]{6})$/.test(h) ? [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)] : [255,82,82]; }
+  return { p:rgb(v('--primary')), p2:rgb(v('--primary-2')), acc:rgb(v('--accent')) };
+}
 function buildPdf(d){
   const { jsPDF } = window.jspdf || {};
   if(!jsPDF) return null;
   const doc = new jsPDF({ unit:'mm', format:'a4' });
-  const W = doc.internal.pageSize.getWidth();
-  const M = 16;
-  let y = 20;
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+  const M = 14, TH = pdfTheme();
+  const LINE=[226,232,240], INK=[15,23,42];
+  let y = 40;
+  function mix(a,b,t){ return [Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)]; }
+  function zebraBg(){
+    doc.setFillColor(243,246,250);
+    for(let z=0; z<H; z+=14) doc.rect(0,z,W,7,'F');
+    doc.setFillColor(TH.p[0],TH.p[1],TH.p[2]); doc.rect(0,0,3.2,H,'F');
+  }
   function head(){
-    doc.setFillColor(167,0,0); doc.rect(0,0,W,26,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(15);
-        doc.text('FORM TRIBIK AUCTION', W/2, 12, {align:'center'});
-    doc.setFontSize(9); doc.setFont('helvetica','normal');
-    doc.text('PORTAL PENGAJUAN LELANG MOBIL', W/2, 18, {align:'center'});
-    doc.setTextColor(0,0,0);
-    y = 34;
+    zebraBg();
+    const hh=30, steps=56, sw=W/steps;
+    for(let i=0;i<steps;i++){ const c=mix(TH.p,TH.p2,i/(steps-1)); doc.setFillColor(c[0],c[1],c[2]); doc.rect(i*sw,0,sw+0.4,hh,'F'); }
+    try{ doc.setGState(new doc.GState({opacity:0.15})); doc.setFillColor(255,255,255);
+      for(let sx=W-58;sx<W-6;sx+=10) doc.rect(sx,0,4.6,hh,'F');
+      doc.setGState(new doc.GState({opacity:1})); }catch(e){}
+    let tx = M+3;
+    if(window.LOGO_PDF){ try{ doc.addImage(window.LOGO_PDF,'PNG',M+1,7,16,16); tx=M+21; }catch(e){} }
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    doc.text('FORM TRIBIK AUCTION', tx, 12.5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    doc.text('PORTAL PENGAJUAN LELANG MOBIL', tx, 18.5);
+    doc.setFillColor(255,255,255);
+    doc.roundedRect(W-M-58, 9.5, 58, 9, 4.5, 4.5, 'F');
+    doc.setTextColor(TH.p2[0],TH.p2[1],TH.p2[2]); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text('No. '+d.docNo, W-M-29, 15.2, {align:'center'});
+    doc.setTextColor(INK[0],INK[1],INK[2]);
+    y = 38;
   }
   function sectionTitle(t){
-    doc.setFillColor(255,186,186); doc.rect(M,y,W-M*2,8,'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(11);
-    doc.text(t, M+2, y+5.5);
+    doc.setFillColor(TH.p[0],TH.p[1],TH.p[2]);
+    doc.roundedRect(M, y, 68, 7.2, 3.6, 3.6, 'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9.3);
+    doc.text(t, M+34, y+4.8, {align:'center'});
+    doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.5);
+    doc.line(M+72, y+3.6, W-M, y+3.6);
+    doc.setTextColor(INK[0],INK[1],INK[2]);
     y += 12;
   }
-  function kv(label, value){
-    doc.setFont('helvetica','bold'); doc.setFontSize(10);
-    doc.text(label, M, y);
-    doc.setFont('helvetica','normal');
-    doc.text(String(value==null?'':value), M+48, y);
-    y += 6;
+  function metaCards(){
+    const items=[['NO. DOKUMEN',d.docNo],['TANGGAL',d.date],['KATEGORI',d.catName]];
+    const gw=(W-M*2-6)/3;
+    items.forEach(function(it,i){
+      const x=M+i*(gw+3);
+      doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
+      doc.roundedRect(x,y,gw,13,2.2,2.2,'FD');
+      doc.setFont('helvetica','bold'); doc.setFontSize(6.3); doc.setTextColor(148,163,184);
+      doc.text(it[0],x+3.5,y+5);
+      doc.setFontSize(9.2); doc.setTextColor(TH.p2[0],TH.p2[1],TH.p2[2]);
+      doc.text(String(it[1]),x+3.5,y+10.2);
+    });
+    y+=17;
   }
-  function footer(){
-    const ph = doc.internal.pageSize.getHeight();
-    doc.setFontSize(8); doc.setTextColor(100,116,139);
-    doc.text('Dokumen dibuat otomatis oleh Sistem Tribik Auction • '+d.docNo+' • '+d.date, W/2, ph-8, {align:'center'});
+  function kv(label, value){
+    doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
+    doc.roundedRect(M, y, W-M*2, 7, 1.8, 1.8, 'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(71,85,105);
+    doc.text(label, M+3.5, y+4.8);
+    doc.setFont('helvetica','normal'); doc.setTextColor(INK[0],INK[1],INK[2]);
+    doc.text(String(value==null?'':value), M+50, y+4.8);
+    y += 9.2;
+  }
+  function rowItem(i, txt){
+    if(y > 252){ doc.addPage(); head(); }
+    if(i%2===1){ doc.setFillColor(248,250,253); doc.roundedRect(M,y,W-M*2,7.4,1.8,1.8,'F'); }
+    doc.setFillColor(TH.p[0],TH.p[1],TH.p[2]);
+    doc.circle(M+5.5,y+3.7,2.4,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
+    doc.text(String(i+1),M+5.5,y+4.9,{align:'center'});
+    doc.setFontSize(9.5); doc.setFont('helvetica','normal'); doc.setTextColor(INK[0],INK[1],INK[2]);
+    doc.text(txt,M+11,y+5);
+    y+=8.6;
+  }
+  function footerAll(){
+    const n=doc.getNumberOfPages();
+    for(let i=1;i<=n;i++){
+      doc.setPage(i);
+      doc.setFillColor(TH.p2[0],TH.p2[1],TH.p2[2]); doc.rect(0,H-7,W,7,'F');
+      doc.setTextColor(255,255,255); doc.setFont('helvetica','normal'); doc.setFontSize(7);
+      doc.text('Dokumen dibuat otomatis oleh Sistem Tribik Auction  •  '+d.docNo+'  •  '+d.date, M, H-2.7);
+      doc.setFont('helvetica','bold');
+      doc.text('Hal. '+i+'/'+n, W-M, H-2.7, {align:'right'});
+    }
   }
   head();
   sectionTitle(CATS[d.cat].pdf);
-  kv('No. Dokumen:', d.docNo);
-  kv('Tanggal:', d.date);
-  kv('Kategori:', d.catName);
-  y += 4;
+  metaCards();
   sectionTitle('DATA PEMOHON');
   kv('Nama Lengkap:', d.nama);
   kv('NIK / SIM / ID:', d.nik);
   kv('Perusahaan:', d.perusahaan);
   if(d.ktp){
     try{
-      if(y + 28 > 250){ doc.addPage(); head(); }
+      if(y + 34 > 252){ doc.addPage(); head(); }
       kv('Foto KTP / ID:', d.ktpName||'');
-      const imgW=80, imgH=imgW/KTP_RATIO;   // 80 x 50.4 mm -> presisi ID-1 (85.6 x 53.98)
+      const imgW=80, imgH=imgW/KTP_RATIO;
       doc.addImage(d.ktp, 'JPEG', M, y, imgW, imgH, undefined, 'FAST');
-      doc.setDrawColor(148,163,184); doc.setLineWidth(0.3);
-      doc.rect(M, y, imgW, imgH);          // garis tepi agar terlihat seperti kartu
-      y += imgH + 8;
+      doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.4);
+      doc.roundedRect(M, y, imgW, imgH, 2, 2, 'S');
+      y += imgH + 7;
     }catch(e){ if(d.ktpName) kv('Foto KTP / ID:', d.ktpName); }
   } else if(d.ktpName){ kv('Foto KTP / ID:', d.ktpName); }
-  y += 4;
+  y += 3;
   sectionTitle(d.cat==='barang' ? 'DETAIL ITEM BARANG' : 'DAFTAR UNIT KENDARAAN');
-  d.rows.forEach((r,i)=>{
-    if(y > 250){ doc.addPage(); head(); }
+  d.rows.forEach(function(r,i){
     const line = d.cat==='barang'
-      ? (i+1)+'. '+(r.nama||'-')+'  x'+(r.jml||'-')+' '+(r.sat||'')+(r.ket?'  ('+r.ket+')':'')
-      : (i+1)+'. '+(r.nopol||'-')+'  —  '+(r.merk||'-');
-    doc.setFontSize(10); doc.setFont('helvetica','normal');
-    doc.text(line, M, y);
-    y += 6;
+      ? (r.nama||'-')+'  x'+(r.jml||'-')+' '+(r.sat||'')+(r.ket?'  ('+r.ket+')':'')
+      : (r.nopol||'-')+'  —  '+(r.merk||'-');
+    rowItem(i, line);
   });
-  y += 8;
-  if(y > 210){ doc.addPage(); head(); }
+  y += 6;
+  if(y > 205){ doc.addPage(); head(); }
   sectionTitle('VERIFIKASI & PERSETUJUAN');
-  doc.setFontSize(9);
-  doc.text('Tanda tangan pemohon menandakan data di atas adalah benar dan disetujui untuk diproses.', M, y); y+=4;
-  if(d.signature){
-    try{
-      const sigW=50, sigH=17;                       // area goresan tanda tangan
-      doc.addImage(d.signature, 'PNG', M+10, y+28-sigH, sigW, sigH, undefined, 'FAST');
-    }catch(e){}
-  }
-  doc.text('[ Terverifikasi Sistem Lelang ]', W-M-8, y+22, {align:'right'});
-  doc.setDrawColor(30,41,59); doc.line(M, y+30, M+70, y+30); doc.line(W-M-70, y+30, W-M, y+30);
-  doc.setFont('helvetica','bold');
-  doc.text('Pemohon / Pengaju', M, y+35);
-  doc.text('Pengawas / Disetujui Oleh', W-M, y+35, {align:'right'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(8);
-  doc.text(d.nama||'-----------------', M, y+39);
-  doc.text('Supervisor Operasional Lelang', W-M, y+39, {align:'right'});
-  footer();
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.6); doc.setTextColor(100,116,139);
+  doc.text('Tanda tangan pemohon menandakan data di atas adalah benar dan disetujui untuk diproses.', M, y+2);
+  const pw=82, phh=36, py=y+7;
+  [[M,'PEMOHON / PENGAJU', d.nama||'-----------------', d.signature, null],
+   [W-M-pw,'PENGAWAS / DISETUJUI OLEH','Supervisor Operasional Lelang', null,'[ Terverifikasi Sistem Lelang ]']
+  ].forEach(function(pp){
+    doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
+    doc.roundedRect(pp[0],py,pw,phh,2.5,2.5,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(148,163,184);
+    doc.text(pp[1],pp[0]+pw/2,py+5.5,{align:'center'});
+    if(pp[3]){ try{ doc.addImage(pp[3],'PNG',pp[0]+pw/2-24,py+8.5,48,13,undefined,'FAST'); }catch(e){} }
+    doc.setDrawColor(30,41,59); doc.setLineWidth(0.35);
+    doc.line(pp[0]+8,py+phh-8.5,pp[0]+pw-8,py+phh-8.5);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(51,65,85);
+    doc.text(String(pp[2]),pp[0]+pw/2,py+phh-4.6,{align:'center'});
+    if(pp[4]){ doc.setFont('helvetica','italic'); doc.setFontSize(6.2); doc.setTextColor(148,163,184);
+      doc.text(pp[4],pp[0]+pw/2,py+phh-1.4,{align:'center'}); }
+  });
+  footerAll();
   return doc;
 }
 function downloadPdf(){
