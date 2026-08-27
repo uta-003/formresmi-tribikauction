@@ -103,3 +103,10 @@ Cek cepat dari terminal (harus JSON, bukan HTML):
 ```
 curl -L -X POST "<URL>/exec" -H "Content-Type: text/plain" -d "{\"docNo\":\"TRB-TEST\"}"
 ```
+
+### Error: "Attempted to execute myFunction, but it was deleted"
+Muncul saat menekan tombol **Run (▶)** di editor Apps Script — dan itu **aman**:
+fungsi template bawaan (`myFunction`) memang sudah terganti oleh kode backend.
+`doPost` tidak dijalankan lewat tombol Run, melainkan otomatis oleh portal lewat HTTP.
+Yang diperlukan hanya: **Deploy > Manage deployments > Edit > Version: New version >
+Access: Anyone > Deploy**. Setelah itu uji via `http://localhost:8000/fix-sheet.html`.
