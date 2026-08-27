@@ -1329,8 +1329,20 @@ async function saveToSheet(d){
       throw new Error(msg);
     }
   }catch(e){
-    toast('Gagal simpan ke Google Sheets: '+(e.message||e), 'err', 7000);
-    return false;
+    /* Fetch langsung gagal (CORS/adblock/halaman error Google) -> coba lewat proxy server
+       lokal (tanpa CORS) supaya data tetap sampai + pesan diagnosis akurat. */
+    try{
+      const pr = await fetch('/api/sheet-proxy', { method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ endpoint: SHEET_ENDPOINT, payload: payload }) });
+      const pj = await pr.json();
+      if(pj.ok_js === true){ toast('Data tersimpan ke Google Sheets ✔ (via proxy)','ok'); return true; }
+      toast('Gagal simpan ke Google Sheets: '+(pj.hint || ('HTTP '+(pj.status||'?'))), 'err', 9000);
+      return false;
+    }catch(e2){
+      toast('Gagal simpan ke Google Sheets: '+(e.message||e), 'err', 7000);
+      return false;
+    }
   }
   return true;
 }

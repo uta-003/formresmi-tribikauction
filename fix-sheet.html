@@ -93,31 +93,22 @@ border-radius:10px;padding:12px;font-size:11.5px;line-height:1.5;color:#cbd5e1;w
 
   async function testEndpoint(url, el){
     setBox(el, '', '⏳ Menguji <code>' + url.slice(0, 80) + '…</code>');
-    var r, txt = '';
+    var p;
     try{
-      r = await fetch(url, { method:'POST', mode:'cors', redirect:'follow',
-        headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-        body: JSON.stringify({ tes:1, docNo:'FIX-SHEET-CHECK' }) });
-      txt = await r.text();
+      var r = await fetch('/api/sheet-proxy', { method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ endpoint:url, payload:{ tes:1, docNo:'FIX-SHEET-CHECK' } }) });
+      p = await r.json();
     }catch(e){
-      setBox(el, 'bad', '❌ <b>Fetch/CORS gagal</b> — deployment saat ini menampilkan halaman error Google (tanpa header CORS). Lanjutkan Langkah 1–3 di bawah, lalu Tes Ulang.');
+      setBox(el, 'bad', '❌ Server lokal tidak dapat dihubungi: ' + (e.message||e));
       return false;
     }
-    var t = txt.trim();
-    if(t.charAt(0) === '{' || t.charAt(0) === '['){
-      var js = {}; try{ js = JSON.parse(t); }catch(e){}
-      if(js.ok === true){
-        setBox(el, 'good', '✅ <b>SEHAT!</b> Endpoint membalas JSON <code>ok:true</code>. Buka <a href="./portal.html">portal</a> → submit → data masuk ke spreadsheet ✔');
-        return true;
-      }
-      setBox(el, 'warn', '⚠️ Respon JSON tapi <code>ok≠true</code>: <code>' + t.slice(0,180) + '</code>');
-      return false;
+    if(p.ok_js === true){
+      setBox(el, 'good', '✅ <b>SEHAT!</b> Endpoint membalas JSON <code>ok:true</code>. Buka <a href="./portal.html">portal</a> → submit → data masuk ke spreadsheet ✔');
+      return true;
     }
-    var plain = txt.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
-    var doPost = /doPost/i.test(txt);
-    setBox(el, 'bad', '❌ <b>Respon HTML (bukan JSON)</b>, HTTP ' + r.status +
-      (doPost ? ' — pesan Google: <b>“Fungsi skrip tidak ditemukan: doPost”</b> → kode backend belum ada / versi deploy masih kosong. Jalankan Langkah 1 → 3, lalu Tes Ulang.' : ' — kemungkinan halaman login/error Google.') +
-      '<br>Cuplikan: <code>' + plain.slice(0,140) + '…</code>');
+    setBox(el, 'bad', '❌ HTTP ' + (p.status||0) + ' — ' + (p.hint || 'respon tidak dikenal') +
+      (p.body ? '<br>Cuplikan: <code>' + String(p.body).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').slice(0,140) + '…</code>' : ''));
     return false;
   }
 

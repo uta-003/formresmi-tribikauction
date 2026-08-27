@@ -157,6 +157,8 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         route = self.path.split("?", 1)[0]
+        if route == "/api/sheet-proxy":
+            return self._sheet_proxy()
         if route != "/api/fix-endpoint":
             self._send_json(404, {"ok": False, "error": "rute tidak dikenal"})
             return
@@ -202,6 +204,60 @@ class Handler(SimpleHTTPRequestHandler):
         except Exception as e:
             errors.append("firebase-config.js: " + str(e))
         self._send_json(200, {"ok": not errors, "updated": updated, "errors": errors, "endpoint": ep})
+
+    def _sheet_proxy(self):
+        """Jembatan tanpa-CORS: portal -> server lokal -> Apps Script -> balasan JSON ke portal."""
+        import urllib.request
+        import urllib.error
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            length = 0
+        raw = self.rfile.read(length).decode("utf-8", "replace") if length else ""
+        try:
+            data = json.loads(raw or "{}")
+        except Exception:
+            data = {}
+        ep = str(data.get("endpoint", "")).strip()
+        payload = data.get("payload", data if "docNo" in data else {})
+        if not (ep.startswith("https://script.google.com/macros/s/") and ep.endswith("/exec")):
+            self._send_json(400, {"ok": False, "error": "endpoint tidak valid"})
+            return
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        req = urllib.request.Request(ep, data=body,
+                                     headers={"Content-Type": "text/plain;charset=utf-8"}, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                status = resp.status
+                text = resp.read(65536).decode("utf-8", "replace")
+        except urllib.error.HTTPError as he:
+            try:
+                text = he.read(65536).decode("utf-8", "replace")
+            except Exception:
+                text = ""
+            status = he.code
+        except Exception as e:
+            self._send_json(200, {"ok": False, "status": 0,
+                "hint": "Endpoint tidak dapat dihubungi dari server: " + str(e), "body": ""})
+            return
+        js = {}
+        try:
+            js = json.loads(text.strip() or "{}")
+        except Exception:
+            js = None
+        if isinstance(js, dict) and js.get("ok") is True:
+            self._send_json(200, {"ok": True, "ok_js": True, "status": status, "js": js})
+            return
+        low = text.lower()
+        if "<" in text and "dopost" in low:
+            hint = 'Deployment Apps Script masih error "Fungsi skrip tidak ditemukan: doPost" — buka /fix-sheet.html: tempel kode backend lalu Deploy versi baru'
+        elif "<" in text and ("sign in" in low or "accounts.google" in low):
+            hint = 'Endpoint menuntut login Google — deploy ulang dengan "Who has access: Anyone"'
+        elif "<" in text:
+            hint = "Endpoint membalas HTML (bukan JSON) — lihat cuplikan"
+        else:
+            hint = text[:300] or ("HTTP " + str(status))
+        self._send_json(200, {"ok": False, "ok_js": False, "status": status, "hint": hint, "body": text[:400]})
 
 
     def end_headers(self):
