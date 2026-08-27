@@ -76,7 +76,10 @@ border-radius:10px;padding:12px;font-size:11.5px;line-height:1.5;color:#cbd5e1;w
   <h2>4 · Tes ulang — dan terapkan URL bila berubah</h2>
   <div class="row">
     <button class="btn btn-p" id="retestBtn">🔁 Tes Ulang Endpoint</button>
+    <button class="btn btn-g" id="rowBtn">🧪 Kirim Baris Uji ke Spreadsheet</button>
   </div>
+  <div class="box" id="rowRes" style="display:none"></div>
+  <p class="note">📍 <b>Penting:</b> data ditulis ke tab <code>Pengajuan</code> di bagian bawah spreadsheet — <u>bukan</u> tab pertama (Sheet1/gid 0). Buka spreadsheet lalu klik tab <b>Pengajuan</b>. Baris uji bertanda <code>TRB-TEST-…</code> boleh dihapus.</p>
   <div class="row" style="margin-top:8px">
     <input type="text" id="urlInput" placeholder="Tempel URL Web app BARU bila berubah (…/exec)">
     <button class="btn btn-g" id="applyBtn">🚀 Terapkan ke Portal</button>
@@ -130,6 +133,31 @@ border-radius:10px;padding:12px;font-size:11.5px;line-height:1.5;color:#cbd5e1;w
   });
 
   $('retestBtn').addEventListener('click', function(){ testEndpoint(EP, statusBox); });
+
+  $('rowBtn').addEventListener('click', async function(){
+    var res = $('rowRes');
+    setBox(res, '', '⏳ Mengirim baris uji…'); res.style.display = 'block';
+    try{
+      var r = await fetch('/api/sheet-proxy', { method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ endpoint: EP, payload: {
+          docId:'1ym6u8evb9PhLvbo6YH3aVFDScGow7KjToj4C7TNO9IM',
+          cat:'cek', catName:'Form Cek Unit Lelang',
+          docNo:'TRB-TEST-'+String(Date.now()).slice(-4),
+          date:new Date().toLocaleDateString('id-ID'),
+          nama:'BARIS UJI (boleh dihapus)', nik:'-', perusahaan:'-',
+          ktpName:'', ktp:'', signature:'',
+          rows:'1. Baris uji integrasi | Merk/Type: -', status:'Tes koneksi' } }) });
+      var p = await r.json();
+      if(p.ok_js === true){
+        setBox(res, 'good', '✅ Baris uji tertulis di baris ke-' + ((p.js && p.js.row) ? p.js.row : '?') + '. Buka spreadsheet → klik tab <b>Pengajuan</b> di bawah.');
+      }else{
+        setBox(res, 'bad', '❌ ' + (p.hint || ('HTTP ' + (p.status||'?'))));
+      }
+    }catch(e){
+      setBox(res, 'bad', '❌ ' + (e.message||e));
+    }
+  });
 
   $('applyBtn').addEventListener('click', async function(){
     var res = $('applyRes');
