@@ -660,12 +660,27 @@ function renderRows(){
   $('rowsArea').innerHTML = state.rows.map(r=>rowTemplate(state.cat,r)).join('');
   if(state.rows.length===0) $('addRowBtn').style.display='block';
 }
+function syncRowsFromDOM(){
+  const els = Array.from($('rowsArea').querySelectorAll('.row'));
+  state.rows = els.map(r=>{
+    const g=n=>{ const el=r.querySelector(n); return el?el.value.trim():''; };
+    if(state.cat==='barang'){
+      const nama=g('.r-nama'), jml=g('.r-jml'), sat=g('.r-sat'), ket=g('.r-ket');
+      return (nama||jml||sat||ket) ? {nama,jml,sat,ket} : {};
+    }
+    const nopol=g('.r-nopol'), merk=g('.r-merk');
+    return (nopol||merk) ? {nopol,merk} : {};
+  });
+  if(state.rows.length===0) state.rows=[{}];
+}
 function addRow(){
+  syncRowsFromDOM();             // simpan isian baris yang sudah diketik
   state.rows.push({});
   renderRows();
   snd('click');
 }
 function delRow(btn){
+  syncRowsFromDOM();             // simpan isian baris lain sebelum menghapus/rebuild
   const rows=[...$('rowsArea').querySelectorAll('.row')];
   const idx=rows.indexOf(btn.closest('.row'));
   if(idx>-1){
