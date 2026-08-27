@@ -1187,7 +1187,7 @@ function unqueuePending(target, d){
 }
 async function flushPendingSync(){
   if(!navigator.onLine) return;
-  const q = loadPending().filter(x => x && x.target !== 'fb');   // buang entri antrean legacy (era-firebase)
+  const q = loadPending().filter(x => x && x.target !== 'fb');   // buang entri antrean legacy
   if(q.length === 0) return;
   let sent = 0;
   for(const item of q){
