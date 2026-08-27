@@ -205,7 +205,7 @@ html.dark .cdot { border-color: rgba(255,255,255,.75); }
     </style>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="modal.js"></script>
-    <script src="doc-capture.js?v=3"></script>
+    <script src="doc-capture.js?v=4"></script>
     <script>(function(){var k="tb_theme",s;try{s=localStorage.getItem(k)}catch(e){}var on=s?s==="dark":(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);var ap=function(x){document.documentElement.classList.toggle("dark",x);var b=document.getElementById("themeToggle");if(b)b.textContent=x?"☀️":"🌙"};ap(on);var ck="tb_color",cv="merah";try{var v=localStorage.getItem(ck);if(v)cv=v}catch(e){}document.documentElement.setAttribute("data-color",cv);var DOTS=[["merah","#dc2626","Merah Tribik"],["biru","#0284c7","Biru Samudra"],["hijau","#059669","Hijau Zamrud"],["ungu","#7c3aed","Ungu Nebula"],["oranye","#ea580c","Oranye Senja"],["tosca","#0d9488","Tosca Segar"]];document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("themeToggle");if(b){b.addEventListener("click",function(){var x=!document.documentElement.classList.contains("dark");ap(x);try{localStorage.setItem(k,x?"dark":"light")}catch(e){}})}var box=document.getElementById("colorDots");if(box){for(var i=0;i<DOTS.length;i++){(function(d){var bt=document.createElement("button");bt.type="button";bt.className="cdot"+(d[0]===cv?" active":"");bt.style.background=d[1];bt.title=d[2];bt.setAttribute("aria-label","Tema "+d[2]);bt.addEventListener("click",function(){cv=d[0];document.documentElement.setAttribute("data-color",d[0]);try{localStorage.setItem(ck,d[0])}catch(e){}var all=box.querySelectorAll(".cdot");for(var j=0;j<all.length;j++)all[j].classList.remove("active");bt.classList.add("active")});box.appendChild(bt)})(DOTS[i])}}});})();</script>
 </head>
 <body>
@@ -473,7 +473,7 @@ html.dark .cdot { border-color: rgba(255,255,255,.75); }
             controls.style.display = 'flex';
             var cfg = CARD[doc] || CARD.ktp;
             var cam = new DocumentAutoCapture({
-                video: video, overlay: overlay, docType: doc, label: cfg.label, ratio: cfg.ratio,
+                video: video, overlay: overlay, docType: doc, label: cfg.label, ratio: cfg.ratio, rotatable: doc === 'idcard',   // ID Card bisa diputar tegak/mendatar
                 sound: playSound,
                 onCapture: function (dataURL, info) { commitPhoto(info.docType, dataURL); },
                 onStatus: function () {}

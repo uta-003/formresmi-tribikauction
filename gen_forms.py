@@ -459,7 +459,7 @@ COMMON_JS = '''
             controls.style.display = 'flex';
             var cfg = CARD[doc] || CARD.ktp;
             var cam = new DocumentAutoCapture({
-                video: video, overlay: overlay, docType: doc, label: cfg.label, ratio: cfg.ratio,
+                video: video, overlay: overlay, docType: doc, label: cfg.label, ratio: cfg.ratio, rotatable: doc === 'idcard',   // ID Card bisa diputar tegak/mendatar
                 sound: playSound,
                 onCapture: function (dataURL, info) { commitPhoto(info.docType, dataURL); },
                 onStatus: function () {}

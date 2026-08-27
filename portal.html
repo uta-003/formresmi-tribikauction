@@ -902,7 +902,9 @@ async function openCam(){
     $('camControls').style.display='flex';
     ktpCam = new DocumentAutoCapture({
       video: $('camVideo'), overlay: $('camOverlay'),
-      docType: camDocType, ratio: KTP_RATIO, sound: snd,
+      docType: camDocType, ratio: KTP_RATIO,
+      rotatable: camDocType === 'idcard',   // hanya ID CARD: tombol putar bingkai
+      sound: snd,
       onCapture: function(dataURL){
         state.ktpData=dataURL; state.ktpName='Kamera ('+m.name+' - auto-capture)';
         $('ktpName').textContent=state.ktpName; $('ktpPill').classList.add('has'); showThumb();
@@ -983,6 +985,8 @@ document.querySelectorAll('.cam-type').forEach(function(btn){
     const ob=$('camOpen'); if(ob) ob.textContent='📷 Buka Kamera '+(DT_MODES[camDocType].name);
     const nb=$('camNote'); if(nb) nb.innerHTML=camNoteText();
     snd('click');
+    /* kamera sedang terbuka? bangun ulang sesi dengan bingkai jenis baru */
+    if(ktpCam){ stopCam(); openCam(); }
   });
 });
 

@@ -1,6 +1,13 @@
 /* ============================================================================
- * doc-capture.js  —  Document Auto Capture Component v3 (reusable)
+ * doc-capture.js  —  Document Auto Capture Component v4 (reusable)
  * ----------------------------------------------------------------------------
+ * BARU v4 (bingkai sesuai ukuran kartu + tombol putar ID Card):
+ *   • Bingkai & hasil mengikuti JENIS terpilih secara presisi:
+ *       KTP & SIM  -> 85,60 × 53,98 mm (lanskap, standar ID-1).
+ *       ID CARD    -> bisa diputar tombol ↻ antara mendatar/tegak.
+ *   • Deteksi menyesuaikan rasio bingkai AKTIF — kartu yang orientasinya
+ *     menyimpang dari bingkai ditolak, sehingga hasil selalu presisi.
+ *
  * BARU v3 (mode per jenis dokumen + hasil presisi):
  *   • Preset KTP / SIM / ID CARD: label, ukuran mm, dan warna aksen sendiri,
  *     tampil sebagai badge jenis kartu di overlay kamera.
@@ -31,16 +38,18 @@
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
-  /* ---- Preset jenis dokumen: label, subjudul ukuran, warna aksen ---- */
+  /* ---- Preset jenis dokumen: dimensi kartu (mm), warna aksen, rotasi ---- */
+  var MM_CARD_W = 85.60, MM_CARD_H = 53.98;   // standar ID-1 (KTP/SIM/ID Card CR80)
   var PRESETS = {
-    ktp:    { label: 'KTP',     sub: 'KTP \u2022 85,60 \u00d7 53,98 mm',     color: '#22c55e' },
-    sim:    { label: 'SIM',     sub: 'SIM \u2022 85,60 \u00d7 53,98 mm',     color: '#38bdf8' },
-    idcard: { label: 'ID CARD', sub: 'ID CARD \u2022 85,60 \u00d7 53,98 mm', color: '#a78bfa' }
+    ktp:    { label: 'KTP',     mm: { w: MM_CARD_W, h: MM_CARD_H }, color: '#22c55e' },
+    sim:    { label: 'SIM',     mm: { w: MM_CARD_W, h: MM_CARD_H }, color: '#38bdf8' },
+    idcard: { label: 'ID CARD', mm: { w: MM_CARD_W, h: MM_CARD_H }, color: '#a78bfa', rotatable: true }
   };
+  function fmtMm(n) { return n.toFixed(2).replace('.', ','); }
   function resolvePreset(docType, explicitLabel) {
     var key = (docType || 'ktp').toLowerCase();
     var p = PRESETS[key] || PRESETS.ktp;
-    return { key: key, label: explicitLabel || p.label, sub: p.sub, color: p.color };
+    return { key: key, label: explicitLabel || p.label, color: p.color, mm: p.mm, rotatable: !!p.rotatable };
   }
 
   function DocumentAutoCapture(opts) {
@@ -51,9 +60,13 @@
     var _preset     = resolvePreset(this.docType, opts.label);
     this.presetKey  = _preset.key;
     this.label      = _preset.label;
-    this.subLabel   = _preset.sub;
+    this.subLabel   = '';
     this.accent     = _preset.color;
     this.ratio      = opts.ratio || DEFAULT_RATIO;
+    this.mm         = _preset.mm;
+    this.rotatable  = !!_preset.rotatable || opts.rotatable === true;
+    this._orient    = (opts.orientation === 'portrait') ? 'portrait' : 'landscape';
+    if (!this.rotatable) this._orient = 'landscape';   // hanya jenis rotatable boleh portrait
     this.onCapture  = opts.onCapture || function () {};
     this.onStatus   = opts.onStatus || function () {};
     this.auto       = opts.auto !== false;
@@ -108,23 +121,29 @@
       '.doc-cap-badge{position:absolute;left:50%;top:0;transform:translate(-50%,0);' +
       'padding:3px 10px;border-radius:999px;font:bold 10px Poppins,Segoe UI,sans-serif;' +
       'letter-spacing:.6px;color:#0b1220;pointer-events:none;z-index:3;' +
-      'box-shadow:0 2px 8px rgba(0,0,0,.35);white-space:nowrap}';
+      'box-shadow:0 2px 8px rgba(0,0,0,.35);white-space:nowrap}' +
+      '.doc-cap-rot{position:absolute;right:12px;top:12px;width:46px;height:46px;' +
+      'border-radius:50%;border:none;background:rgba(15,23,42,.75);color:#fff;font-size:21px;' +
+      'line-height:1;cursor:pointer;z-index:4;box-shadow:0 3px 12px rgba(0,0,0,.45);' +
+      'display:flex;align-items:center;justify-content:center}' +
+      '.doc-cap-rot:hover{background:#334155}.doc-cap-rot:active{transform:scale(.92)}';
     document.head.appendChild(st);
   };
 
-  /* --- kotak bingkai di layar: rasio PERSIS this.ratio dalam area video terlihat --- */
+  /* --- kotak bingkai di layar: rasio PERSIS mode aktif dalam area video terlihat --- */
   DocumentAutoCapture.prototype._box = function () {
+    var FR = this._frameRatio();
     var g = this._geom, cw, ch, cx, cy;
     if (!g.fallback) {
       var maxW = g.drawW * 0.86, maxH = g.drawH * 0.9;
-      if (maxW / maxH > this.ratio) { ch = maxH; cw = ch * this.ratio; }
-      else { cw = maxW; ch = cw / this.ratio; }
+      if (maxW / maxH > FR) { ch = maxH; cw = ch * FR; }
+      else { cw = maxW; ch = cw / FR; }
       cx = g.offX + (g.drawW - cw) / 2;
       cy = g.offY + (g.drawH - ch) / 2;
     } else {
       var W = (this.overlay && this.overlay.width) || 300, H = (this.overlay && this.overlay.height) || 200;
-      if (W / H > this.ratio) { ch = H * 0.9; cw = ch * this.ratio; }
-      else { cw = W * 0.86; ch = cw / this.ratio; }
+      if (W / H > FR) { ch = H * 0.9; cw = ch * FR; }
+      else { cw = W * 0.86; ch = cw / FR; }
       cx = (W - cw) / 2; cy = (H - ch) / 2;
     }
     return { x: cx, y: cy, w: cw, h: ch };
@@ -174,6 +193,7 @@
       self.running = true;
       self._t0 = 0; self._tick = 0; self.stableRun = 0; self.lastBox = null;
       self._resize();
+      if (self.rotatable) self._makeRotBtn(); else self._removeRotBtn();
       window.addEventListener('resize', self._boundResize);
       self.onStatus('Arahkan dokumen ke kamera…', false);
       self._raf = requestAnimationFrame(self._boundLoop);
@@ -189,6 +209,7 @@
     if (this.overlay) { var c = this.overlay.getContext('2d'); if (c) c.clearRect(0, 0, this.overlay.width, this.overlay.height); }
     if (this._badgeEl && this._badgeEl.parentNode) { this._badgeEl.parentNode.removeChild(this._badgeEl); }
     this._badgeEl = null;
+    this._removeRotBtn();
   };
 
   /* ---------- threshold global Otsu dari histogram 256 bin ---------- */
@@ -294,11 +315,10 @@
     /* tak boleh menyentuh tepi frame (kartu terlihat utuh) */
     if (comp.minX <= 1 || comp.minY <= 1 || comp.maxX >= W - 2 || comp.maxY >= H - 2) return null;
 
-    /* rasio ID-1, terima landscape & portrait (sim skew) */
-    var R = this.ratio, ar = bw / bh, invA = bh / bw;
-    var isLand = ar >= R * 0.74 && ar <= R * 1.42;
-    var isPort = invA >= R * 0.74 && invA <= R * 1.42;
-    if (!isLand && !isPort) return null;
+    /* rasio mengikuti BINGKAI AKTIF (KTP/SIM lanskap; ID Card ikut orientasi ↻) */
+    var R = this._frameRatio(), ar = bw / bh;
+    var dAr0 = Math.abs(Math.log(ar / R));
+    if (dAr0 > 0.37) return null;   /* melenceng > ±37% dari bingkai -> tolak */
 
     /* kelengkapan bentuk isi blob */
     var fill = comp.area / (bw * bh);
@@ -318,8 +338,7 @@
     /* kontras tonal kartu vs lingkungannya */
     if (st.contrast < 11) return null;
 
-    var dAr = Math.abs(Math.log((isLand ? ar : invA) / R));
-    var scAr = clamp(1 - dAr / 0.5, 0, 1);
+    var scAr = clamp(1 - dAr0 / 0.5, 0, 1);
     var scFill = clamp((fill - 0.55) / 0.45, 0, 1);
     var scSd = st.sdIn <= 35 ? 1 : clamp((85 - st.sdIn) / 50, 0, 1);
     var scC = clamp(st.contrast / 22, 0, 1);
@@ -328,7 +347,7 @@
 
     return {
       minX: comp.minX, minY: comp.minY, maxX: comp.maxX, maxY: comp.maxY,
-      area: comp.area, score: score, portrait: !isLand && isPort
+      area: comp.area, score: score, orientation: this._orient
     };
   };
 
@@ -465,7 +484,7 @@
     ctx.fillText(msg, W / 2, Math.max(14, b.y - 12));
 
     /* badge HTML: jenis + ukuran kartu, mengikuti posisi bingkai */
-    this._badge(b.x + b.w / 2, b.y + b.h + 18, this.subLabel, this.accent);
+    this._badge(b.x + b.w / 2, b.y + b.h + 18, this._sizeText(), this.accent);
 
     /* bar progres persis di bawah bingkai */
     if (good) {
@@ -475,6 +494,47 @@
       ctx.fillStyle = ready ? this.accent : '#38bdf8';
       ctx.fillRect(b.x, b.y + b.h + 8, pw, 5);
     }
+  };
+
+  DocumentAutoCapture.prototype._frameRatio = function () {
+    /* rasio bingkai EFEKTIF: lanskap = w/h ; potret (setelah putar) = h/w */
+    return this._orient === 'portrait' ? 1 / this.ratio : this.ratio;
+  };
+  DocumentAutoCapture.prototype._sizeText = function () {
+    var mm = this.mm || { w: 85.60, h: 53.98 };
+    return this.label + ' \u2022 ' +
+      (this._orient === 'portrait'
+        ? fmtMm(mm.h) + ' \u00d7 ' + fmtMm(mm.w)
+        : fmtMm(mm.w) + ' \u00d7 ' + fmtMm(mm.h)) + ' mm';
+  };
+
+  /* tombol putar bingkai (hanya jenis rotatable, mis. ID CARD) */
+  DocumentAutoCapture.prototype._makeRotBtn = function () {
+    var host = this.overlay && this.overlay.parentElement;
+    if (!host) return;
+    if (!this._rotBtn) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'doc-cap-rot'; b.innerHTML = '&#8635;';
+      b.setAttribute('aria-label', 'Putar bingkai');
+      b.title = 'Putar bingkai mendatar/tegak';
+      var self = this;
+      b.addEventListener('click', function (ev) {
+        ev.preventDefault(); ev.stopPropagation(); self.rotateFrame();
+      });
+      host.appendChild(b);
+      this._rotBtn = b;
+    }
+    this._rotBtn.style.display = 'flex';
+  };
+  DocumentAutoCapture.prototype._removeRotBtn = function () {
+    if (this._rotBtn && this._rotBtn.parentNode) this._rotBtn.parentNode.removeChild(this._rotBtn);
+    this._rotBtn = null;
+  };
+  DocumentAutoCapture.prototype.rotateFrame = function () {
+    if (!this.rotatable) return;
+    this._orient = this._orient === 'portrait' ? 'landscape' : 'portrait';
+    this.snd('click');
+    this._resize();
   };
 
   /* badge jenis dokumen diposisikan ikut geometri overlay tiap frame */
@@ -519,9 +579,10 @@
       if (ch > vh) { ch = vh; cw = vh * this.ratio; }
       cx = (vw - cw) / 2; cy = (vh - ch) / 2;
     }
-    /* --- KUNCI RASIO ID-1: crop dipaksa persis this.ratio -> TIDAK gepeng --- */
-    if (cw / ch > this.ratio) { var nw = ch * this.ratio; cx += (cw - nw) / 2; cw = nw; }
-    else                      { var nh = cw / this.ratio; cy += (ch - nh) / 2; ch = nh; }
+    /* --- KUNCI RASIO bingkai aktif: crop dipaksa persis FR -> TIDAK gepeng --- */
+    var FR = this._frameRatio();
+    if (cw / ch > FR) { var nw = ch * FR; cx += (cw - nw) / 2; cw = nw; }
+    else              { var nh = cw / FR; cy += (ch - nh) / 2; ch = nh; }
     if (cx < 0) cx = 0;
     if (cy < 0) cy = 0;
     if (cx + cw > vw) cw = vw - cx;
@@ -530,7 +591,7 @@
 
     /* canvas keluaran proporsional: tinggi = lebar / rasio -> gambar tak melar */
     var outW = Math.min(1000, Math.max(480, Math.round(cw)));
-    var outH = Math.round(outW / this.ratio);
+    var outH = Math.round(outW / FR);
     void self;
     var out = document.createElement('canvas');
     out.width = outW; out.height = outH;
@@ -542,6 +603,6 @@
     void self;
   };
 
-  DocumentAutoCapture.VERSION = '2.0';
+  DocumentAutoCapture.VERSION = '4.0';
   global.DocumentAutoCapture = DocumentAutoCapture;
 })(window);
