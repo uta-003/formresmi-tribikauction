@@ -10,6 +10,7 @@
 <title>Form Tribik Auction — Portal Pengajuan</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="./modal.js"></script>
+<script src="./doc-capture.js"></script>
 <style>
 :root{
   --primary:#ff5252; --primary-2:#a70000; --accent:#ff7b7b;
@@ -767,6 +768,7 @@ $('sigReset').addEventListener('click', ()=>{ sigCtx.clearRect(0,0,$('sigCanvas'
 
 /* ============ KAMERA KTP / ID CARD (presisi ID-1 = 85.6 x 53.98 mm) ============ */
 const KTP_RATIO = 85.60 / 53.98;   // 1.586 (standar ID-1, KTP/SIM/kartu)
+let ktpCam = null;                 // instance DocumentAutoCapture
 let camStream = null;
 let camActive = false;
 
@@ -816,29 +818,30 @@ function redrawFrame(){
 }
 async function openCam(){
   try{
+    if(typeof DocumentAutoCapture==='undefined'){ toast('Komponen pemindai (doc-capture.js) belum termuat','err'); return; }
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
       toast('Kamera tidak didukung browser ini','err'); return;
     }
-    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
-    const v=$('camVideo');
-    v.srcObject=camStream;
-    await v.play();
-    camActive=true;
     $('camPreview').style.display='block';
     $('camOpen').style.display='none';
     $('camControls').style.display='flex';
-    setTimeout(redrawFrame, 80);
-    window.addEventListener('resize', redrawFrame);
+    ktpCam = new DocumentAutoCapture({
+      video: $('camVideo'), overlay: $('camOverlay'),
+      docType: 'ktp', label: 'KTP / ID CARD', ratio: KTP_RATIO, sound: snd,
+      onCapture: function(dataURL){
+        state.ktpData=dataURL; state.ktpName='Kamera (KTP / ID Card - auto-capture)';
+        $('ktpName').textContent=state.ktpName; $('ktpPill').classList.add('has'); showThumb();
+        $('camPreview').style.display='none'; $('camOpen').style.display='inline-flex'; $('camControls').style.display='none';
+      }
+    });
+    await ktpCam.start();
     snd('open');
   }catch(e){
     toast('Kamera tidak dapat diakses. Pastikan izin diberikan & halaman dibuka via http://localhost','err');
   }
 }
 function stopCam(){
-  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
-  camActive=false;
-  const v=$('camVideo'); if(v) v.srcObject=null;
-  const cv=$('camOverlay'); if(cv){ const c=cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); }
+  if(ktpCam){ ktpCam.stop(); ktpCam=null; }
   $('camPreview').style.display='none';
   $('camOpen').style.display='inline-flex';
   $('camControls').style.display='none';
@@ -889,23 +892,7 @@ function fitCardBox(box, srcW, srcH, ratio){
   return {sx,sy,cw,ch};
 }
 function captureKtp(){
-  const v=$('camVideo');
-  if(!v || !v.videoWidth) return;
-  const OUT_W=640, OUT_H=Math.round(OUT_W/KTP_RATIO);
-  const vw=v.videoWidth, vh=v.videoHeight;
-  // auto-detect card and fit to ID-1 so result is never stretched ("gepeng")
-  const box=fitCardBox(findCardBox(vw, vh, v), vw, vh, KTP_RATIO);
-  const out=document.createElement('canvas');
-  out.width=OUT_W; out.height=OUT_H;
-  const octx=out.getContext('2d');
-  octx.drawImage(v, box.sx, box.sy, box.cw, box.ch, 0, 0, OUT_W, OUT_H);
-  state.ktpData=out.toDataURL('image/jpeg', 0.92);
-  state.ktpName='Kamera (KTP / ID Card - auto-fit)';
-  $('ktpName').textContent=state.ktpName;
-  $('ktpPill').classList.add('has');
-  showThumb();
-  stopCam();
-  snd('shutter');
+  if(ktpCam) ktpCam.capture();
 }
 
 $('camOpen').addEventListener('click', openCam);

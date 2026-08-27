@@ -202,6 +202,7 @@ html.dark .cdot { border-color: rgba(255,255,255,.75); }
     </style>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="modal.js"></script>
+    <script src="doc-capture.js"></script>
     <script>(function(){var k="tb_theme",s;try{s=localStorage.getItem(k)}catch(e){}var on=s?s==="dark":(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);var ap=function(x){document.documentElement.classList.toggle("dark",x);var b=document.getElementById("themeToggle");if(b)b.textContent=x?"☀️":"🌙"};ap(on);var ck="tb_color",cv="merah";try{var v=localStorage.getItem(ck);if(v)cv=v}catch(e){}document.documentElement.setAttribute("data-color",cv);var DOTS=[["merah","#dc2626","Merah Tribik"],["biru","#0284c7","Biru Samudra"],["hijau","#059669","Hijau Zamrud"],["ungu","#7c3aed","Ungu Nebula"],["oranye","#ea580c","Oranye Senja"],["tosca","#0d9488","Tosca Segar"]];document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("themeToggle");if(b){b.addEventListener("click",function(){var x=!document.documentElement.classList.contains("dark");ap(x);try{localStorage.setItem(k,x?"dark":"light")}catch(e){}})}var box=document.getElementById("colorDots");if(box){for(var i=0;i<DOTS.length;i++){(function(d){var bt=document.createElement("button");bt.type="button";bt.className="cdot"+(d[0]===cv?" active":"");bt.style.background=d[1];bt.title=d[2];bt.setAttribute("aria-label","Tema "+d[2]);bt.addEventListener("click",function(){cv=d[0];document.documentElement.setAttribute("data-color",d[0]);try{localStorage.setItem(ck,d[0])}catch(e){}var all=box.querySelectorAll(".cdot");for(var j=0;j<all.length;j++)all[j].classList.remove("active");bt.classList.add("active")});box.appendChild(bt)})(DOTS[i])}}});})();</script>
 </head>
 <body>
@@ -434,72 +435,67 @@ html.dark .cdot { border-color: rgba(255,255,255,.75); }
             ctx.fillText('Letakkan dokumen di dalam bingkai', w / 2, cy + ch + 40);
         }
 
+        /* --- Document Auto Capture (doc-capture.js) — deteksi & auto-capture --- */
+        var docCams = {};   // doc -> instance DocumentAutoCapture
+
+        function commitPhoto(doc, dataURL) {
+            var cfg = CARD[doc] || CARD.ktp;
+            capturedPhotos[doc] = { label: cfg.label, dataURL: dataURL };
+            var hid = document.getElementById('foto-' + doc);
+            if (hid) hid.value = dataURL;
+            var frame = document.getElementById(doc + 'Frame');
+            if (frame) frame.innerHTML = '<img src="' + dataURL + '" alt="Foto ' + cfg.label + '" style="max-width:100%;max-height:150px;object-fit:contain;border-radius:4px;">';
+            var preview = document.getElementById('preview-' + doc);
+            var controls = document.getElementById('controls-' + doc);
+            if (preview) preview.classList.remove('active');
+            if (controls) controls.style.display = 'none';
+            playSound('success');
+        }
+
         function openCamera(doc) {
             var preview = document.getElementById('preview-' + doc);
             var controls = document.getElementById('controls-' + doc);
             var video = document.getElementById('video-' + doc);
             var overlay = document.getElementById('overlay-' + doc);
-            if (!preview || !controls) return;
+            if (!preview || !controls || !video || !overlay) { playSound('error'); return; }
+            if (typeof DocumentAutoCapture === 'undefined') {
+                Modal.alert('Komponen pemindai (doc-capture.js) belum termuat.', 'Kamera');
+                return;
+            }
             preview.classList.add('active');
             controls.style.display = 'flex';
-            overlay.width = overlay.offsetWidth;
-            overlay.height = overlay.offsetHeight;
-            drawCardFrame(overlay, doc);
-            playSound('open');
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                .then(function(stream){ cameraState[doc] = stream; video.srcObject = stream; })
-                .catch(function(err){ Modal.alert('Kamera tidak dapat diakses: ' + err.message, 'Kamera'); });
+            var cfg = CARD[doc] || CARD.ktp;
+            var cam = new DocumentAutoCapture({
+                video: video, overlay: overlay, docType: doc, label: cfg.label, ratio: cfg.ratio,
+                sound: playSound,
+                onCapture: function (dataURL, info) { commitPhoto(info.docType, dataURL); },
+                onStatus: function () {}
+            });
+            cam.start()['catch'](function (err) {
+                preview.classList.remove('active'); controls.style.display = 'none';
+                Modal.alert('Kamera tidak dapat diakses: ' + (err.message || err), 'Kamera');
+            });
+            docCams[doc] = cam;
         }
 
         function capturePhoto(doc) {
-            playSound('shutter');
-            var video = document.getElementById('video-' + doc);
-            var frame = document.getElementById(doc + 'Frame');
-            var preview = document.getElementById('preview-' + doc);
-            var controls = document.getElementById('controls-' + doc);
-            if (!video || !video.videoWidth) {
-                playSound('error');
-                Modal.alert('Kamera belum siap, coba ambil foto lagi.', 'Kamera');
-                return;
-            }
-            var cfg = CARD[doc] || CARD.ktp;
-            var vw = video.videoWidth, vh = video.videoHeight;
-            // Crop presisi ke area kartu (rasio ID-1: 85.60 x 53.98 mm) di tengah frame, tanpa distorsi/gepeng
-            var ratio = cfg.ratio;
-            var cw = vw, ch = vw / ratio;
-            if (ch > vh) { ch = vh; cw = vh * ratio; }
-            var sx = (vw - cw) / 2, sy = (vh - ch) / 2;
-            var OUT_W = 720, OUT_H = Math.round(OUT_W / ratio);
-            var out = document.createElement('canvas'); out.width = OUT_W; out.height = OUT_H;
-            var oc = out.getContext('2d');
-            oc.drawImage(video, sx, sy, cw, ch, 0, 0, OUT_W, OUT_H);
-            var dataURL = out.toDataURL('image/jpeg', 0.92);
-            capturedPhotos[doc] = { label: cfg.label, dataURL: dataURL };
-            var hid = document.getElementById('foto-' + doc);
-            if (hid) hid.value = dataURL;
-            if (frame) frame.innerHTML = '<img src="' + dataURL + '" alt="Foto ' + cfg.label + '" style="max-width:100%;max-height:150px;object-fit:contain;border-radius:4px;">';
-            if (preview) preview.classList.remove('active');
-            if (controls) controls.style.display = 'none';
-            if (cameraState[doc]) { cameraState[doc].getTracks().forEach(function(t){ t.stop(); }); cameraState[doc] = null; }
-            video.srcObject = null;
+            var cam = docCams[doc];
+            if (cam) cam.capture();
         }
 
         function cancelCamera(doc) {
-            playSound('click');
+            var cam = docCams[doc];
+            if (cam) { cam.stop(); docCams[doc] = null; }
             var preview = document.getElementById('preview-' + doc);
             var controls = document.getElementById('controls-' + doc);
-            var video = document.getElementById('video-' + doc);
-            preview.classList.remove('active');
-            controls.style.display = 'none';
-            if (cameraState[doc]) { cameraState[doc].getTracks().forEach(function(t){ t.stop(); }); cameraState[doc] = null; }
-            video.srcObject = null;
+            if (preview) preview.classList.remove('active');
+            if (controls) controls.style.display = 'none';
         }
 
         document.addEventListener('click', function(e) {
             var target = e.target.closest('button[data-doc]');
             if (!target) return;
             var doc = target.getAttribute('data-doc');
-            var cls = target.className || '';
             if (target.classList.contains('btn-open')) { openCamera(doc); }
             else if (target.classList.contains('btn-capture')) { capturePhoto(doc); }
             else if (target.classList.contains('btn-cancel-cam')) { cancelCamera(doc); }
