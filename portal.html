@@ -452,8 +452,8 @@ footer b{color:#cbd5e1}
       <button class="btn btn-ghost" id="sigReset">🔄 Reset Tanda Tangan</button>
       <button class="btn btn-ghost" id="resetForm">Reset Form</button>
       <button class="btn btn-ghost" id="saveDraft">💾 Simpan Draft</button>
-      <button class="btn btn-ghost" id="testFirebase" style="display:none">🧪 Test Firebase</button>
-      <button class="btn btn-ghost" id="loadFirebase" style="display:none">📥 Muat dari Firebase</button>
+      <button class="btn btn-ghost" id="testFirebase">🧪 Test Firebase</button>
+      <button class="btn btn-ghost" id="loadFirebase">📥 Muat dari Firebase</button>
       <button class="btn btn-primary" id="submitForm">🚀 Kirim Form PDF ke Database (Firebase) &amp; WhatsApp</button>
     </div>
   </div>
@@ -1320,10 +1320,12 @@ async function saveToSheet(d){
     const raw = await res.text();
     let js = {};
     try { js = JSON.parse(raw||'{}'); } catch(_e) { js = { } ; }
-    if(js.ok || res.ok){ toast('Data tersimpan ke Google Sheets ✔','ok'); }
+    if(js.ok === true){ toast('Data tersimpan ke Google Sheets ✔','ok'); }
     else {
+      /* res.ok saja TIDAK cukup: halaman error Google (mis. doPost hilang) juga HTTP 200 HTML */
       const msg = js.error ? ('Apps Script: '+js.error)
-        : (raw && raw.length>40 ? ('resp '+res.status+': '+raw.slice(0,80)+'…') : ('HTTP '+res.status));
+        : (raw && raw.indexOf('<') !== -1 ? ('Endpoint merespon HTML, bukan JSON — deployment Apps Script perlu diperbarui (lihat DEPLOY_SHEETS.md)')
+        : (raw && raw.length>40 ? ('resp '+res.status+': '+raw.slice(0,80)+'…') : ('HTTP '+res.status)));
       throw new Error(msg);
     }
   }catch(e){

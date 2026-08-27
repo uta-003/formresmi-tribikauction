@@ -28,6 +28,7 @@ const firebaseConfig = {
 };
 let app = null, analytics = null, db = null, storage = null, auth = null;
 let _authReady = false, _authUser = null, _initPromise = null;
+var DB_PROBE_OK = null;   // true = ada host RTDB merespon; false = semua kandidat 404/tak terjangkau; null = belum dicek
 
 async function resolveDbHost() {
   try {
@@ -50,11 +51,13 @@ async function resolveDbHost() {
       // 200/403/401/429 = instance live; 404 = bukan instance
       if (r.status === 404) continue;
       if (r.status >= 200 && r.status < 500) {
+        DB_PROBE_OK = true;
         try { localStorage.setItem("tribi_rtdb_host", base); } catch (eh) {}
         return base;
       }
     } catch (e2) { /* DNS/network: try next */ }
   }
+  DB_PROBE_OK = false;   // tidak ada satu pun host yang merespon -> RTDB belum ada/belum dibuat
   return cands[0];
 }
 
@@ -108,7 +111,14 @@ async function uploadDataURL(path, dataURL) {
 /** Simpan SATU pengajuan ke Realtime Database (node `pengajuan`) + foto KTP/sig ke Storage. */
 async function saveToFirebase(d) {
   const _toast = window.toast ? window.toast : null;
-  try {
+  // Gagal cepat bila probing awal menunjukkan RTDB tidak ada (hindari hang tanpa info)
+  if (DB_PROBE_OK === false) {
+    const msg = "Realtime Database tidak ditemukan pada proyek '" + firebaseConfig.projectId +
+      "' — buka Firebase Console → Build → Realtime Database → Create Database, lalu muat ulang halaman ini. Data tetap aman di antrean & Google Sheets.";
+    _toast && _toast(msg, "err", 12000);
+    return false;
+  }
+  const work = (async () => {
     const user = await ensureAuth();
     const ts = Date.now();
     const uid = user ? user.uid : null;
@@ -122,15 +132,32 @@ async function saveToFirebase(d) {
     };
     const newDocRef = push(ref(db, "pengajuan"));
     await set(newDocRef, doc);
+    return true;
+  })();
+  const ok = await Promise.race([
+    work,
+    new Promise((r) => setTimeout(() => r("timeout"), 30000)),
+  ]);
+  if (ok === "timeout") {
+    _toast && _toast("Kirim ke Firebase melebihi 30 dtk (host RTDB tidak merespon) — data masuk antrean otomatis", "warn", 9000);
+    try { localStorage.removeItem("tribi_rtdb_host"); } catch (e2) {}   // host mungkin mati -> resolve ulang di percobaan berikutnya
+    return false;
+  }
+  if (ok === true) {
     _toast && _toast("Data tersimpan ke Realtime Database (Firebase) [OK]", "ok");
     return true;
+  }
+  // ok === false : work() melempar error (sudah ditangani catch di bawah)
+  try {
+    await work;
   } catch (e) {
     const h = hintFor(e);
     _toast && _toast("Gagal simpan ke Firebase: " + ((e && e.message) || String(e)) + (h ? " | " + h : ""), "err", 10000);
     console.error("[firebase] saveToFirebase error:", e);
-    try { localStorage.removeItem("tribi_rtdb_host"); } catch (e2) {}   // host mungkin mati -> resolve ulang di percobaan berikutnya
+    try { localStorage.removeItem("tribi_rtdb_host"); } catch (e2) {}
     return false;
   }
+  return false;
 }
 
 /** Muat seluruh pengajuan dari node RTDB `pengajuan` (terbaru dulu). */
@@ -181,7 +208,16 @@ async function testFirebase() {
       out.authReady = !!u && !!u.uid; out.authUid = u ? u.uid : null;
     } catch (ea) { out.steps.push("Anonymous Auth gagal: " + ea.message); }
     try {
-      const qSnap = await get(query(ref(db, "pengajuan"), limitToLast(1)));
+      const qSnap = await Promise.race([
+        get(query(ref(db, "pengajuan"), limitToLast(1))),
+        new Promise((r) => setTimeout(() => r("timeout"), 25000)),
+      ]);
+      if (qSnap === "timeout") {
+        out.dbRead = false;
+        out.steps.push("Realtime Database tidak merespon (timeout 25 dtk) — buat/cek Realtime Database di Firebase Console");
+        out.ok = false;
+        return out;
+      }
       out.dbRead = true;
       const cnt = qSnap && typeof qSnap.numChildren === "function" ? qSnap.numChildren() : 0;
       out.steps.push("Realtime Database terbaca [OK] (" + cnt + " node ditemukan)");
@@ -239,6 +275,7 @@ window.ffc = {
   app, analytics, db, storage, auth, firebaseConfig,
   saveToFirebase, loadFromFirebase, ensureAuth, testFirebase, hintFor, saveToSheet,
   sheetInfo: () => ({ docId: SHEET_DOC_ID, endpoint: SHEET_ENDPOINT }),
+  dbProbeOk: () => DB_PROBE_OK,
   ready: () => _authReady, uid: () => (_authUser ? _authUser.uid : null),
 };
 export { app, analytics, db, storage, auth, firebaseConfig, saveToFirebase, loadFromFirebase, saveToSheet };

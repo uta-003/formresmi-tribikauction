@@ -145,3 +145,24 @@ Firebase bisa diakses dari `localhost`. Pada browser akan muncul notifikasi
 | `Gagal simpan ke Firebase: Missing or insufficient permissions` | Pastikan Anonymous auth aktif + rules Realtime Database / Storage sudah *published*. |
 | `Realtime Database kosong atau tidak dapat diakses` | Cek rules read; cek koneksi internet; pastikan proyek = `heinuuu` & `databaseURL` benar. |
 | Foto KTP tidak muncul di preview | `storage.rules` folder `ktp/`/`sig/` harus `allow read: if true;` (sudah ada di atas). |
+
+---
+
+## Troubleshooting
+
+### Semua kandidat host RTDB 404 / tak terjangkau
+Portal melakukan probing 5 kandidat URL Realtime Database (Asia/Eropa/US).
+Bila **semuanya 404 atau DNS gagal**, artinya instance RTDB belum dibuat di proyek
+`heinuuu` (atau namanya bukan `-default-rtdb`). Perbaiki:
+
+1. Buka https://console.firebase.google.com -> proyek **heinuuu** -> **Build > Realtime Database**.
+2. **Create Database** -> pilih lokasi (mis. Singapura `asia-southeast1`) -> Start in test mode
+   (atau atur rules: `{ "rules": { "pengajuan": { ".read": true, ".write": "auth != null" } } }`).
+3. Muat ulang portal -> tombol **Test Firebase** (di panel aksi form) -> dialog harus
+   menampilkan `Realtime DB read: OK`.
+4. Bila URL instance Anda berbeda dari 5 kandidat bawaan (cek bagian atas console RTDB),
+   paksa portal memakainya lewat console browser:
+   `localStorage.setItem("tribi_rtdb_host", "https://<instance>.fire.database.app")` lalu reload.
+
+Portal kini **gagal cepat + pesan jelas** (tanpa menggantung) bila RTDB belum ada,
+dan pengajuan tetap masuk antrean otomatis (`tribik_pending_sync`) hingga DB siap.

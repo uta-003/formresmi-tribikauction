@@ -82,3 +82,24 @@ Ambang batas sudah berubah menjadi nama resmi di seluruh portal ("Form Tribik Au
 | `Google Sheets belum terhubung` | Deploy lagi → isi `SHEET_ENDPOINT`. |
 | `Gagal simpan ke Google Sheets` | Pastikan deploy = *Anyone*/**Saya**; cek **Apps Script → Executions** untuk error detail. |
 | Foto tidak muncul | Pastikan KTP di‑crop (tombol 📷 → **AmbilFoto**). Apps Script otomatis buat file Drive & share «Anyone with link». |
+
+---
+
+## Troubleshooting
+
+### Error: "Fungsi skrip tidak ditemukan: doPost"
+Respons HTML ini berarti **deployment Web app menunjuk ke versi script yang tidak
+memiliki fungsi `doPost`** (kode di editor Apps Script kosong/terganti). Perbaiki:
+
+1. Buka spreadsheet -> **Ekstensi > Apps Script**.
+2. Pastikan editor berisi **seluruh isi `gsheet_backend.gs`** (copy ulang bila kosong), lalu **Save**.
+3. **Deploy > Manage deployments > (pensi) Edit > Version: "New version" > Deploy.**
+4. Uji sehat: buka `<URL>/exec` di browser -> harus muncul `{"ok":true,"ready":true,...}` (dari `doGet`).
+5. Bila URL deployment berubah, perbarui konstanta `SHEET_ENDPOINT` di **dua tempat**:
+   `portal.html` dan `firebase-config.js` (harus sama).
+
+Cek cepat dari terminal (harus JSON, bukan HTML):
+
+```
+curl -L -X POST "<URL>/exec" -H "Content-Type: text/plain" -d "{\"docNo\":\"TRB-TEST\"}"
+```
