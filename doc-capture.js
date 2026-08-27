@@ -1,6 +1,15 @@
 /* ============================================================================
- * doc-capture.js  —  Document Auto Capture Component v2 (reusable)
+ * doc-capture.js  —  Document Auto Capture Component v3 (reusable)
  * ----------------------------------------------------------------------------
+ * BARU v3 (mode per jenis dokumen + hasil presisi):
+ *   • Preset KTP / SIM / ID CARD: label, ukuran mm, dan warna aksen sendiri,
+ *     tampil sebagai badge jenis kartu di overlay kamera.
+ *   • Bingkai overlay memakai rasio PERSIS ID-1 pada AREA VIDEO TERLIHAT
+ *     (konsep object-fit: contain) -> tidak ada distorsi antara bingkai &
+ *     potongan akhir walau orientasi kamera beda dari layar.
+ *   • Hasil crop DIKUNCI rasio ID-1 lalu digambar ke canvas proporsional
+ *     (tinggi = lebar / rasio) -> foto KTP/SIM tidak pernah gepeng/melar.
+ *
  * PERBAIKAN v2 (anti "langsung motret"):
  *   • Deteksi HANYA saat ada objek berbentuk kartu ID-1 (KTP/SIM/ID Card):
  *       - Otsu threshold, dua polaritas (kartu lebih terang ATAU gelap) dicoba.
@@ -22,12 +31,28 @@
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
+  /* ---- Preset jenis dokumen: label, subjudul ukuran, warna aksen ---- */
+  var PRESETS = {
+    ktp:    { label: 'KTP',     sub: 'KTP \u2022 85,60 \u00d7 53,98 mm',     color: '#22c55e' },
+    sim:    { label: 'SIM',     sub: 'SIM \u2022 85,60 \u00d7 53,98 mm',     color: '#38bdf8' },
+    idcard: { label: 'ID CARD', sub: 'ID CARD \u2022 85,60 \u00d7 53,98 mm', color: '#a78bfa' }
+  };
+  function resolvePreset(docType, explicitLabel) {
+    var key = (docType || 'ktp').toLowerCase();
+    var p = PRESETS[key] || PRESETS.ktp;
+    return { key: key, label: explicitLabel || p.label, sub: p.sub, color: p.color };
+  }
+
   function DocumentAutoCapture(opts) {
     opts = opts || {};
     this.video      = opts.video;
     this.overlay    = opts.overlay;
     this.docType    = opts.docType || 'ktp';
-    this.label      = opts.label || 'DOKUMEN';
+    var _preset     = resolvePreset(this.docType, opts.label);
+    this.presetKey  = _preset.key;
+    this.label      = _preset.label;
+    this.subLabel   = _preset.sub;
+    this.accent     = _preset.color;
     this.ratio      = opts.ratio || DEFAULT_RATIO;
     this.onCapture  = opts.onCapture || function () {};
     this.onStatus   = opts.onStatus || function () {};
@@ -70,7 +95,43 @@
     };
   };
 
+  /* --- gaya overlay sekali pasang: contain (anti distorsi) + badge jenis --- */
+  DocumentAutoCapture._cssDone = false;
+  DocumentAutoCapture._injectCss = function () {
+    if (DocumentAutoCapture._cssDone || typeof document === 'undefined' || !document.head) return;
+    DocumentAutoCapture._cssDone = true;
+    var st = document.createElement('style');
+    st.id = 'doc-capture-css';
+    st.textContent =
+      '.video-frame video,.camera-preview video,.cam-preview video{' +
+      'object-fit:contain!important;object-position:center!important;background:#05070d}' +
+      '.doc-cap-badge{position:absolute;left:50%;top:0;transform:translate(-50%,0);' +
+      'padding:3px 10px;border-radius:999px;font:bold 10px Poppins,Segoe UI,sans-serif;' +
+      'letter-spacing:.6px;color:#0b1220;pointer-events:none;z-index:3;' +
+      'box-shadow:0 2px 8px rgba(0,0,0,.35);white-space:nowrap}';
+    document.head.appendChild(st);
+  };
+
+  /* --- kotak bingkai di layar: rasio PERSIS this.ratio dalam area video terlihat --- */
+  DocumentAutoCapture.prototype._box = function () {
+    var g = this._geom, cw, ch, cx, cy;
+    if (!g.fallback) {
+      var maxW = g.drawW * 0.86, maxH = g.drawH * 0.9;
+      if (maxW / maxH > this.ratio) { ch = maxH; cw = ch * this.ratio; }
+      else { cw = maxW; ch = cw / this.ratio; }
+      cx = g.offX + (g.drawW - cw) / 2;
+      cy = g.offY + (g.drawH - ch) / 2;
+    } else {
+      var W = (this.overlay && this.overlay.width) || 300, H = (this.overlay && this.overlay.height) || 200;
+      if (W / H > this.ratio) { ch = H * 0.9; cw = ch * this.ratio; }
+      else { cw = W * 0.86; ch = cw / this.ratio; }
+      cx = (W - cw) / 2; cy = (H - ch) / 2;
+    }
+    return { x: cx, y: cy, w: cw, h: ch };
+  };
+
   DocumentAutoCapture.prototype._resize = function () {
+    DocumentAutoCapture._injectCss();
     if (this.overlay) { this.overlay.width = this.overlay.offsetWidth; this.overlay.height = this.overlay.offsetHeight; }
     this._syncGeom();
     if (this.running) this._makeBuffers();
@@ -126,6 +187,8 @@
     if (this.video) this.video.srcObject = null;
     window.removeEventListener('resize', this._boundResize);
     if (this.overlay) { var c = this.overlay.getContext('2d'); if (c) c.clearRect(0, 0, this.overlay.width, this.overlay.height); }
+    if (this._badgeEl && this._badgeEl.parentNode) { this._badgeEl.parentNode.removeChild(this._badgeEl); }
+    this._badgeEl = null;
   };
 
   /* ---------- threshold global Otsu dari histogram 256 bin ---------- */
@@ -339,7 +402,7 @@
       this._drawOverlay(detected ? this.lastBox : null, locked, prog, ready);
       this.onStatus(
         detected ? (locked ? (ready ? 'Dokumen terkunci — mengambil…' : 'Memindai ' + Math.round(prog * 100) + '%') : 'Jaga dokumen tetap diam') :
-                   'Posisikan dokumen di dalam bingkai', detected
+                   'Posisikan ' + this.label + ' di dalam bingkai', detected
       );
 
       /* GATE auto-capture: butuh deteksi valid x stabil penuh x waktu minimal */
@@ -353,7 +416,7 @@
     this._raf = requestAnimationFrame(self._boundLoop);
   };
 
-  /* ---------- overlay: vignette bingkai + sudut deteksi + progress ---------- */
+  /* ---------- overlay: vignette bingkai (rasio PERSIS ID-1) + sudut deteksi + progress ---------- */
   DocumentAutoCapture.prototype._drawOverlay = function (box, good, prog, ready) {
     var cv = this.overlay;
     if (!cv) return;
@@ -363,19 +426,18 @@
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = 'rgba(2,6,23,0.42)';
     ctx.fillRect(0, 0, W, H);
-    var cw = W * 0.86, ch = cw / this.ratio;
-    if (ch > H * 0.9) { ch = H * 0.9; cw = ch * this.ratio; }
-    var cx = (W - cw) / 2, cy = (H - ch) / 2;
+
+    /* bingkai = rasio persis this.ratio pada AREA VIDEO TERLIHAT (bukan area layar) */
+    var b = this._box();
     ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillRect(cx, cy, cw, ch);
+    ctx.fillRect(b.x, b.y, b.w, b.h);
     ctx.globalCompositeOperation = 'source-over';
     ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1; ctx.setLineDash([5, 6]);
-    ctx.strokeRect(cx, cy, cw, ch); ctx.setLineDash([]);
+    ctx.strokeRect(b.x, b.y, b.w, b.h); ctx.setLineDash([]);
 
-    function corners(x, y, w, h) {
-      var L = Math.max(12, w * 0.09), lw = good ? 4 : 2.2;
-      ctx.strokeStyle = good ? '#22c55e' : '#ffffff';
-      ctx.lineWidth = lw;
+    function corners(x, y, w, h, color, lw) {
+      var L = Math.max(12, w * 0.09);
+      ctx.strokeStyle = color; ctx.lineWidth = lw;
       ctx.beginPath();
       ctx.moveTo(x, y + L); ctx.lineTo(x, y); ctx.lineTo(x + L, y);
       ctx.moveTo(x + w - L, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + L);
@@ -389,27 +451,48 @@
       ctx.strokeStyle = good ? 'rgba(34,197,94,.85)' : 'rgba(255,255,255,.75)';
       ctx.lineWidth = good ? 3 : 1.6; ctx.setLineDash([3, 3]);
       ctx.strokeRect(bx, by, bx2 - bx, by2 - by); ctx.setLineDash([]);
-      corners(bx, by, bx2 - bx, by2 - by);
+      corners(bx, by, bx2 - bx, by2 - by, good ? '#22c55e' : '#ffffff', good ? 4 : 2.2);
     }
-    corners(cx, cy, cw, ch);
+    corners(b.x, b.y, b.w, b.h, good ? this.accent : '#ffffff', good ? 4 : 2.2);
 
     /* teks status di atas bingkai */
     ctx.textAlign = 'center';
     ctx.font = 'bold 12px Poppins, Segoe UI, sans-serif';
-    ctx.fillStyle = good ? '#22c55e' : '#fff';
+    ctx.fillStyle = good ? this.accent : '#fff';
     var msg = good
-      ? ((prog >= 1 && ready) ? '\u25CF MENGAMBIL ' : 'MEMINDAI\u2026') + this.label
+      ? ((prog >= 1 && ready) ? '\u25CF MENGAMBIL ' : 'MEMINDAI\u2026 ') + this.label
       : 'POSISIKAN ' + this.label + ' DI DALAM BINGKAI';
-    ctx.fillText(msg, W / 2, cy - 12);
+    ctx.fillText(msg, W / 2, Math.max(14, b.y - 12));
 
-    /* bar progres di dalam batas bawah bingkai */
+    /* badge HTML: jenis + ukuran kartu, mengikuti posisi bingkai */
+    this._badge(b.x + b.w / 2, b.y + b.h + 18, this.subLabel, this.accent);
+
+    /* bar progres persis di bawah bingkai */
     if (good) {
-      var pw = cw * clamp(prog || 0, 0, 1);
+      var pw = b.w * clamp(prog || 0, 0, 1);
       ctx.fillStyle = 'rgba(255,255,255,.18)';
-      ctx.fillRect(cx, cy + ch + 8, cw, 5);
-      ctx.fillStyle = ready ? '#22c55e' : '#38bdf8';
-      ctx.fillRect(cx, cy + ch + 8, pw, 5);
+      ctx.fillRect(b.x, b.y + b.h + 8, b.w, 5);
+      ctx.fillStyle = ready ? this.accent : '#38bdf8';
+      ctx.fillRect(b.x, b.y + b.h + 8, pw, 5);
     }
+  };
+
+  /* badge jenis dokumen diposisikan ikut geometri overlay tiap frame */
+  DocumentAutoCapture.prototype._badge = function (cx, cy, text, color) {
+    var host = this.overlay && this.overlay.parentElement;
+    if (!host) return;
+    if (!this._badgeEl) {
+      this._badgeEl = document.createElement('div');
+      this._badgeEl.className = 'doc-cap-badge';
+      host.appendChild(this._badgeEl);
+    }
+    var r = this.overlay.getBoundingClientRect();
+    var pr = host.getBoundingClientRect();
+    this._badgeEl.textContent = text || '';
+    this._badgeEl.style.display = text ? 'block' : 'none';
+    this._badgeEl.style.background = color || '#22c55e';
+    this._badgeEl.style.left = Math.round(r.left - pr.left + cx) + 'px';
+    this._badgeEl.style.top = Math.round(r.top - pr.top + cy) + 'px';
   };
 
   /* ---------- ambil foto: crop area kartu terdeteksi ke rasio ID-1 ---------- */
@@ -436,15 +519,22 @@
       if (ch > vh) { ch = vh; cw = vh * this.ratio; }
       cx = (vw - cw) / 2; cy = (vh - ch) / 2;
     }
-    if (cx < 0) { cw += cx; cx = 0; }
-    if (cy < 0) { ch += cy; cy = 0; }
+    /* --- KUNCI RASIO ID-1: crop dipaksa persis this.ratio -> TIDAK gepeng --- */
+    if (cw / ch > this.ratio) { var nw = ch * this.ratio; cx += (cw - nw) / 2; cw = nw; }
+    else                      { var nh = cw / this.ratio; cy += (ch - nh) / 2; ch = nh; }
+    if (cx < 0) cx = 0;
+    if (cy < 0) cy = 0;
     if (cx + cw > vw) cw = vw - cx;
     if (cy + ch > vh) ch = vh - cy;
-    if (cw < 16 || ch < 16 || this.lastBox === null && !cw) return;
+    if (cw < 16 || ch < 16) return;
 
+    /* canvas keluaran proporsional: tinggi = lebar / rasio -> gambar tak melar */
+    var outW = Math.min(1000, Math.max(480, Math.round(cw)));
+    var outH = Math.round(outW / this.ratio);
+    void self;
     var out = document.createElement('canvas');
-    out.width = this.outW; out.height = this.outH;
-    out.getContext('2d').drawImage(this.video, cx | 0, cy | 0, cw | 0, ch | 0, 0, 0, this.outW, this.outH);
+    out.width = outW; out.height = outH;
+    out.getContext('2d').drawImage(this.video, cx | 0, cy | 0, cw | 0, ch | 0, 0, 0, outW, outH);
     var dataURL = out.toDataURL('image/jpeg', 0.92);
     this.stop();
     this.onStatus('Foto ' + this.label + ' terambil' + (this.auto ? ' (auto-capture)' : ''), true);

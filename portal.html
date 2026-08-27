@@ -10,7 +10,7 @@
 <title>Form Tribik Auction — Portal Pengajuan</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="./modal.js"></script>
-<script src="./doc-capture.js?v=2"></script>
+<script src="./doc-capture.js?v=3"></script>
 <style>
 :root{
   --primary:#ff5252; --primary-2:#a70000; --accent:#ff7b7b;
@@ -178,12 +178,19 @@ textarea{resize:vertical;min-height:54px}
 /* camera capture KTP / ID card */
 .cam-box{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .cam-preview{position:relative;width:100%;border-radius:13px;overflow:hidden;background:#06080f;display:none;border:1px solid var(--line)}
-.cam-preview video{width:100%;height:auto;display:block;max-height:320px}
+.cam-preview video{width:100%;height:auto;display:block;max-height:340px;object-fit:contain;background:#05070d}
 .cam-preview .cam-overlay{position:absolute;inset:0;width:100%;height:100%}
 .cam-controls{display:flex;gap:8px}
 .cam-controls .btn{flex:1;justify-content:center}
 .cam-note{font-size:11.5px;color:var(--muted)}
 .cam-note b{color:var(--primary)}
+/* pemilih jenis kartu kamera */
+.cam-types{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:2px}
+.cam-type{flex:1;min-width:92px;padding:9px 8px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);font-weight:700;font-size:12px;cursor:pointer;transition:.15s;font-family:inherit}
+.cam-type:hover{border-color:var(--primary);color:#fff}
+.cam-type.active[data-dt="ktp"]{background:linear-gradient(135deg,#22c55e,#16a34a);border-color:transparent;color:#06210f;box-shadow:0 4px 14px rgba(34,197,94,.35)}
+.cam-type.active[data-dt="sim"]{background:linear-gradient(135deg,#38bdf8,#0284c7);border-color:transparent;color:#04283c;box-shadow:0 4px 14px rgba(56,189,248,.35)}
+.cam-type.active[data-dt="idcard"]{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-color:transparent;color:#1e1043;box-shadow:0 4px 14px rgba(167,139,250,.35)}
 .ktp-thumb{max-width:170px;max-height:120px;border:1px solid var(--line);border-radius:9px;display:block;margin-top:9px;object-fit:cover;box-shadow:var(--shadow)}
 .ktp-rm-row{margin-top:8px;text-align:center}
 .cam-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -387,8 +394,13 @@ footer b{color:#cbd5e1}
             <video id="camVideo" autoplay playsinline></video>
             <canvas class="cam-overlay" id="camOverlay"></canvas>
           </div>
+          <div class="cam-types" id="camTypes" role="tablist">
+            <button type="button" class="cam-type active" data-dt="ktp">🪪 KTP</button>
+            <button type="button" class="cam-type" data-dt="sim">🚗 SIM</button>
+            <button type="button" class="cam-type" data-dt="idcard">🆔 ID Card</button>
+          </div>
           <div class="cam-row">
-            <button type="button" class="btn btn-ghost btn-open-cam" id="camOpen">📷 Buka Kamera</button>
+            <button type="button" class="btn btn-ghost btn-open-cam" id="camOpen">📷 Buka Kamera KTP</button>
             <!-- Upload file/galeri disembunyikan: pengguna hanya memakai fitur kamera.
                  Elemen dipertahankan (style="display:none") agar seluruh handler JS tetap aman;
                  untuk mengaktifkan kembali, hapus saja style tersebut. -->
@@ -402,7 +414,7 @@ footer b{color:#cbd5e1}
             <button type="button" class="btn btn-primary" id="camCapture">📸 Ambil Foto</button>
             <button type="button" class="btn btn-ghost" id="camCancel">🗙 Batal</button>
           </div>
-          <div class="cam-note">Arahkan kamera ke <b>KTP / ID Card</b> &amp; samakan dengan garis bingkai (ukuran standar ID-1 / 85,60 × 53,98 mm) untuk hasil presisi.</div>
+          <div class="cam-note" id="camNote">Mode <b>KTP</b>: arahkan kartu ke dalam bingkai sampai terkunci — rana otomatis menangkap saat kartu utuh &amp; stabil. Hasil dipotong presisi rasio ID-1 (85,60 × 53,98 mm): rapi &amp; tidak gepeng.</div>
         </div>
         <img class="ktp-thumb" id="ktpThumb" alt="Preview KTP" style="display:none">
         <div class="ktp-rm-row" id="ktpRemoveRow" style="display:none">
@@ -822,6 +834,18 @@ let ktpCam = null;                 // instance DocumentAutoCapture
 let camStream = null;
 let camActive = false;
 
+/* Mode kamera per jenis kartu: label overlay, warna aksen, istilah simpan */
+const DT_MODES = {
+  ktp:    { label: 'KTP',     name: 'KTP',     color: '#22c55e' },
+  sim:    { label: 'SIM',     name: 'SIM',     color: '#38bdf8' },
+  idcard: { label: 'ID CARD', name: 'ID Card', color: '#a78bfa' }
+};
+let camDocType = 'ktp';
+function camNoteText(){
+  const m = DT_MODES[camDocType] || DT_MODES.ktp;
+  return 'Mode <b>'+m.label+'</b>: arahkan '+m.label+' ke dalam bingkai sampai terkunci — rana otomatis menangkap saat kartu utuh &amp; stabil. Hasil dipotong presisi rasio ID-1 (85,60 × 53,98 mm): rapi &amp; tidak gepeng.';
+}
+
 function showThumb(){
   const th=$('ktpThumb');
   const rm=$('ktpRemoveRow');
@@ -872,14 +896,15 @@ async function openCam(){
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
       toast('Kamera tidak didukung browser ini','err'); return;
     }
+    const m = DT_MODES[camDocType] || DT_MODES.ktp;   // jenis kartu terpilih
     $('camPreview').style.display='block';
     $('camOpen').style.display='none';
     $('camControls').style.display='flex';
     ktpCam = new DocumentAutoCapture({
       video: $('camVideo'), overlay: $('camOverlay'),
-      docType: 'ktp', label: 'KTP / ID CARD', ratio: KTP_RATIO, sound: snd,
+      docType: camDocType, ratio: KTP_RATIO, sound: snd,
       onCapture: function(dataURL){
-        state.ktpData=dataURL; state.ktpName='Kamera (KTP / ID Card - auto-capture)';
+        state.ktpData=dataURL; state.ktpName='Kamera ('+m.name+' - auto-capture)';
         $('ktpName').textContent=state.ktpName; $('ktpPill').classList.add('has'); showThumb();
         $('camPreview').style.display='none'; $('camOpen').style.display='inline-flex'; $('camControls').style.display='none';
       }
@@ -948,6 +973,18 @@ function captureKtp(){
 $('camOpen').addEventListener('click', openCam);
 $('camCapture').addEventListener('click', captureKtp);
 $('camCancel').addEventListener('click', ()=>{ stopCam(); snd('click'); });
+
+/* Pemilih jenis kartu (KTP / SIM / ID Card): sesuaikan tombol & catatan mode */
+document.querySelectorAll('.cam-type').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    if(camDocType === (btn.getAttribute('data-dt')||'ktp')) return;
+    camDocType = btn.getAttribute('data-dt')||'ktp';
+    document.querySelectorAll('.cam-type').forEach(function(b){ b.classList.toggle('active', b===btn); });
+    const ob=$('camOpen'); if(ob) ob.textContent='📷 Buka Kamera '+(DT_MODES[camDocType].name);
+    const nb=$('camNote'); if(nb) nb.innerHTML=camNoteText();
+    snd('click');
+  });
+});
 
 /* Hapus foto KTP / ID Card dari kolom upload (reset thumbnail + tombol) */
 function clearKtp(){
