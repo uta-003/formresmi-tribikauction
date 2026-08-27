@@ -10,9 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
 :root {
-    --primary: #6366f1; --primary-light: #818cf8; --secondary: #a855f7;
+    --primary: #dc2626; --primary-light: #fca5a5; --secondary: #b91c1c;
     --background: #f8fafc; --card: #ffffff; --text: #1e293b;
     --muted: #64748b; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+    --tint: 220,38,38; --primary-soft: #fee2e2;
 }
 * { box-sizing: border-box; }
 body { font-family: 'Poppins', sans-serif; background: var(--background); color: var(--text); margin: 0; padding: 20px; }
@@ -41,15 +42,15 @@ body { font-family: 'Poppins', sans-serif; background: var(--background); color:
 .field-row .form-group { margin-bottom: 15px; }
 @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
 .upload-area { border: 2px dashed #cbd5e1; border-radius: 8px; padding: 30px 16px; text-align: center; margin: 16px 0; transition: all .3s; cursor: pointer; }
-.upload-area:hover { border-color: var(--primary); background: #eef2ff; }
+.upload-area:hover { border-color: var(--primary); background: var(--primary-soft); }
 .upload-label { color: var(--muted); font-size: 14px; }
 .upload-label strong { color: var(--text); font-weight: 500; }
 .file-input { display: none; }
 .camera-frame { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin: 12px 0; background: #f8fafc; min-height: 130px; display: flex; align-items: center; justify-content: center; text-align: center; }
 .camera-frame img { max-width: 100%; max-height: 150px; object-fit: cover; border-radius: 4px; }
 .frame-guide { color: var(--muted); font-size: 12px; }
-.btn-submit { width: 100%; padding: 14px 24px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; font-family: 'Poppins', sans-serif; cursor: pointer; transition: transform .15s, box-shadow .15s; margin-top: 10px; box-shadow: 0 4px 12px rgba(99,102,241,.3); }
-.btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,.4); }
+.btn-submit { width: 100%; padding: 14px 24px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; font-family: 'Poppins', sans-serif; cursor: pointer; transition: transform .15s, box-shadow .15s; margin-top: 10px; box-shadow: 0 4px 12px rgba(var(--tint),.3); }
+.btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(var(--tint),.4); }
 .btn-cancel { width: 100%; padding: 14px 24px; background: #f1f5f9; color: var(--text); border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; font-weight: 500; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all .2s; margin-top: 10px; }
 .btn-cancel:hover { background: #e2e8f0; }
 .status-notice { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin: 20px 0; color: var(--success); font-size: 14px; }
@@ -83,7 +84,7 @@ html { scroll-behavior: smooth; }
 .form-section {
     background: rgba(255,255,255,.82);
     backdrop-filter: blur(8px) saturate(180%);
-    border: 1px solid rgba(99,102,241,.14);
+    border: 1px solid rgba(var(--tint),.14);
     box-shadow: 0 8px 32px rgba(0,0,0,.04), inset 0 1px 0 rgba(255,255,255,.8);
 }
 .form-section h2 {
@@ -114,27 +115,27 @@ html { scroll-behavior: smooth; }
 .btn-open, .btn-capture, .btn-cancel-cam, .btn-file {
     font-weight: 500; position: relative; overflow: hidden;
 }
-.btn-open { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border: none; box-shadow: 0 4px 12px rgba(99,102,241,.3); transition: transform .15s, box-shadow .15s; }
-.btn-open:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(99,102,241,.4); }
+.btn-open { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border: none; box-shadow: 0 4px 12px rgba(var(--tint),.3); transition: transform .15s, box-shadow .15s; }
+.btn-open:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(var(--tint),.4); }
 .btn-open:active { transform: translateY(0); }
 .btn-submit { font-weight: 600; }
 .signature-box { border: 1.5px dashed #cbd5e1; background: rgba(248,250,252,.9); border-radius: 10px; transition: border-color .25s; }
 .signature-box canvas { background: rgba(0,0,0,.02); }
 
 /* ==== Dark Mode (auto-detect + tombol toggle 🌙/☀️) ==== */
-.theme-toggle { position: absolute; top: 14px; right: 14px; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(99,102,241,.35); background: rgba(255,255,255,.55); color: var(--text); font-size: 19px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .2s, box-shadow .2s, background .2s; backdrop-filter: blur(8px); box-shadow: 0 4px 14px rgba(0,0,0,.08); z-index: 5; }
-.theme-toggle:hover { transform: translateY(-2px) rotate(12deg); box-shadow: 0 8px 22px rgba(99,102,241,.3); }
+.theme-toggle { position: absolute; top: 14px; right: 14px; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(var(--tint),.35); background: rgba(255,255,255,.55); color: var(--text); font-size: 19px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .2s, box-shadow .2s, background .2s; backdrop-filter: blur(8px); box-shadow: 0 4px 14px rgba(0,0,0,.08); z-index: 5; }
+.theme-toggle:hover { transform: translateY(-2px) rotate(12deg); box-shadow: 0 8px 22px rgba(var(--tint),.3); }
 html.dark { --background: #0b1220; --card: #151e33; --text: #e2e8f0; --muted: #94a3b8; color-scheme: dark; }
-html.dark body { background: radial-gradient(900px 700px at 12% -8%, rgba(99,102,241,.14), transparent 60%), var(--background); }
-html.dark .header { border-bottom-color: rgba(99,102,241,.4); }
-html.dark .form-section { background: rgba(21,30,51,.72); border-color: rgba(99,102,241,.22); box-shadow: 0 10px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06); }
-html.dark .form-section h2 { border-bottom-color: rgba(99,102,241,.25); }
+html.dark body { background: radial-gradient(900px 700px at 12% -8%, rgba(var(--tint),.14), transparent 60%), var(--background); }
+html.dark .header { border-bottom-color: rgba(var(--tint),.4); }
+html.dark .form-section { background: rgba(21,30,51,.72); border-color: rgba(var(--tint),.22); box-shadow: 0 10px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06); }
+html.dark .form-section h2 { border-bottom-color: rgba(var(--tint),.25); }
 html.dark .form-group input, html.dark .form-group select, html.dark .form-group textarea { background: rgba(10,15,30,.85); border-color: rgba(255,255,255,.14); color: #e2e8f0; }
-html.dark .form-group input:focus, html.dark .form-group select:focus, html.dark .form-group textarea:focus { background: rgba(17,24,44,.95); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.3); }
+html.dark .form-group input:focus, html.dark .form-group select:focus, html.dark .form-group textarea:focus { background: rgba(17,24,44,.95); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--tint),.3); }
 html.dark .form-group input::placeholder, html.dark .form-group textarea::placeholder { color: #64748b; }
 html.dark select option { background: #151e33; color: #e2e8f0; }
 html.dark .upload-area { border-color: rgba(255,255,255,.2); }
-html.dark .upload-area:hover { background: rgba(99,102,241,.12); border-color: var(--primary); }
+html.dark .upload-area:hover { background: rgba(var(--tint),.12); border-color: var(--primary); }
 html.dark .checkbox-option { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.12); }
 html.dark .camera-frame { background: rgba(10,15,30,.6); border-color: rgba(255,255,255,.14); }
 html.dark .camera-preview { border-color: #0b1220; }
@@ -148,6 +149,18 @@ html.dark .signature-actions button { background: rgba(255,255,255,.07); border-
 html.dark .signature-actions button:hover { background: rgba(255,255,255,.13); }
 html.dark .status-notice { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.35); }
 html.dark .theme-toggle { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); }
+
+/* ==== Tema Warna (pilih lewat titik warna di header) ==== */
+html[data-color="biru"] { --primary:#0284c7; --primary-light:#7dd3fc; --secondary:#1d4ed8; --tint:2,132,199; --primary-soft:#e0f2fe; }
+html[data-color="hijau"] { --primary:#059669; --primary-light:#6ee7b7; --secondary:#0d9488; --tint:5,150,105; --primary-soft:#d1fae5; }
+html[data-color="ungu"] { --primary:#7c3aed; --primary-light:#c4b5fd; --secondary:#8b5cf6; --tint:124,58,237; --primary-soft:#ede9fe; }
+html[data-color="oranye"] { --primary:#ea580c; --primary-light:#fdba74; --secondary:#c2410c; --tint:234,88,12; --primary-soft:#ffedd5; }
+html[data-color="tosca"] { --primary:#0d9488; --primary-light:#5eead4; --secondary:#0f766e; --tint:13,148,136; --primary-soft:#ccfbf1; }
+.color-dots { display: flex; gap: 9px; justify-content: center; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+.cdot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.18); cursor: pointer; padding: 0; transition: transform .15s, box-shadow .15s; }
+.cdot:hover { transform: scale(1.18); }
+.cdot.active { box-shadow: 0 0 0 3px rgba(var(--tint),.4); transform: scale(1.1); }
+html.dark .cdot { border-color: rgba(255,255,255,.75); }
 
 /* ===== Presisi & Responsif (PC + Mobile) ===== */
 .form-section { scroll-margin-top: 16px; }
@@ -189,7 +202,7 @@ html.dark .theme-toggle { background: rgba(255,255,255,.08); border-color: rgba(
     </style>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="modal.js"></script>
-    <script>(function(){var k="tb_theme",s;try{s=localStorage.getItem(k)}catch(e){}var on=s?s==="dark":(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);var ap=function(x){document.documentElement.classList.toggle("dark",x);var b=document.getElementById("themeToggle");if(b)b.textContent=x?"☀️":"🌙"};ap(on);document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("themeToggle");if(!b)return;b.addEventListener("click",function(){var x=!document.documentElement.classList.contains("dark");ap(x);try{localStorage.setItem(k,x?"dark":"light")}catch(e){}})});})();</script>
+    <script>(function(){var k="tb_theme",s;try{s=localStorage.getItem(k)}catch(e){}var on=s?s==="dark":(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);var ap=function(x){document.documentElement.classList.toggle("dark",x);var b=document.getElementById("themeToggle");if(b)b.textContent=x?"☀️":"🌙"};ap(on);var ck="tb_color",cv="merah";try{var v=localStorage.getItem(ck);if(v)cv=v}catch(e){}document.documentElement.setAttribute("data-color",cv);var DOTS=[["merah","#dc2626","Merah Tribik"],["biru","#0284c7","Biru Samudra"],["hijau","#059669","Hijau Zamrud"],["ungu","#7c3aed","Ungu Nebula"],["oranye","#ea580c","Oranye Senja"],["tosca","#0d9488","Tosca Segar"]];document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("themeToggle");if(b){b.addEventListener("click",function(){var x=!document.documentElement.classList.contains("dark");ap(x);try{localStorage.setItem(k,x?"dark":"light")}catch(e){}})}var box=document.getElementById("colorDots");if(box){for(var i=0;i<DOTS.length;i++){(function(d){var bt=document.createElement("button");bt.type="button";bt.className="cdot"+(d[0]===cv?" active":"");bt.style.background=d[1];bt.title=d[2];bt.setAttribute("aria-label","Tema "+d[2]);bt.addEventListener("click",function(){cv=d[0];document.documentElement.setAttribute("data-color",d[0]);try{localStorage.setItem(ck,d[0])}catch(e){}var all=box.querySelectorAll(".cdot");for(var j=0;j<all.length;j++)all[j].classList.remove("active");bt.classList.add("active")});box.appendChild(bt)})(DOTS[i])}}});})();</script>
 </head>
 <body>
     <div class="container">
@@ -198,6 +211,7 @@ html.dark .theme-toggle { background: rgba(255,255,255,.08); border-color: rgba(
             <div class="brand">Tribik Auction</div>
             <h1>FORM PENGAJUAN PENGAMBILAN UNIT</h1>
             <p>Pelelangan Mobil</p>
+            <div class="color-dots" id="colorDots" aria-label="Pilih tema warna"></div>
         </div>
         <form id="autoForm">
         <div class="form-section">

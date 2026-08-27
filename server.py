@@ -66,18 +66,18 @@ INDEX_HTML = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tribik Auction - Lelang Mobil</title>
 <style>
-  :root { --primary:#6366f1; --secondary:#8b5cf6; --bg:#0f172a; --card:rgba(255,255,255,.06); }
+  :root { --primary:#ff5252; --secondary:#a70000; --bg:#0b1020; --card:rgba(255,255,255,.06); --tint:255,82,82; --glowA:#2a1015; --glowB:#050810; --hA:#ffbaba; --hB:#ff7b7b; }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
     min-height:100vh; display:flex; align-items:center; justify-content:center;
     font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
-    background:radial-gradient(1200px 800px at 15% 10%, #1e1b4b 0%, var(--bg) 55%, #020617 100%);
+    background:radial-gradient(1200px 800px at 15% 10%, var(--glowA) 0%, var(--bg) 55%, var(--glowB) 100%);
     color:#e2e8f0; padding:24px;
   }
   .wrap { max-width:920px; width:100%; text-align:center; }
     .logo { width:96px; margin:0 auto 8px; display:block; }
-  .logo img { width:100%; height:auto; display:block; filter:drop-shadow(0 4px 14px rgba(99,102,241,.45)); }
-  h1 { font-size:30px; margin:10px 0 6px; background:linear-gradient(90deg,#a5b4fc,#f0abfc);
+  .logo img { width:100%; height:auto; display:block; filter:drop-shadow(0 4px 14px rgba(var(--tint),.45)); }
+  h1 { font-size:30px; margin:10px 0 6px; background:linear-gradient(90deg,var(--hA),var(--hB));
        -webkit-background-clip:text; background-clip:text; color:transparent; }
   .tagline { color:#94a3b8; margin-bottom:28px; font-size:14px; }
   .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:18px; }
@@ -96,11 +96,22 @@ INDEX_HTML = """<!DOCTYPE html>
   .card .go { font-size:13px; color:#a5b4fc; font-weight:600; }
   .footer { margin-top:26px; color:#64748b; font-size:12px; }
   .footer code { background:rgba(255,255,255,.08); padding:2px 6px; border-radius:6px; color:#cbd5e1; }
+  /* ====== Tema Warna ====== */
+  html[data-color="biru"]{--primary:#38bdf8;--secondary:#1d4ed8;--bg:#081121;--tint:56,189,248;--glowA:#0b1a33;--glowB:#04070f;--hA:#bae6fd;--hB:#7dd3fc}
+  html[data-color="hijau"]{--primary:#34d399;--secondary:#047857;--bg:#071510;--tint:52,211,153;--glowA:#0a2418;--glowB:#040a08;--hA:#a7f3d0;--hB:#6ee7b7}
+  html[data-color="ungu"]{--primary:#a78bfa;--secondary:#6d28d9;--bg:#100b21;--tint:167,139,250;--glowA:#1d1233;--glowB:#07040f;--hA:#ddd6fe;--hB:#c4b5fd}
+  html[data-color="oranye"]{--primary:#fb923c;--secondary:#c2410c;--bg:#170f08;--tint:251,146,60;--glowA:#2a1708;--glowB:#0d0704;--hA:#fed7aa;--hB:#fdba74}
+  html[data-color="tosca"]{--primary:#2dd4bf;--secondary:#0f766e;--bg:#061413;--tint:45,212,191;--glowA:#0a2420;--glowB:#040a09;--hA:#99f6e4;--hB:#5eead4}
+  .cdots{display:flex;gap:9px;justify-content:center;margin:0 auto 12px;flex-wrap:wrap}
+  .cdots button{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.85);cursor:pointer;padding:0;box-shadow:0 0 0 1px rgba(0,0,0,.25);transition:transform .15s, box-shadow .15s}
+  .cdots button:hover{transform:scale(1.2)}
+  .cdots button.active{box-shadow:0 0 0 3px rgba(var(--tint),.45)}
 </style>
 </head>
 <body>
   <div class="wrap">
         <div class="logo"><img src="./logo.png?v=6" alt="Tribik Auction"></div>
+    <div class="cdots" id="cdots"></div>
     <h1>Tribik Auction - Pelelangan Mobil</h1>
     <p class="tagline">Pilih form pengajuan yang diperlukan</p>
     <div class="grid">
@@ -108,6 +119,7 @@ INDEX_HTML = """<!DOCTYPE html>
     </div>
     <div class="footer">Server lokal aktif • data dikirim langsung ke WhatsApp • <code>localhost</code></div>
   </div>
+  <script>(function(){var ck="tb_color",cv="merah";try{var v=localStorage.getItem(ck);if(v)cv=v}catch(e){}document.documentElement.setAttribute("data-color",cv);var D=[["merah","#ff5252","Merah Tribik"],["biru","#38bdf8","Biru Samudra"],["hijau","#34d399","Hijau Zamrud"],["ungu","#a78bfa","Ungu Nebula"],["oranye","#fb923c","Oranye Senja"],["tosca","#2dd4bf","Tosca Segar"]];document.addEventListener("DOMContentLoaded",function(){var box=document.getElementById("cdots");if(!box)return;for(var i=0;i<D.length;i++){(function(d){var b=document.createElement("button");b.type="button";b.style.background=d[1];b.title=d[2];if(d[0]===cv)b.className="active";b.setAttribute("aria-label","Tema "+d[2]);b.addEventListener("click",function(){cv=d[0];document.documentElement.setAttribute("data-color",d[0]);try{localStorage.setItem(ck,d[0])}catch(e){}var a=box.querySelectorAll("button");for(var j=0;j<a.length;j++)a[j].className="";b.className="active"});box.appendChild(b)})(D[i])}});})();</script>
 </body>
 </html>"""
 
