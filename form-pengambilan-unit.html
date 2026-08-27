@@ -6,7 +6,7 @@
     <link rel="icon" href="logo.png?v=6" type="image/png">
     <link rel="icon" href="favicon.svg?v=6" type="image/svg+xml">
     <meta name="color-scheme" content="light dark">
-    <title>FORM PENGAJUAN PENGAMBILAN UNIT - Tribik Auction</title>
+    <title>Form Pengambilan Unit - Tribik Auction</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
 :root {
@@ -22,6 +22,9 @@ body { font-family: 'Poppins', sans-serif; background: var(--background); color:
 .header h1 { color: var(--primary); font-size: 24px; font-weight: 600; margin: 0; }
 .header p { color: var(--muted); margin: 5px 0 0; font-size: 14px; }
 .brand { display: inline-block; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; margin-bottom: 12px; }
+.doc-meta { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 16px; background: var(--primary-soft); border-radius: 8px; border: 1px solid var(--primary-light); }
+.doc-label { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.doc-value { font-family: 'Courier New', monospace; font-size: 13px; font-weight: 600; color: var(--primary); }
 .form-section { margin-bottom: 30px; padding: 20px; background: var(--card); border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 .form-section h2 { color: var(--primary); font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f1f5f9; }
 .form-section h2 .note { color: var(--muted); font-weight: 400; font-size: 12px; font-style: italic; margin-left: 8px; }
@@ -210,8 +213,12 @@ html.dark .cdot { border-color: rgba(255,255,255,.75); }
         <div class="header">
             <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Mode gelap / terang">🌙</button>
             <div class="brand">Tribik Auction</div>
-            <h1>FORM PENGAJUAN PENGAMBILAN UNIT</h1>
+            <h1>Form Pengambilan Unit</h1>
             <p>Pelelangan Mobil</p>
+            <div class="doc-meta">
+                <span class="doc-label">NO. DOKUMEN</span>
+                <span class="doc-value" id="docNo">TRB/2026/------/FPU</span>
+            </div>
             <div class="color-dots" id="colorDots" aria-label="Pilih tema warna"></div>
         </div>
         <form id="autoForm">
@@ -528,11 +535,27 @@ html.dark .cdot { border-color: rgba(255,255,255,.75); }
     </script>
 
     <script>
+        function generateDocNo(code){
+            const y = new Date().getFullYear();
+            const n = String(Date.now()).slice(-6);
+            /* Suffix kode unik acak: beda device/PC/waktu buka => No. Dokumen pasti beda */
+            var cs = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', suf = '';
+            try{
+                var b = new Uint32Array(8);
+                (window.crypto||window.msCrypto).getRandomValues(b);
+                for(var i=0;i<b.length;i++) suf += cs.charAt(b[i]%cs.length);
+            }catch(err){
+                for(var j=0;j<8;j++) suf += cs.charAt(Math.floor(Math.random()*cs.length));
+            }
+            return 'TRB/'+y+'/'+n+'/'+code+'-'+suf;
+        }
         document.addEventListener('DOMContentLoaded', function(){
             bindUpload('ktpFile','ktpFrame');
             bindUpload('idcardFile','idcardFrame');
             bindUpload('simFile','simFrame');
             initSignature();
+            var docNoEl = document.getElementById('docNo');
+            if(docNoEl) docNoEl.textContent = generateDocNo('FPU');
         });
     </script>
     <script>
@@ -552,7 +575,7 @@ html.dark .cdot { border-color: rgba(255,255,255,.75); }
             if (Object.keys(capturedPhotos).length === 0) { showError('Ambil minimal satu foto dokumen (KTP / ID Card / SIM) sebelum mengirim.'); isValid = false; }
             if (!isValid) return;
             const waUrl = 'https://wa.me/628111454507?text=';
-            const text = '*FORM PENGAJUAN PENGAMBILAN UNIT - Tribik Auction*\n*Nama:* '+name+'\n*Terpilih:* '+(selected.join(', ') || '-')+'\n*Tanda Tangan:* '+(sigDrawn ? 'sudah ditandatangani' : 'belum ada')+'\n*Foto Dokumen Identitas:* '+(capturedDocList() || '-')+'\n*Status:* Form dikirim';
+            const text = '*Form Pengambilan Unit - Tribik Auction*\n*No. Dokumen:* '+(document.getElementById('docNo').textContent||'-')+'\n*Nama:* '+name+'\n*Terpilih:* '+(selected.join(', ') || '-')+'\n*Tanda Tangan:* '+(sigDrawn ? 'sudah ditandatangani' : 'belum ada')+'\n*Foto Dokumen Identitas:* '+(capturedDocList() || '-')+'\n*Status:* Form dikirim';
             window.open(waUrl+encodeURIComponent(text), '_blank');
             showNotice(document.getElementById('autoForm'), 'Form berhasil dikirim ke WhatsApp Tribik Auction.');
         });

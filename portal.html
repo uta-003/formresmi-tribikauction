@@ -520,9 +520,9 @@ const SHEET_DOC_ID  = '1ym6u8evb9PhLvbo6YH3aVFDScGow7KjToj4C7TNO9IM';
 const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw4V7Jr7ZEy8SvNr771Gz4uHiLeFL59zfwKvJ0LCoRE_KqZc6j3gKb42CGpQTvwWYPN/exec'; /* <-- URL Web app (deploy) */
 const SHEET_KTP_FOLDER = ''; /* <-- (opsional) ID folder Drive untuk foto KTP */
 const CATS = {
-  cek:    { name:'Form Cek Unit Lelang',      key:'cek',    pdf:'FORMULIR PENGAJUAN CEK UNIT LELANG MOBIL' },
-  barang: { name:'Form Pengambilan Barang',    key:'barang', pdf:'FORMULIR PENGAJUAN PENGAMBILAN BARANG' },
-  unit:   { name:'Form Pengambilan Unit',      key:'unit',   pdf:'FORMULIR PENGAJUAN PENGAMBILAN UNIT' },
+  cek:    { name:'Form Cek Unit Lelang',      key:'cek',    pdf:'Form Cek Unit Lelang' },
+  barang: { name:'Form Pengambilan Barang',    key:'barang', pdf:'Form Pengambilan Barang' },
+  unit:   { name:'Form Pengambilan Unit',      key:'unit',   pdf:'Form Pengambilan Unit' },
 };
 const state = {
   cat: 'cek',
@@ -625,14 +625,51 @@ function docNumberFormat(n){
   const code = state.cat==='barang' ? 'FPB' : state.cat==='unit' ? 'FPU' : 'FCUL';
   return 'TRB/'+y+'/'+String(n).padStart(4,'0')+'/'+code;
 }
-/* Pratinjau nomor berikutnya (meta form). TIDAK menaikkan urutan — hanya tampilan. */
+/* --- Kode unik anti-kembar lintas perangkat -----------------------------
+   Beda device/PC/tab/pembukaan => kombinasi kode berbeda, ditambahkan DI
+   BELAKANG No. Dokumen (contoh: TRB/2026/0001/FCUL-A7K3M9PQ).
+   - devCode() : 4 huruf stabil per browser/device (localStorage)
+   - openCode(): 4 huruf stabil per sesi pembukaan form (sessionStorage)
+   - Ditambah serial urutan yang selalu naik  => praktis mustahil kembar. */
+function randDocCode(len){
+  len = len || 6;
+  const cs = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  try{
+    const buf = new Uint32Array(len);
+    (window.crypto||window.msCrypto).getRandomValues(buf);
+    for(let i=0;i<len;i++) out += cs.charAt(buf[i] % cs.length);
+  }catch(e){
+    for(let j=0;j<len;j++) out += cs.charAt(Math.floor(Math.random()*cs.length));
+  }
+  return out;
+}
+function devCode(){
+  const k = 'tribik_device_code';
+  let v = '';
+  try{ v = localStorage.getItem(k)||''; }catch(e){}
+  if(!v || !/^[A-Z2-9]{4}$/.test(v)){ v = randDocCode(4); try{ localStorage.setItem(k,v); }catch(e2){} }
+  return v;
+}
+function openCode(){
+  const k = 'tribik_open_code';
+  let v = '';
+  try{ v = sessionStorage.getItem(k)||''; }catch(e){}
+  if(!v || !/^[A-Z2-9]{4}$/.test(v)){ v = randDocCode(4); try{ sessionStorage.setItem(k,v); }catch(e2){} }
+  return v;
+}
+
+/* Pratinjau nomor berikutnya (meta form). TIDAK menaikkan urutan — hanya tampilan.
+   Sudah memuat kode unik perangkat+sesi sehingga tiap pembuka melihat nomornya sendiri. */
 function nextDocNo(){
-  return docNumberFormat(docSeq()+1);
+  return docNumberFormat(docSeq()+1)+'-'+devCode()+openCode();
 }
 /* Alokasikan nomor berikutnya SEPENUHNYA UNIK untuk disubmit.
    Dipakai sekali-per-request lewat Web Locks API sehingga dua tab/dua link yang
    dibuka bersamaan tetap mendapat nomor berbeda (tidak pernah kembar), lalu
-   naikkan & simpan urutan, dan pastikan tidak bertabrakan dengan nomor lama. */
+   naikkan & simpan urutan, dan pastikan tidak bertabrakan dengan nomor lama.
+   Setiap nomor juga diberi sufiks kode unik dibelakangnya agar device/PC yang
+   berbeda tidak pernah menghasilkan nomor dokumen yang sama. */
 function nextUniqueDocNumber(){
   return new Promise(function(resolve){
     function allocate(){
@@ -641,7 +678,7 @@ function nextUniqueDocNumber(){
       let cand;
       for(let it=0; it<200; it++){          // lompati semua nomor yang sudah dipakai
         n += 1;
-        cand = docNumberFormat(n);
+        cand = docNumberFormat(n)+'-'+devCode()+openCode();
         if(!used.has(cand)) break;
         used.add(cand);                     // tandai tiap kandidat agar tidak dipakai ulang
       }
@@ -655,6 +692,19 @@ function nextUniqueDocNumber(){
       allocate();   // fallback: browser tanpa Web Locks — masih aman utk satu browser
     }
   });
+}
+
+/* Unduh otomatis PDF resmi begitu form dikirim — tanpa perlu klik "Unduh PDF" lagi. */
+function autoDownloadPdf(d){
+  try{
+    const doc = buildPdf(d);
+    if(doc){
+      doc.save('Tribik-'+d.docNo+'.pdf');
+      toast('PDF resmi otomatis terunduh: Tribik-'+d.docNo+'.pdf','ok');
+    }else{
+      toast('Pustaka PDF belum termuat — silakan klik tombol ⬇️ Unduh PDF','warn');
+    }
+  }catch(e){ /* pratinjau tetap tampil; unduh manual tetap tersedia */ }
 }
 
 function refreshDocMeta(){
@@ -1285,9 +1335,10 @@ $('submitForm').addEventListener('click', async function(){
     + '\n*Status:* Menunggu verifikasi. PDF resmi terlampir di riwayat.';
   window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg), '_blank');
 
-  // 3) Tampilkan preview PDF
+  // 3) Tampilkan preview PDF + unduh otomatis file PDF resmi
   snd('success');
   openPdfModal(d);
+  autoDownloadPdf(d);
   refreshDocMeta();
   renderHistory();
   renderSummary();
