@@ -95,8 +95,8 @@ memiliki fungsi `doPost`** (kode di editor Apps Script kosong/terganti). Perbaik
 2. Pastikan editor berisi **seluruh isi `gsheet_backend.gs`** (copy ulang bila kosong), lalu **Save**.
 3. **Deploy > Manage deployments > (pensi) Edit > Version: "New version" > Deploy.**
 4. Uji sehat: buka `<URL>/exec` di browser -> harus muncul `{"ok":true,"ready":true,...}` (dari `doGet`).
-5. Bila URL deployment berubah, perbarui konstanta `SHEET_ENDPOINT` di **dua tempat**:
-   `portal.html` dan `firebase-config.js` (harus sama).
+5. Bila URL deployment berubah, perbarui konstanta `SHEET_ENDPOINT` hanya di satu tempat:
+   `portal.html`.
 
 Cek cepat dari terminal (harus JSON, bukan HTML):
 

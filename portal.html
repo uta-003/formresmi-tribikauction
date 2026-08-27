@@ -10,21 +10,6 @@
 <title>Form Tribik Auction — Portal Pengajuan</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="./modal.js"></script>
-<!-- Firebase (Web SDK v9 modular) — backend Realtime Database + Storage, pengganti Google Sheets.
-     Importmap di bawah felesa bare import (firebase/app, firebase/database, ...) di
-     firebase-config.js -> URL CDN. -->
-<script type="importmap">
-{
-  "imports": {
-    "firebase/app":       "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-    "firebase/analytics": "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js",
-    "firebase/database":  "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js",
-    "firebase/storage":   "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js",
-    "firebase/auth":      "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"
-  }
-}
-</script>
-<script type="module" src="./firebase-config.js"></script>
 <style>
 :root{
   --primary:#ff5252; --primary-2:#a70000; --accent:#ff7b7b;
@@ -452,9 +437,7 @@ footer b{color:#cbd5e1}
       <button class="btn btn-ghost" id="sigReset">🔄 Reset Tanda Tangan</button>
       <button class="btn btn-ghost" id="resetForm">Reset Form</button>
       <button class="btn btn-ghost" id="saveDraft">💾 Simpan Draft</button>
-      <button class="btn btn-ghost" id="testFirebase">🧪 Test Firebase</button>
-      <button class="btn btn-ghost" id="loadFirebase">📥 Muat dari Firebase</button>
-      <button class="btn btn-primary" id="submitForm">🚀 Kirim Form PDF ke Database (Firebase) &amp; WhatsApp</button>
+      <button class="btn btn-primary" id="submitForm">🚀 Kirim Form PDF ke Google Sheets &amp; WhatsApp</button>
     </div>
   </div>
 </section>
@@ -533,7 +516,7 @@ const $ = (id) => document.getElementById(id);
 const WA_NUMBER = '628111454507';
 /* ==== Google Sheets (backend Google Apps Script web-app) ==== */
 const SHEET_DOC_ID  = '1ym6u8evb9PhLvbo6YH3aVFDScGow7KjToj4C7TNO9IM';
-const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzTTJxvdpnC50KmURJrSxy2eCD72QCfzIKoHjfmj-kGl7fNB5SgenLlD-srQRiqmA84/exec'; /* <-- URL Web app (deploy) */
+const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw4V7Jr7ZEy8SvNr771Gz4uHiLeFL59zfwKvJ0LCoRE_KqZc6j3gKb42CGpQTvwWYPN/exec'; /* <-- URL Web app (deploy) */
 const SHEET_KTP_FOLDER = ''; /* <-- (opsional) ID folder Drive untuk foto KTP */
 const CATS = {
   cek:    { name:'Form Cek Unit Lelang',      key:'cek',    pdf:'FORMULIR PENGAJUAN CEK UNIT LELANG MOBIL' },
@@ -1183,12 +1166,12 @@ function downloadPdf(){
 }
 
 
-/* ============ ANTREAN SINKRONISASI (pastikan data masuk Firebase & Sheets) ============ */
+/* ============ ANTREAN SINKRONISASI (pastikan data masuk ke Google Sheets) ============ */
 /* Data yang gagal terkirim (koneksi/endpoint down) masuk antrean localStorage dan
-   dikirim ulang OTOMATIS saat halaman dibuka / modul Firebase siap. */
+   dikirim ulang OTOMATIS saat halaman dibuka lagi. */
 const PENDING_KEY = 'tribik_pending_sync';
 function loadPending(){
-  try{ return JSON.parse(localStorage.getItem(PENDING_KEY)) || []; }catch(e){ return []; }
+  try{ return (JSON.parse(localStorage.getItem(PENDING_KEY)) || []).filter(x => x && x.target !== 'fb'); }catch(e){ return []; }
 }
 function savePending(q){
   try{ localStorage.setItem(PENDING_KEY, JSON.stringify(q.slice(-80))); }catch(e){ /* storage penuh */ }
@@ -1204,23 +1187,16 @@ function unqueuePending(target, d){
 }
 async function flushPendingSync(){
   if(!navigator.onLine) return;
-  const ffcReady = window.ffc && typeof window.ffc.saveToFirebase === 'function';
-  const q = loadPending();
+  const q = loadPending().filter(x => x && x.target !== 'fb');   // buang entri antrean legacy (era-firebase)
   if(q.length === 0) return;
   let sent = 0;
   for(const item of q){
     try{
-      if(item.target === 'fb'){
-        if(!ffcReady) continue;                              // tunggu flush berikutnya
-        const ok = await window.ffc.saveToFirebase(item.d);  // true/false
-        if(ok){ unqueuePending('fb', item.d); sent++; }
-      }else if(item.target === 'sheet'){
-        const ok = await saveToSheet(item.d);
-        if(ok){ unqueuePending('sheet', item.d); sent++; }
-      }
+      const ok = await saveToSheet(item.d);
+      if(ok){ unqueuePending(item.target || 'sheet', item.d); sent++; }
     }catch(e){ /* biarkan di antrean untuk percobaan berikutnya */ }
   }
-  if(sent > 0) toast('✔ '+sent+' pengajuan tertunda berhasil dikirim ke database', 'ok', 7000);
+  if(sent > 0) toast('✔ '+sent+' pengajuan tertunda berhasil dikirim ke Google Sheets', 'ok', 7000);
 }
 
 /* ============ SUBMIT ============ */
@@ -1235,21 +1211,11 @@ $('submitForm').addEventListener('click', function(){
   db.unshift(d);
   saveDB(db);      /* riwayat lokal (database ringan) */
 
-  /* -> kirim PARALEL ke Firebase (Realtime DB + Storage) dan ke Google Sheets.
+  /* -> kirim ke Google Sheets (Apps Script, SHEET_ENDPOINT).
      Gagal kirim = otomatis masuk antrean (tribik_pending_sync) dan dikirim ulang
-     saat halaman dibuka berikutnya / modul Firebase siap, jadi data tidak hilang. */
+     saat halaman dibuka berikutnya, jadi data tidak hilang. */
   (function dispatchSync(){
-    const t0 = Date.now();
-    (function pollFfc(){                       // beri waktu modul firebase-config.js termuat (maks 4 dtk)
-      if(window.ffc && typeof window.ffc.saveToFirebase === 'function'){
-        Promise.resolve(window.ffc.saveToFirebase(d)).then(ok => { if(!ok) queuePending('fb', d); });
-      }else if(Date.now() - t0 < 4000){
-        setTimeout(pollFfc, 150);
-      }else{
-        queuePending('fb', d);
-      }
-    })();
-    Promise.resolve(saveToSheet(d)).then(ok => { if(!ok) queuePending('sheet', d); });
+    Promise.resolve(saveToSheet(d)).then(function(ok){ if(!ok) queuePending('sheet', d); });
     setTimeout(flushPendingSync, 10000);       // cek ulang antrean lama setelah submit
   })();
 
@@ -1284,11 +1250,7 @@ $('submitForm').addEventListener('click', function(){
 });
 
 /* ========== SINKRONIZASI PARALEL: GOOGLE SHEETS (Apps Script web-app) ========== */
-/*  Backend UTAMA = Firebase (Realtime Database + Storage) via window.ffc.saveToFirebase(). */
-/*  Fungsi di bawah SINKRONISASI PARALEL: masih kirim SEMUA hasil inputan —          */
-/*  termasuk foto KTP & tanda tangan — ke spreadsheet Tribik Auction, supaya data     */
-/*  tersimpan di Google Sheets DAN Realtime Database serentak.                               */
-/*  Pastikan SHEET_ENDPOINT terisi (deploy gsheet_backend.gs) agar paralel berfungi. */
+/*  Backend penyimpanan data = Google Sheets (Apps Script web-app, konstanta SHEET_ENDPOINT). */
 async function saveToSheet(d){
   if(!SHEET_ENDPOINT){ toast('Google Sheets belum terhubung — deploy gsheet_backend.gs & isi SHEET_ENDPOINT','err',7000); return; }
   const NL = String.fromCharCode(10);
@@ -1413,62 +1375,7 @@ function renderSummary(){
   document.querySelector('.modal-back').addEventListener('click', e=>{ if(e.target===$('pdfModal')) closePdfModal(); });
   window.closePdfModal = closePdfModal;
   window.downloadPdf = downloadPdf;
-// --- Diagnose Firebase connection (no data change) ---
-  $('testFirebase').addEventListener('click', async function(){
-    snd('click');
-    const ffc = window.ffc;
-    if(!ffc || typeof ffc.testFirebase!=='function'){
-      await Modal.alert('Firebase belum termuat — firebase-config.js gagal load. Buka DevTools (F12) → Network tab untuk cek koneksi SDK, osa cek pastikan file firebase-config.js berada sama folder portal.html.', 'Peringatan', { icon:'⚠️' });
-      return;
-    }
-    toast('Test de Firebase...', 'ok');
-    const t = await ffc.testFirebase();
-    const lines = [];
-    lines.push('Project: '+(t.projectId||'?'));
-    lines.push('SDK module loaded: '+(t.moduleLoaded?'YES':'NO'));
-    lines.push('Anonymous Auth ready: '+(t.authReady?'YES':'NO')+(t.authUid?' (uid '+t.authUid+')':''));
-    lines.push('Realtime DB read: '+(t.dbRead?'OK':'FAIL'));
-    lines.push('---');
-    lines.push.apply(lines, t.steps||[]);
-    await Modal.alert(lines.join('\n'), 'Hasil Tes Firebase', { icon:'📊' });
-    toast(t.ok ? 'Firebase OK ✓' : 'Firebase masih blok — cek detail di dialog test-ah', t.ok?'ok':'err', 9000);
-  });
-    // --- Muat riwayat dari Firebase Realtime Database ---
-  $('loadFirebase').addEventListener('click', async function(){
-    snd('click');
-    const ffc = window.ffc;
-    if(!ffc || typeof ffc.loadFromFirebase!=='function'){
-      toast('Firebase (firebase-config.js) belum termuat — pastikan ada koneksi & aturan keamanan sudah diset di konsol Firebase','err',8000);
-      return;
-    }
-    if(!ffc.ready()){ toast('Menunggu otentikasi Firebase (anon) siap...','ok',4000); }
-        toast('Mengambil data dari Realtime Database...','ok');
-    const remote = await ffc.loadFromFirebase();
-        if(remote.length===0){ toast('Realtime Database kosong atau tidak dapat diakses. Cek aturan keamanan & koneksi.','warn',6000); return; }
-
-        // Peta node RTDB -> bentuk yang dipakai UI (ktp/signature = URL)
-    const existing = new Set(loadDB().map(x=>x.docNo));
-    const mapped = remote
-      .filter(x=>!existing.has(x.docNo))                 // hanya yang belum ada lokal
-      .map(x=>({
-        cat: x.cat||'cek', catName: x.catName||CATS[x.cat||'cek'].name,
-        docNo: x.docNo, date: x.date,
-        nama: x.nama, nik: x.nik, perusahaan: x.perusahaan,
-        ktpName: x.ktpName,
-                ktp: x.ktpUrl || '',                 // RTDB: URL download | UI: <img src>
-        signature: x.signatureUrl || '',     // sama — <img src="https://firebasestorage…">
-        rows: x.rows || [],
-      }));
-    const dbArr = loadDB();
-        mapped.reverse();                         // luruskan urutan (terbaru di RTDB di head)
-    mapped.forEach(m=>dbArr.unshift(m));
-    saveDB(dbArr);
-    renderHistory(); renderSummary();
-    toast('✔ '+mapped.length+' pengajuan dimuat dari Firebase ke riwayat lokal','ok',5000);
-  });
-
-
-  // Muat draft terakhir jika ada
+// Muat draft terakhir jika ada
   try{
     const d=JSON.parse(localStorage.getItem('tribik_draft'));
     if(d && d.nama){
@@ -1498,7 +1405,6 @@ function renderSummary(){
   renderSummary();
 
   // Antrean sinkronisasi: kirim ulang data yang sebelumnya gagal masuk database
-  window.addEventListener('firebase-ready', function(){ setTimeout(flushPendingSync, 1500); });
   setTimeout(flushPendingSync, 2500);
 })();
 </script>

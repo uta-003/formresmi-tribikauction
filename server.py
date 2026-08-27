@@ -190,19 +190,6 @@ class Handler(SimpleHTTPRequestHandler):
                 errors.append("portal.html: konstanta SHEET_ENDPOINT tidak ditemukan")
         except Exception as e:
             errors.append("portal.html: " + str(e))
-        # firebase-config.js (kutip ganda, toleransi BOM)
-        try:
-            fp = os.path.join(BASE_DIR, "firebase-config.js")
-            s = open(fp, encoding="utf-8-sig").read()
-            s2, n = re.subn(r'const SHEET_ENDPOINT = "https://script\.google\.com/macros/s/[^"]*/exec";',
-                            'const SHEET_ENDPOINT = "' + ep + '";', s, count=1)
-            if n:
-                open(fp, "w", encoding="utf-8", newline="").write(s2)
-                updated.append("firebase-config.js")
-            else:
-                errors.append("firebase-config.js: konstanta SHEET_ENDPOINT tidak ditemukan")
-        except Exception as e:
-            errors.append("firebase-config.js: " + str(e))
         self._send_json(200, {"ok": not errors, "updated": updated, "errors": errors, "endpoint": ep})
 
     def _sheet_proxy(self):
