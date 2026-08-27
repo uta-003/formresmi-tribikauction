@@ -86,7 +86,7 @@ border-radius:10px;padding:12px;font-size:11.5px;line-height:1.5;color:#cbd5e1;w
 </div>
 <script>
 (function(){
-  var EP = 'https://script.google.com/macros/s/AKfycbyUgq1Qld1diz-xk5cfWg0OgOKN5_PA0zT-qeaEDzBJM3KrLJobCAsBVd6fOTFZn4_y/exec';
+  var EP = '';
   var $ = function(id){ return document.getElementById(id); };
   var statusBox = $('status');
 
@@ -153,8 +153,12 @@ border-radius:10px;padding:12px;font-size:11.5px;line-height:1.5;color:#cbd5e1;w
     }
   });
 
-  // uji otomatis saat halaman dibuka
-  testEndpoint(EP, statusBox);
+  // uji otomatis saat halaman dibuka — endpoint dibaca dari portal.html via server
+  fetch('/api/sheet-info').then(function(r){ return r.json(); }).then(function(j){
+    EP = j.endpoint || EP;
+    $('urlInput').value = EP;
+    testEndpoint(EP, statusBox);
+  }).catch(function(){ testEndpoint(EP, statusBox); });
 })();
 </script>
 

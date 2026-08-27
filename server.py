@@ -269,6 +269,16 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         route = self.path.split("?", 1)[0].split("#", 1)[0]
 
+        # Endpoint Sheets aktif (dibaca dari portal.html) — untuk fix-sheet.html
+        if route == "/api/sheet-info":
+            try:
+                s = open(os.path.join(BASE_DIR, "portal.html"), encoding="utf-8").read()
+                m = re.search(r"const SHEET_ENDPOINT = '([^']+)'", s)
+                self._send_json(200, {"ok": True, "endpoint": m.group(1) if m else ""})
+            except Exception as e:
+                self._send_json(200, {"ok": False, "error": str(e)})
+            return
+
         # Rute utama -> portal aplikasi (portal.html)
         if route == "/" or route == "/index.html" or route == "/portal.html":
             portal_path = os.path.join(BASE_DIR, "portal.html")

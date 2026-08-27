@@ -237,7 +237,7 @@ async function testFirebase() {
 const SHEET_DOC_ID = "1ym6u8evb9PhLvbo6YH3aVFDScGow7KjToj4C7TNO9IM";
 // Endpoint Apps Script (Terbuka → POST JSON). Sudah diverifikasi AKTIF (HTTP 200).
 // Harus SAMA dengan SHEET_ENDPOINT di portal.html.
-const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbyUgq1Qld1diz-xk5cfWg0OgOKN5_PA0zT-qeaEDzBJM3KrLJobCAsBVd6fOTFZn4_y/exec";
+const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbzTTJxvdpnC50KmURJrSxy2eCD72QCfzIKoHjfmj-kGl7fNB5SgenLlD-srQRiqmA84/exec";
 const SHEET_FALLBACK_NOTE = "Google Apps Script endpoint belum merespon (402/403/timeout); data tetap tersimpan ke Firebase.";
 
 async function saveToSheet(d) {
