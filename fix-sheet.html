@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="./favicon.svg?v=6" type="image/svg+xml">
+<title>Perbaikan Google Sheets — Tribik Auction</title>
+<style>
+:root{--primary:#ff5252;--primary-2:#a70000;--accent:#ff7b7b;--bg:#0b1020;--card:rgba(255,255,255,.055);
+--ink:#e2e8f0;--muted:#94a3b8;--line:rgba(255,255,255,.11)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;color:var(--ink);min-height:100vh;padding:28px 16px;
+background:radial-gradient(900px 500px at 15% -5%,rgba(255,82,82,.28),transparent 60%),var(--bg)}
+.wrap{max-width:860px;margin:0 auto}
+h1{font-size:24px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.box{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:14px 16px;font-size:13.5px;
+line-height:1.55;margin-bottom:14px;backdrop-filter:blur(10px)}
+.box.good{border-color:rgba(52,211,153,.5);background:rgba(52,211,153,.1)}
+.box.bad{border-color:rgba(255,82,82,.5);background:rgba(255,82,82,.1)}
+.box.warn{border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.08)}
+.box code{background:rgba(255,255,255,.09);padding:1px 6px;border-radius:6px;font-size:12px;word-break:break-all}
+.card{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:18px;margin-bottom:14px}
+.card h2{font-size:15px;margin-bottom:10px;color:#ffbaba}
+.card ol{margin:8px 0 8px 20px;font-size:13.5px;line-height:1.8;color:#cbd5e1}
+.card a{color:var(--accent)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;border-radius:11px;
+padding:10px 16px;font-weight:700;font-size:13px;margin:4px 6px 4px 0;transition:.18s}
+.btn-p{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff}
+.btn-g{background:rgba(255,255,255,.08);border:1px solid var(--line);color:#ffbaba}
+.btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=text]{flex:1;min-width:260px;padding:11px 13px;border-radius:11px;border:1px solid var(--line);
+background:rgba(255,255,255,.07);color:var(--ink);font-size:13px;outline:none}
+input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,82,82,.25)}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--accent);font-size:13px;font-weight:600}
+pre{margin-top:8px;max-height:260px;overflow:auto;background:rgba(0,0,0,.35);border:1px solid var(--line);
+border-radius:10px;padding:12px;font-size:11.5px;line-height:1.5;color:#cbd5e1;white-space:pre}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.ok{color:#34d399;font-weight:700}.err{color:#ff7b7b;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🛠️ Perbaikan Koneksi Google Sheets</h1>
+<p class="sub">Portal Tribik Auction gagal menyimpan ke spreadsheet karena deployment Apps Script kehilangan fungsi <code>doPost</code>. Ikuti 4 langkah di bawah — sekitar 5 menit.</p>
+
+<div class="box" id="status">⏳ Menguji endpoint saat ini…</div>
+
+<div class="card">
+  <h2>1 &amp; 2 · Salin kode backend, lalu tempel ke Apps Script spreadsheet</h2>
+  <div class="row">
+    <button class="btn btn-p" id="copyBtn">📋 Salin Kode Backend</button>
+    <a class="btn btn-g" href="https://docs.google.com/spreadsheets/d/1ym6u8evb9PhLvbo6YH3aVFDScGow7KjToj4C7TNO9IM/edit" target="_blank">🔗 Buka Spreadsheet</a>
+  </div>
+  <ol>
+    <li>Klik <b>Salin Kode Backend</b> di atas.</li>
+    <li>Di spreadsheet: <b>Ekstensi → Apps Script</b>.</li>
+    <li>Hapus semua isi editor, <b>tempel</b> (Ctrl+V), lalu <b>Save</b> 💾.</li>
+  </ol>
+  <details><summary>Lihat kode (gsheet_backend.gs)</summary><pre id="codeTxt">memuat…</pre></details>
+</div>
+
+<div class="card">
+  <h2>3 · Deploy ulang (wajib setelah kode ditempel)</h2>
+  <ol>
+    <li><b>Deploy → Manage deployments → ✏️ Edit</b> (ikon pensil).</li>
+    <li>Version: <b>New version</b> · Who has access: <b>Anyone</b> · klik <b>Deploy</b>.</li>
+    <li>URL <b>boleh tetap sama</b> — jika sama, langsung lanjut langkah 4.</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h2>4 · Tes ulang — dan terapkan URL bila berubah</h2>
+  <div class="row">
+    <button class="btn btn-p" id="retestBtn">🔁 Tes Ulang Endpoint</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <input type="text" id="urlInput" placeholder="Tempel URL Web app BARU bila berubah (…/exec)">
+    <button class="btn btn-g" id="applyBtn">🚀 Terapkan ke Portal</button>
+  </div>
+  <div class="box" id="applyRes" style="display:none"></div>
+  <p class="note">Tombol Terapkan otomatis memperbarui <code>portal.html</code> &amp; <code>firebase-config.js</code>. Jika URL tetap sama, cukup Tes Ulang lalu buka <a href="./portal.html">portal</a> dan submit.</p>
+</div>
+<script>
+(function(){
+  var EP = 'https://script.google.com/macros/s/AKfycbyUgq1Qld1diz-xk5cfWg0OgOKN5_PA0zT-qeaEDzBJM3KrLJobCAsBVd6fOTFZn4_y/exec';
+  var $ = function(id){ return document.getElementById(id); };
+  var statusBox = $('status');
+
+  function setBox(el, cls, html){ el.className = 'box ' + cls; el.innerHTML = html; }
+
+  async function testEndpoint(url, el){
+    setBox(el, '', '⏳ Menguji <code>' + url.slice(0, 80) + '…</code>');
+    var r, txt = '';
+    try{
+      r = await fetch(url, { method:'POST', mode:'cors', redirect:'follow',
+        headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+        body: JSON.stringify({ tes:1, docNo:'FIX-SHEET-CHECK' }) });
+      txt = await r.text();
+    }catch(e){
+      setBox(el, 'bad', '❌ <b>Fetch/CORS gagal</b> — deployment saat ini menampilkan halaman error Google (tanpa header CORS). Lanjutkan Langkah 1–3 di bawah, lalu Tes Ulang.');
+      return false;
+    }
+    var t = txt.trim();
+    if(t.charAt(0) === '{' || t.charAt(0) === '['){
+      var js = {}; try{ js = JSON.parse(t); }catch(e){}
+      if(js.ok === true){
+        setBox(el, 'good', '✅ <b>SEHAT!</b> Endpoint membalas JSON <code>ok:true</code>. Buka <a href="./portal.html">portal</a> → submit → data masuk ke spreadsheet ✔');
+        return true;
+      }
+      setBox(el, 'warn', '⚠️ Respon JSON tapi <code>ok≠true</code>: <code>' + t.slice(0,180) + '</code>');
+      return false;
+    }
+    var plain = txt.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+    var doPost = /doPost/i.test(txt);
+    setBox(el, 'bad', '❌ <b>Respon HTML (bukan JSON)</b>, HTTP ' + r.status +
+      (doPost ? ' — pesan Google: <b>“Fungsi skrip tidak ditemukan: doPost”</b> → kode backend belum ada / versi deploy masih kosong. Jalankan Langkah 1 → 3, lalu Tes Ulang.' : ' — kemungkinan halaman login/error Google.') +
+      '<br>Cuplikan: <code>' + plain.slice(0,140) + '…</code>');
+    return false;
+  }
+
+  // muat kode backend untuk ditampilkan & disalin
+  fetch('./gsheet_backend.gs').then(function(r){ return r.text(); }).then(function(t){
+    $('codeTxt').textContent = t;
+  }).catch(function(){ $('codeTxt').textContent = '(gagal memuat gsheet_backend.gs)'; });
+
+  $('copyBtn').addEventListener('click', function(){
+    var txt = $('codeTxt').textContent;
+    var done = function(){ $('copyBtn').textContent = '✔ Tersalin!'; setTimeout(function(){ $('copyBtn').textContent = '📋 Salin Kode Backend'; }, 2500); };
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ fallback(); }); }
+    else fallback();
+    function fallback(){
+      var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta);
+      ta.select(); try{ document.execCommand('copy'); done(); }catch(e){} document.body.removeChild(ta);
+    }
+  });
+
+  $('retestBtn').addEventListener('click', function(){ testEndpoint(EP, statusBox); });
+
+  $('applyBtn').addEventListener('click', async function(){
+    var res = $('applyRes');
+    var url = $('urlInput').value.trim();
+    if(!url){ setBox(res, 'warn', '⚠️ Tempel dulu URL Web app baru (diakhiri <code>/exec</code>).'); res.style.display='block'; return; }
+    setBox(res, '', '⏳ Menerapkan…'); res.style.display = 'block';
+    try{
+      var r = await fetch('/api/fix-endpoint', { method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ endpoint:url }) });
+      var js = await r.json();
+      if(js.ok){
+        EP = url;
+        setBox(res, 'good', '✅ Diperbarui: <b>' + js.updated.join('</b>, <b>') + '</b>. Menguji endpoint baru…');
+        testEndpoint(EP, statusBox);
+      }else{
+        setBox(res, 'bad', '❌ Gagal: ' + (js.error || (js.errors||[]).join('; ')));
+      }
+    }catch(e){
+      setBox(res, 'bad', '❌ Tidak dapat menghubungi server lokal: ' + (e.message||e));
+    }
+  });
+
+  // uji otomatis saat halaman dibuka
+  testEndpoint(EP, statusBox);
+})();
+</script>
+
+</body>
+</html>

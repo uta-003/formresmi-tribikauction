@@ -14,7 +14,9 @@ URL utama:
 """
 
 import os
+import re
 import sys
+import json
 import time
 import socket
 import webbrowser
@@ -144,6 +146,63 @@ class Handler(SimpleHTTPRequestHandler):
     def log_message(self, fmt, *args):
         # Ringkas log: 127.0.0.1 GET /form-...html 200
         print("  -> %s %s" % (self.command, self.path))
+
+    def _send_json(self, code, obj):
+        body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_POST(self):
+        route = self.path.split("?", 1)[0]
+        if route != "/api/fix-endpoint":
+            self._send_json(404, {"ok": False, "error": "rute tidak dikenal"})
+            return
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            length = 0
+        raw = self.rfile.read(length).decode("utf-8", "replace") if length else ""
+        try:
+            data = json.loads(raw or "{}")
+        except Exception:
+            data = {}
+        ep = str(data.get("endpoint", "")).strip()
+        if not (ep.startswith("https://script.google.com/macros/s/") and ep.endswith("/exec") and len(ep) < 300):
+            self._send_json(400, {"ok": False,
+                "error": "URL tidak valid — bentuk yang benar: https://script.google.com/macros/s/…/exec"})
+            return
+        updated, errors = [], []
+        # portal.html (kutip tunggal)
+        try:
+            pp = os.path.join(BASE_DIR, "portal.html")
+            s = open(pp, encoding="utf-8").read()
+            s2, n = re.subn(r"const SHEET_ENDPOINT = 'https://script\.google\.com/macros/s/[^']*/exec';",
+                            "const SHEET_ENDPOINT = '" + ep + "';", s, count=1)
+            if n:
+                open(pp, "w", encoding="utf-8", newline="").write(s2)
+                updated.append("portal.html")
+            else:
+                errors.append("portal.html: konstanta SHEET_ENDPOINT tidak ditemukan")
+        except Exception as e:
+            errors.append("portal.html: " + str(e))
+        # firebase-config.js (kutip ganda, toleransi BOM)
+        try:
+            fp = os.path.join(BASE_DIR, "firebase-config.js")
+            s = open(fp, encoding="utf-8-sig").read()
+            s2, n = re.subn(r'const SHEET_ENDPOINT = "https://script\.google\.com/macros/s/[^"]*/exec";',
+                            'const SHEET_ENDPOINT = "' + ep + '";', s, count=1)
+            if n:
+                open(fp, "w", encoding="utf-8", newline="").write(s2)
+                updated.append("firebase-config.js")
+            else:
+                errors.append("firebase-config.js: konstanta SHEET_ENDPOINT tidak ditemukan")
+        except Exception as e:
+            errors.append("firebase-config.js: " + str(e))
+        self._send_json(200, {"ok": not errors, "updated": updated, "errors": errors, "endpoint": ep})
+
 
     def end_headers(self):
         # Nonaktifkan cache agar perubahan langsung terlihat

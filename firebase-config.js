@@ -1,4 +1,4 @@
-﻿/* firebase-config.js - Firebase Web SDK v9 modular (project heinuuu)
+/* firebase-config.js - Firebase Web SDK v9 modular (project heinuuu)
    Backend: Realtime Database (node `pengajuan`) + Firebase Storage (foto KTP/ttd)
    Di-load via <script type="module" src="firebase-config.js"> di portal.html.
    Hasil init diekspor ke window.ffc agar kode global di portal tetap dipakai.
