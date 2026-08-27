@@ -220,12 +220,17 @@ class Handler(SimpleHTTPRequestHandler):
             data = {}
         ep = str(data.get("endpoint", "")).strip()
         payload = data.get("payload", data if "docNo" in data else {})
+        ping = bool(data.get("ping"))
         if not (ep.startswith("https://script.google.com/macros/s/") and ep.endswith("/exec")):
             self._send_json(400, {"ok": False, "error": "endpoint tidak valid"})
             return
-        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        req = urllib.request.Request(ep, data=body,
-                                     headers={"Content-Type": "text/plain;charset=utf-8"}, method="POST")
+        if ping:
+            # health-check lewat doGet (tidak menulis baris ke spreadsheet)
+            req = urllib.request.Request(ep, method="GET")
+        else:
+            body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+            req = urllib.request.Request(ep, data=body,
+                                         headers={"Content-Type": "text/plain;charset=utf-8"}, method="POST")
         try:
             with urllib.request.urlopen(req, timeout=45) as resp:
                 status = resp.status
