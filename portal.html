@@ -610,14 +610,51 @@ document.querySelectorAll('.tab').forEach(btn=>{
   });
 });
 
-/* ============ DATE & DOC NUMBER ============ */
+/* ============ DATE & DOC NUMBER (anti-kembar) ============ */
 function fmtDate(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear(); }
-function nextDocNo(){
-  const n=docSeq()+1;
-  const y=new Date().getFullYear();
-  // append device token: TRB-2026-0001-AB3F (unique across every PC/mobile device)
-  return 'TRB-'+y+'-'+String(n).padStart(4,'0')+'-'+deviceToken();
+/* Simpan daftar nomor yang sudah TERPAKAI (riwayat + antrean) untuk memastikan tidak kembar. */
+function usedDocNumbers(){
+  const used=new Set();
+  try{ (JSON.parse(localStorage.getItem('tribik_history')||'[]')||[]).forEach(function(x){ if(x&&x.docNo) used.add(x.docNo); }); }catch(e){}
+  try{ (JSON.parse(localStorage.getItem(PENDING_KEY))||[]).forEach(function(x){ if(x&&x.d&&x.d.docNo) used.add(x.d.docNo); }); }catch(e){}
+  return used;
 }
+function docNumberFormat(n){
+  const y=new Date().getFullYear();
+  return 'TRB/'+y+'/'+String(n).padStart(4,'0')+'/'+deviceToken();
+}
+/* Pratinjau nomor berikutnya (meta form). TIDAK menaikkan urutan — hanya tampilan. */
+function nextDocNo(){
+  return docNumberFormat(docSeq()+1);
+}
+/* Alokasikan nomor berikutnya SEPENUHNYA UNIK untuk disubmit.
+   Dipakai sekali-per-request lewat Web Locks API sehingga dua tab/dua link yang
+   dibuka bersamaan tetap mendapat nomor berbeda (tidak pernah kembar), lalu
+   naikkan & simpan urutan, dan pastikan tidak bertabrakan dengan nomor lama. */
+function nextUniqueDocNumber(){
+  return new Promise(function(resolve){
+    function allocate(){
+      let used = usedDocNumbers();
+      let n = docSeq();
+      let cand;
+      for(let it=0; it<200; it++){          // lompati semua nomor yang sudah dipakai
+        n += 1;
+        cand = docNumberFormat(n);
+        if(!used.has(cand)) break;
+        used.add(cand);                     // tandai tiap kandidat agar tidak dipakai ulang
+      }
+      setSeq(n);
+      resolve(cand);
+    }
+    if(typeof navigator!=='undefined' && navigator.locks && navigator.locks.request){
+      // serentak antar-tab pada origin yang sama (localhost): jalankan satu-per-satu
+      navigator.locks.request('tribik_doc_no_allocator', allocate);
+    } else {
+      allocate();   // fallback: browser tanpa Web Locks — masih aman utk satu browser
+    }
+  });
+}
+
 function refreshDocMeta(){
   $('docDate').textContent = fmtDate(new Date());
   $('docCat').textContent = CATS[state.cat].name;
@@ -1215,14 +1252,18 @@ async function flushPendingSync(){
 }
 
 /* ============ SUBMIT ============ */
-$('submitForm').addEventListener('click', function(){
+$('submitForm').addEventListener('click', async function(){
   const d = collectForm();
   const err = validate(d);
   if(err){ toast(err,'err'); snd('error'); return; }
 
+  /* Alokasikan No. Dokumen yang dijamin unik (aman walau beberapa tab/link dibuka
+     bersamaan). Nomor lompat dipakai/tersimpan agar tidak pernah kembar. */
+  d.docNo = await nextUniqueDocNumber();
+  $('docNo').textContent = d.docNo;
+
   // 1) Simpan ke database (localStorage)
   const db = loadDB();
-  setSeq(docSeq()+1);
   db.unshift(d);
   saveDB(db);      /* riwayat lokal (database ringan) */
 
