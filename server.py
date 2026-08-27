@@ -61,8 +61,8 @@ INDEX_HTML = """<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-    <link rel="icon" href="./logo.png?v=4" type="image/png">
-    <link rel="icon" href="./favicon.svg?v=4" type="image/svg+xml">
+    <link rel="icon" href="./logo.png?v=5" type="image/png">
+    <link rel="icon" href="./favicon.svg?v=5" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tribik Auction - Lelang Mobil</title>
 <style>
@@ -100,7 +100,7 @@ INDEX_HTML = """<!DOCTYPE html>
 </head>
 <body>
   <div class="wrap">
-        <div class="logo"><img src="./logo.png?v=4" alt="Tribik Auction"></div>
+        <div class="logo"><img src="./logo.png?v=5" alt="Tribik Auction"></div>
     <h1>Tribik Auction - Pelelangan Mobil</h1>
     <p class="tagline">Pilih form pengajuan yang diperlukan</p>
     <div class="grid">
