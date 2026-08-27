@@ -1,91 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1240" viewBox="0 0 1240 1240">
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1240" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="gCircle" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#F03663"/>
-      <stop offset="0.55" stop-color="#CE1B49"/>
-      <stop offset="1" stop-color="#9E0E33"/>
+    <linearGradient id="tileG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff7b7b"/>
+      <stop offset="0.45" stop-color="#ff5252"/>
+      <stop offset="1" stop-color="#a70000"/>
     </linearGradient>
-    <linearGradient id="gNavy" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#223468"/>
-      <stop offset="1" stop-color="#0C1531"/>
+    <linearGradient id="checkG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff5252"/>
+      <stop offset="1" stop-color="#a70000"/>
     </linearGradient>
-    <linearGradient id="gPen" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#FF6B6B"/>
-      <stop offset="1" stop-color="#D91F2D"/>
-    </linearGradient>
-    <linearGradient id="gRed" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FF4D5E"/>
-      <stop offset="1" stop-color="#D31740"/>
-    </linearGradient>
-    <filter id="ds" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#3A0518" flood-opacity="0.45"/>
+    <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#2a0000" flood-opacity="0.35"/>
     </filter>
   </defs>
-
-  <!-- sapuan kecepatan navy (belakang) -->
-  <path d="M300 952 C560 1075 900 1060 1215 838 L1215 972 C930 1150 560 1160 285 1005 Z" fill="url(#gNavy)"/>
-
-  <!-- lingkaran utama crimson -->
-  <circle cx="335" cy="655" r="418" fill="url(#gCircle)"/>
-
-  <!-- garis kecepatan kiri-atas -->
-  <g fill="#1E2B5C" transform="rotate(24 300 320)">
-    <rect x="200" y="280" width="170" height="16" rx="8"/>
-    <rect x="225" y="318" width="130" height="16" rx="8"/>
-    <rect x="250" y="356" width="95" height="16" rx="8"/>
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="url(#tileG)"/>
+  <rect x="9.5" y="9.5" width="493" height="493" rx="110.5" fill="none" stroke="#ffffff" stroke-opacity="0.16" stroke-width="3"/>
+  <g transform="rotate(-3 256 260)" filter="url(#sh)">
+    <rect x="148" y="108" width="216" height="280" rx="20" fill="#f8fafc"/>
+    <rect x="216" y="92" width="80" height="30" rx="15" fill="#0b1020"/>
+    <rect x="170" y="140" width="130" height="24" rx="12" fill="url(#checkG)"/>
+    <rect x="170" y="172" width="90" height="10" rx="5" fill="#cbd5e1"/>
+    <rect x="170" y="205" width="30" height="30" rx="8" fill="#ff5252"/>
+    <path d="M178 220 l8 8 14 -16" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="212" y="209" width="122" height="10" rx="5" fill="#94a3b8"/>
+    <rect x="212" y="226" width="96" height="10" rx="5" fill="#cbd5e1"/>
+    <rect x="170" y="258" width="30" height="30" rx="8" fill="#ff5252"/>
+    <path d="M178 273 l8 8 14 -16" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="212" y="262" width="122" height="10" rx="5" fill="#94a3b8"/>
+    <rect x="212" y="279" width="84" height="10" rx="5" fill="#cbd5e1"/>
+    <rect x="172.5" y="313.5" width="25" height="25" rx="7" fill="#f8fafc" stroke="#94a3b8" stroke-width="5"/>
+    <rect x="212" y="315" width="122" height="10" rx="5" fill="#94a3b8"/>
+    <rect x="212" y="332" width="108" height="10" rx="5" fill="#cbd5e1"/>
   </g>
-
-  <!-- aksen kanan-atas -->
-  <path d="M985 262 L1160 232 L1146 286 L971 316 Z" fill="#E8365A"/>
-  <path d="M1085 322 L1165 308 L1156 340 L1076 354 Z" fill="#1E2B5C"/>
-
-  <!-- badge TRIBIK FORM (miring, gaya kekinian) -->
-  <g transform="skewX(-8)" filter="url(#ds)">
-    <rect x="577" y="348" width="640" height="214" rx="42" fill="url(#gNavy)"/>
-    <rect x="643" y="588" width="630" height="218" rx="42" fill="url(#gNavy)"/>
-    <text x="639" y="509" font-family="'Arial Black',Arial,sans-serif" font-weight="900" font-size="150" fill="#FF3D52" stroke="#FFFFFF" stroke-width="9" paint-order="stroke" stroke-linejoin="round" textLength="560" lengthAdjust="spacingAndGlyphs">TRIBIK</text>
-    <text x="725" y="756" font-family="'Arial Black',Arial,sans-serif" font-weight="900" font-size="165" fill="#FFFFFF" textLength="112" lengthAdjust="spacingAndGlyphs">F</text>
-    <rect x="833" y="620" width="144" height="144" rx="38" fill="#E8365A"/>
-    <path d="M875 691 L912 723 L951 660" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="1009" y="756" font-family="'Arial Black',Arial,sans-serif" font-weight="900" font-size="165" fill="#FFFFFF" textLength="272" lengthAdjust="spacingAndGlyphs">RM</text>
-  </g>
-
-  <!-- sapuan merah tipis di bawah badge -->
-  <path d="M300 938 C560 1058 900 1046 1200 822" fill="none" stroke="#E8365A" stroke-width="16" stroke-linecap="round"/>
-
-  <!-- clipboard checklist -->
-  <g transform="rotate(-4 330 700)" filter="url(#ds)">
-    <rect x="150" y="430" width="360" height="520" rx="30" fill="#FFFFFF"/>
-    <g fill="#22306B">
-      <rect x="280" y="556" width="158" height="14" rx="7"/>
-      <rect x="280" y="582" width="112" height="14" rx="7"/>
-      <rect x="280" y="671" width="158" height="14" rx="7"/>
-      <rect x="280" y="697" width="112" height="14" rx="7"/>
-      <rect x="280" y="786" width="158" height="14" rx="7"/>
-      <rect x="280" y="812" width="112" height="14" rx="7"/>
-    </g>
-    <rect x="196" y="545" width="58" height="58" rx="14" fill="#E8365A"/>
-    <path d="M209 575 L222 589 L243 562" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="196" y="660" width="58" height="58" rx="14" fill="#E8365A"/>
-    <path d="M209 690 L222 704 L243 677" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="196" y="775" width="58" height="58" rx="14" fill="#FFFFFF" stroke="#22306B" stroke-width="7"/>
-    <circle cx="330" cy="404" r="24" fill="none" stroke="url(#gRed)" stroke-width="14"/>
-    <rect x="266" y="410" width="128" height="52" rx="16" fill="url(#gRed)"/>
-  </g>
-
-  <!-- pena merah -->
-  <g transform="rotate(35 540 600)" filter="url(#ds)">
-    <rect x="508" y="400" width="64" height="310" rx="32" fill="url(#gPen)"/>
-    <rect x="508" y="452" width="64" height="30" fill="#1A2347"/>
-    <rect x="543" y="410" width="12" height="118" rx="6" fill="#A31220"/>
-    <path d="M508 706 L572 706 L540 796 Z" fill="#1A2347"/>
-    <path d="M526 768 L554 768 L540 808 Z" fill="#0C1226"/>
-  </g>
-
-  <!-- dashes kecil kiri-bawah -->
-  <g transform="rotate(-14 140 1040)" fill="#C21B47">
-    <rect x="60" y="1024" width="150" height="14" rx="7"/>
-    <rect x="86" y="1056" width="100" height="14" rx="7"/>
+  <g filter="url(#sh)">
+    <circle cx="372" cy="384" r="62" fill="#f8fafc"/>
+    <circle cx="372" cy="384" r="48" fill="url(#checkG)"/>
+    <path d="M350 384 l16 16 30 -34" fill="none" stroke="#ffffff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 </svg>
