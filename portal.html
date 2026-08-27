@@ -621,7 +621,8 @@ function usedDocNumbers(){
 }
 function docNumberFormat(n){
   const y=new Date().getFullYear();
-  return 'TRB/'+y+'/'+String(n).padStart(4,'0')+'/'+deviceToken();
+  const code = state.cat==='barang' ? 'FPB' : state.cat==='unit' ? 'FPU' : 'FCUL';
+  return 'TRB/'+y+'/'+String(n).padStart(4,'0')+'/'+code;
 }
 /* Pratinjau nomor berikutnya (meta form). TIDAK menaikkan urutan — hanya tampilan. */
 function nextDocNo(){
