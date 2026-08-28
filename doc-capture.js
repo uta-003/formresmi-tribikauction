@@ -575,8 +575,9 @@
       var px = cw * 0.12, py = ch * 0.12;
       cx -= px; cy -= py; cw += px * 2; ch += py * 2;
     } else {
-      cw = vw; ch = vw / this.ratio;
-      if (ch > vh) { ch = vh; cw = vh * this.ratio; }
+      var FRf = this._frameRatio();
+      cw = vw; ch = vw / FRf;
+      if (ch > vh) { ch = vh; cw = vh * FRf; }
       cx = (vw - cw) / 2; cy = (vh - ch) / 2;
     }
     /* --- KUNCI RASIO bingkai aktif: crop dipaksa persis FR -> TIDAK gepeng --- */
@@ -587,6 +588,8 @@
     if (cy < 0) cy = 0;
     if (cx + cw > vw) cw = vw - cx;
     if (cy + ch > vh) ch = vh - cy;
+    /* re-lock rasio setelah clamp tepi video — hasil tetap presisi (tidak melar) */
+    if (cw / ch > FR) { cw = ch * FR; } else { ch = cw / FR; }
     if (cw < 16 || ch < 16) return;
 
     /* canvas keluaran proporsional: tinggi = lebar / rasio -> gambar tak melar */
@@ -603,6 +606,6 @@
     void self;
   };
 
-  DocumentAutoCapture.VERSION = '4.0';
+  DocumentAutoCapture.VERSION = '4.1';
   global.DocumentAutoCapture = DocumentAutoCapture;
 })(window);

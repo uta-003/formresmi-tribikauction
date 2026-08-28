@@ -10,7 +10,7 @@
 <title>Form Tribik Auction — Portal Pengajuan</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="./modal.js"></script>
-<script src="./doc-capture.js?v=3"></script>
+<script src="./doc-capture.js?v=5"></script>
 <style>
 :root{
   --primary:#ff5252; --primary-2:#a70000; --accent:#ff7b7b;
@@ -154,6 +154,8 @@ textarea{resize:vertical;min-height:54px}
 .add-row:hover{background:rgba(var(--tint),.14);border-color:var(--primary);color:var(--accent)}
 .rows-note{font-size:12px;color:var(--muted);margin:-8px 0 12px}
 .rows-note .req{color:var(--err);font-weight:800}
+/* nomor urut baris Point 3 */
+.row-no{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:rgba(var(--tint),.22);color:var(--accent);font-size:10.5px;font-weight:800;margin-right:7px;vertical-align:1px;border:1px solid rgba(var(--tint),.4);letter-spacing:.3px}
 
 /* signature + terms + actions */
 .sigbox{width:100%;height:190px;border:2px dashed rgba(var(--tint),.45);border-radius:14px;background:#fff;touch-action:none;cursor:crosshair;transition:border-color .2s, box-shadow .2s}
@@ -727,11 +729,12 @@ function refreshDocMeta(){
 
 
 /* ============ KATEGORI & BARIS DINAMIS ============ */
-function rowTemplate(cat, data){
+function rowTemplate(cat, data, no){
   data = data || {};
+  no = no || 1;
   if(cat==='barang'){
     return '<div class="row g3">'
-      +'<div><label>Nama / Rincian Barang <span class="req">*</span></label><input type="text" class="r-nama" value="'+(data.nama||'')+'" placeholder="cth: Dokumen STNK, kunci, dll"></div>'
+      +'<div><label><span class="row-no">'+no+'</span> Nama / Rincian Barang <span class="req">*</span></label><input type="text" class="r-nama" value="'+(data.nama||'')+'" placeholder="cth: Dokumen STNK, kunci, dll"></div>'
       +'<div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
       +'<div><label>Jumlah <span class="req">*</span></label><input type="number" min="1" class="r-jml" value="'+(data.jml||1)+'"></div>'
       +'<div><label>Satuan</label><input type="text" class="r-sat" value="'+(data.sat||'')+'" placeholder="unit/lbr"></div>'
@@ -741,7 +744,7 @@ function rowTemplate(cat, data){
       +'</div>';
   }
   return '<div class="row g2">'
-    +'<div><label>Nomor Polisi <span class="req">*</span></label><input type="text" class="r-nopol" value="'+(data.nopol||'')+'" placeholder="cth: B 1234 XYZ"></div>'
+    +'<div><label><span class="row-no">'+no+'</span> Nomor Polisi <span class="req">*</span></label><input type="text" class="r-nopol" value="'+(data.nopol||'')+'" placeholder="cth: B 1234 XYZ"></div>'
     +'<div><label>Merk / Type Kendaraan <span class="req">*</span></label><input type="text" class="r-merk" value="'+(data.merk||'')+'" placeholder="cth: Toyota Fortuner 2.4"></div>'
     +'<div class="rm"><button class="btn btn-danger btn-sm" onclick="delRow(this)">🗑 Hapus</button></div>'
     +'</div>';
@@ -758,7 +761,7 @@ function renderRows(){
   $('rowsTitle').textContent = rowsTitleOf(state.cat);
   $('rowsNum').textContent = state.cat==='barang' ? 3 : 3;
   $('addRowBtn').textContent = rowAddBtnLabel(state.cat);
-  $('rowsArea').innerHTML = state.rows.map(r=>rowTemplate(state.cat,r)).join('');
+  $('rowsArea').innerHTML = state.rows.map((r,i)=>rowTemplate(state.cat,r,i+1)).join('');
   if(state.rows.length===0) $('addRowBtn').style.display='block';
 }
 function syncRowsFromDOM(){
@@ -1242,9 +1245,14 @@ function buildPdf(d){
   kv('Perusahaan:', d.perusahaan);
   if(d.ktp){
     try{
-      if(y + 34 > 252){ doc.addPage(); head(); }
+      /* orientasi foto mengikuti gambar asli — hasil kamera ID CARD potret tampil POTRET di PDF */
+      let ar = KTP_RATIO;
+      try{ const pr = doc.getImageProperties(d.ktp); if(pr && pr.width && pr.height) ar = pr.width/pr.height; }catch(e2){}
+      const portrait = ar < 1;
+      const imgW = portrait ? Math.round(84*ar) : 80;          // potret: tinggi tetap 84mm, lebar proporsional
+      const imgH = portrait ? 84 : Math.round(80/ar);          // lanskap: lebar tetap 80mm, tinggi proporsional
+      if(y + imgH + 16 > 252){ doc.addPage(); head(); }        // pindah halaman agar foto tidak menabrak bagian bawah
       kv('Foto KTP / ID:', d.ktpName||'');
-      const imgW=80, imgH=imgW/KTP_RATIO;
       doc.addImage(d.ktp, 'JPEG', M, y, imgW, imgH, undefined, 'FAST');
       doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.4);
       doc.roundedRect(M, y, imgW, imgH, 2, 2, 'S');
