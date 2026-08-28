@@ -737,7 +737,7 @@ function rowTemplate(cat, data, no){
       +'<div><label><span class="row-no">'+no+'</span> Nama / Rincian Barang <span class="req">*</span></label><input type="text" class="r-nama" value="'+(data.nama||'')+'" placeholder="cth: Dokumen STNK, kunci, dll"></div>'
       +'<div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
       +'<div><label>Jumlah <span class="req">*</span></label><input type="number" min="1" class="r-jml" value="'+(data.jml||1)+'"></div>'
-      +'<div><label>Satuan</label><input type="text" class="r-sat" value="'+(data.sat||'')+'" placeholder="unit/lbr"></div>'
+      +'<div><label>Satuan</label><input type="text" class="r-sat" value="'+(data.sat||'Pcs')+'" placeholder="cth: Pcs, unit, lbr"></div>'
       +'</div>'
       +'<div><label>Keterangan / Peruntukan</label><input type="text" class="r-ket" value="'+(data.ket||'')+'"></div>'
       +'<div class="rm"><button class="btn btn-danger btn-sm" onclick="delRow(this)">🗑 Hapus</button></div>'
@@ -1041,7 +1041,7 @@ function collectRows(){
   return Array.from($('rowsArea').querySelectorAll('.row')).map(r=>{
     const g=n=>{ const el=r.querySelector(n); return el?el.value.trim():''; };
     if(state.cat==='barang'){
-      return { nama:g('.r-nama'), jml:g('.r-jml'), sat:g('.r-sat'), ket:g('.r-ket') };
+      return { nama:g('.r-nama'), jml:g('.r-jml'), sat:(g('.r-sat')||'Pcs'), ket:g('.r-ket') };
     }
     return { nopol:g('.r-nopol'), merk:g('.r-merk') };
   }).filter(r=>{
@@ -1118,7 +1118,7 @@ function paperHTML(d){
   // zebra striping: alternate kv rows (SECTION DATA + panel rows)
   const zeb = (z)=>' class="kv'+(z?' zebra':'')+'"';
   let rowsHtml = d.rows.map((r,i)=>{
-    if(d.cat==='barang') return '<div'+zeb(i%2===1)+'><b>Item '+(i+1)+':</b><span>'+esc(r.nama||'-')+' — '+esc(r.jml||'-')+' '+esc(r.sat||'')+(r.ket?' ('+esc(r.ket)+')':'')+'</span></div>';
+    if(d.cat==='barang') return '<div'+zeb(i%2===1)+'><b>Item '+(i+1)+':</b><span>'+esc(r.nama||'-')+' — '+esc(r.jml||'-')+' '+esc(r.sat||'Pcs')+(r.ket?' ('+esc(r.ket)+')':'')+'</span></div>';
     return '<div'+zeb(i%2===1)+'><b>Unit '+(i+1)+':</b><span>'+esc(r.nopol||'-')+' — '+esc(r.merk||'-')+'</span></div>';
   }).join('');
   return '<div class="ph"><h4>TRIBIK AUCTION</h4><p>'+CATS[d.cat].pdf+'</p><p>No. '+esc(d.docNo)+' &nbsp;•&nbsp; '+esc(d.date)+'</p></div>'
@@ -1263,7 +1263,7 @@ function buildPdf(d){
   sectionTitle(d.cat==='barang' ? 'DETAIL ITEM BARANG' : 'DAFTAR UNIT KENDARAAN');
   d.rows.forEach(function(r,i){
     const line = d.cat==='barang'
-      ? (r.nama||'-')+'  x'+(r.jml||'-')+' '+(r.sat||'')+(r.ket?'  ('+r.ket+')':'')
+      ? (r.nama||'-')+'  x'+(r.jml||'-')+' '+(r.sat||'Pcs')+(r.ket?'  ('+r.ket+')':'')
       : (r.nopol||'-')+'  —  '+(r.merk||'-');
     rowItem(i, line);
   });
@@ -1365,7 +1365,7 @@ $('submitForm').addEventListener('click', async function(){
   // 2) Teruskan ke WhatsApp
   const lines = d.rows.map(function(r,i){
     if(d.cat==='barang'){
-      return (i+1)+'. Nama: '+(r.nama||'-')+' | Jumlah: '+(r.jml||'-')+' '+(r.sat||'')+(r.ket?' | Keterangan: '+r.ket:'');
+      return (i+1)+'. Nama: '+(r.nama||'-')+' | Jumlah: '+(r.jml||'-')+' '+(r.sat||'Pcs')+(r.ket?' | Keterangan: '+r.ket:'');
     }
     return (i+1)+'. No. Polisi: '+(r.nopol||'-')+' | Merk/Type: '+(r.merk||'-');
   });
@@ -1401,7 +1401,7 @@ async function saveToSheet(d){
   /* bangun teks penuh untuk kolom “Daftar Barang / Unit” */
   const rowsText = (d.rows||[]).map((r,i)=>{
     if(d.cat==='barang'){
-      return (i+1)+'. '+r.nama+' | Jumlah: '+(r.jml||0)+' '+(r.sat||'')+(r.ket?' | Keterangan: '+r.ket:'');
+      return (i+1)+'. '+r.nama+' | Jumlah: '+(r.jml||0)+' '+(r.sat||'Pcs')+(r.ket?' | Keterangan: '+r.ket:'');
     }
     return (i+1)+'. '+r.nopol+' | Merk/Type: '+(r.merk||'-');
   }).join(NL);
