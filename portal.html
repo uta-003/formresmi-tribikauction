@@ -1216,14 +1216,16 @@ function buildPdf(d){
   }
   function rowItem(i, txt){
     if(y > 252){ doc.addPage(); head(); }
-    if(i%2===1){ doc.setFillColor(248,250,253); doc.roundedRect(M,y,W-M*2,7.4,1.8,1.8,'F'); }
+    /* kartu baris bernomor — border presisi sama seperti baris kv (Nama Lengkap, NIK/SIM/ID, Perusahaan) */
+    doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
+    doc.roundedRect(M, y, W-M*2, 7, 1.8, 1.8, 'FD');
     doc.setFillColor(TH.p[0],TH.p[1],TH.p[2]);
-    doc.circle(M+5.5,y+3.7,2.4,'F');
+    doc.circle(M+5.5, y+3.5, 2.4, 'F');
     doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
-    doc.text(String(i+1),M+5.5,y+4.9,{align:'center'});
+    doc.text(String(i+1), M+5.5, y+4.5, {align:'center'});
     doc.setFontSize(9.5); doc.setFont('helvetica','normal'); doc.setTextColor(INK[0],INK[1],INK[2]);
-    doc.text(txt,M+11,y+5);
-    y+=8.6;
+    doc.text(txt, M+11, y+4.9);
+    y += 9.2;
   }
   function footerAll(){
     const n=doc.getNumberOfPages();
