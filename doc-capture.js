@@ -1,6 +1,16 @@
 /* ============================================================================
- * doc-capture.js  —  Document Auto Capture Component v4 (reusable)
+ * doc-capture.js  —  Document Auto Capture Component v5 (reusable)
  * ----------------------------------------------------------------------------
+ * BARU v5 (perbaikan bingkai di semua perangkat — khusus kamera pertama dibuka):
+ *   • Buffer deteksi kini mengikuti rasio AREA VIDEO TERLIHAT (object-fit contain),
+ *     bukan rasio container layar -> bingkai & sudut hijau selalu persis menempel
+ *     pada kartu, walau rasio layar beda dari rasio video (banyak HP/PC).
+ *   • Geometri disinkronkan SETIAP frame deteksi (bukan tiap 10 frame) + didengar
+ *     via event video 'loadedmetadata'/'resize'/'playing' + ResizeObserver, jadi
+ *     tidak ada lagi fase awal dengan bingkai meleset saat kamera pertama dibuka.
+ *   • Ukur ulang layout 150 ms setelah start (browser HP menetapkan ukuran
+ *     belakangan) & reset kotak deteksi lama ketika ukuran buffer berubah.
+ *
  * BARU v4 (bingkai sesuai ukuran kartu + tombol putar ID Card):
  *   • Bingkai & hasil mengikuti JENIS terpilih secara presisi:
  *       KTP & SIM  -> 85,60 × 53,98 mm (lanskap, standar ID-1).
@@ -91,6 +101,9 @@
 
     this._raf = 0; this._tick = 0; this._t0 = 0; this._syncT = 0;
     this._geom = { fallback: true };
+    this._geomKey = '';
+    this.ux = 1; this.uy = 1;        // skala piksel kerja -> piksel video terlihat
+    this._ro = null; this._resizeTimer = 0;
     this._boundLoop = this._loop.bind(this);
     this._boundResize = this._resize.bind(this);
   }
@@ -99,13 +112,19 @@
   DocumentAutoCapture.prototype._syncGeom = function () {
     var vw = this.video && this.video.videoWidth, vh = this.video && this.video.videoHeight;
     var dw = this.overlay && this.overlay.clientWidth, dh = this.overlay && this.overlay.clientHeight;
-    if (!vw || !vh || !dw || !dh) { this._geom = { fallback: true }; return; }
-    var s = Math.min(dw / vw, dh / vh);
-    this._geom = {
-      fallback: false, k: s,
-      drawW: vw * s, drawH: vh * s,
-      offX: (dw - vw * s) / 2, offY: (dh - vh * s) / 2
-    };
+    var g;
+    if (!vw || !vh || !dw || !dh) { g = { fallback: true }; }
+    else {
+      var s = Math.min(dw / vw, dh / vh);
+      g = { fallback: false, k: s, drawW: vw * s, drawH: vh * s, offX: (dw - vw * s) / 2, offY: (dh - vh * s) / 2 };
+    }
+    var key = g.fallback
+      ? 'F'
+      : [Math.round(g.drawW), Math.round(g.drawH), Math.round(g.offX), Math.round(g.offY)].join('x');
+    var changed = key !== this._geomKey;
+    this._geomKey = key;
+    this._geom = g;
+    return changed;   // true bila area video terlihat berubah -> buffer harus diukur ulang
   };
 
   /* --- gaya overlay sekali pasang: contain (anti distorsi) + badge jenis --- */
@@ -157,10 +176,23 @@
   };
 
   DocumentAutoCapture.prototype._makeBuffers = function () {
-    var OW = (this.overlay && this.overlay.offsetWidth) || 300;
-    var OH = (this.overlay && this.overlay.offsetHeight) || 200;
-    var W = 160;
-    var H = clamp(Math.round(W * OH / Math.max(1, OW)), 64, 220);
+    var g = this._geom, W, H;
+    if (g && !g.fallback && g.drawW > 0 && g.drawH > 0) {
+      /* buffer deteksi = AREA VIDEO TERLIHAT (bukan container) -> rasio sama dgn video,
+         sehingga posisi kartu di buffer === posisi kartu di bingkai, tanpa distorsi. */
+      W = 176;
+      H = Math.max(48, Math.min(240, Math.round(W * g.drawH / g.drawW)));
+      this.ux = g.drawW / W;
+      this.uy = g.drawH / H;
+    } else {
+      /* belum ada metadata video: pakai rasio container sementara */
+      var OW = (this.overlay && this.overlay.offsetWidth) || 320;
+      var OH = (this.overlay && this.overlay.offsetHeight) || 240;
+      W = 160;
+      H = clamp(Math.round(W * OH / Math.max(1, OW)), 64, 220);
+      this.ux = OW / W;
+      this.uy = OH / H;
+    }
     if (!this.work || this.work.width !== W || this.work.height !== H) {
       this.work = document.createElement('canvas');
       this.work.width = W; this.work.height = H;
@@ -168,6 +200,8 @@
       this.lum = new Float32Array(W * H);
       this.stamp = new Int32Array(W * H);
       this.q = new Uint32Array(W * H);
+      /* ukuran baru -> posisi deteksi lama tidak valid lagi */
+      this.lastBox = null; this.stableRun = 0;
     }
     this.W = W; this.H = H;
   };
@@ -188,6 +222,15 @@
       try { self.video.setAttribute('playsinline', ''); self.video.muted = true; } catch (e) {}
       var p = self.video.play();
       if (p && p.catch) p.catch(function () {});
+      /* ukuran video baru diketahui setelah metadata/hidup: ukur ulang overlay saat itu juga */
+      self.video.addEventListener('loadedmetadata', self._boundResize);
+      self.video.addEventListener('resize', self._boundResize);
+      self.video.addEventListener('playing', self._boundResize);
+      /* container bisa berubah ukuran (HP: bar address, wrap tombol) -> ikut re-measure */
+      if (typeof ResizeObserver === 'function' && self.overlay && self.overlay.parentElement) {
+        self._ro = new ResizeObserver(function () { self._resize(); });
+        self._ro.observe(self.overlay.parentElement);
+      }
       return stream;
     }).then(function () {
       self.running = true;
@@ -195,6 +238,8 @@
       self._resize();
       if (self.rotatable) self._makeRotBtn(); else self._removeRotBtn();
       window.addEventListener('resize', self._boundResize);
+      /* sebagian browser HP menetapkan layout belakangan -> ukur ulang sekali lagi */
+      self._resizeTimer = setTimeout(function () { if (self.running) self._resize(); }, 150);
       self.onStatus('Arahkan dokumen ke kamera…', false);
       self._raf = requestAnimationFrame(self._boundLoop);
     });
@@ -203,8 +248,15 @@
   DocumentAutoCapture.prototype.stop = function () {
     this.running = false;
     if (this._raf) cancelAnimationFrame(this._raf);
+    if (this._resizeTimer) { clearTimeout(this._resizeTimer); this._resizeTimer = 0; }
+    if (this._ro) { this._ro.disconnect(); this._ro = null; }
     if (this.stream) { this.stream.getTracks().forEach(function (t) { t.stop(); }); this.stream = null; }
-    if (this.video) this.video.srcObject = null;
+    if (this.video) {
+      this.video.removeEventListener('loadedmetadata', this._boundResize);
+      this.video.removeEventListener('resize', this._boundResize);
+      this.video.removeEventListener('playing', this._boundResize);
+      this.video.srcObject = null;
+    }
     window.removeEventListener('resize', this._boundResize);
     if (this.overlay) { var c = this.overlay.getContext('2d'); if (c) c.clearRect(0, 0, this.overlay.width, this.overlay.height); }
     if (this._badgeEl && this._badgeEl.parentNode) { this._badgeEl.parentNode.removeChild(this._badgeEl); }
@@ -397,7 +449,7 @@
 
     if (this.video && this.video.readyState >= 2 && this.video.videoWidth) {
       if ((++this._tick & 1) === 1 || !this.lastBox) {          // setiap frame genap
-        if ((this._tick % 10) === 0) this._syncGeom();
+        if (this._syncGeom()) this._makeBuffers();
         var box = this._detect();
         var good = !!box;
         var dTolX = 0.04 * this.W, dTolY = 0.04 * this.H;
@@ -465,8 +517,9 @@
       ctx.stroke();
     }
     if (box) {
-      var bx = box.minX / this.W * W, by = box.minY / this.H * H;
-      var bx2 = box.maxX / this.W * W, by2 = box.maxY / this.H * H;
+      var g = this._geom, ox = (g && !g.fallback) ? g.offX : 0, oy = (g && !g.fallback) ? g.offY : 0;
+      var bx = ox + box.minX * this.ux, by = oy + box.minY * this.uy;
+      var bx2 = ox + box.maxX * this.ux, by2 = oy + box.maxY * this.uy;
       ctx.strokeStyle = good ? 'rgba(34,197,94,.85)' : 'rgba(255,255,255,.75)';
       ctx.lineWidth = good ? 3 : 1.6; ctx.setLineDash([3, 3]);
       ctx.strokeRect(bx, by, bx2 - bx, by2 - by); ctx.setLineDash([]);
@@ -566,11 +619,10 @@
     if (this.lastBox && !this._geom.fallback) {
       /* work-piksel -> piksel video lewat geometri tampilan yang sebenarnya */
       var g = this._geom;
-      var ux = g.drawW / this.W, uy = g.drawH / this.H;
-      cx = g.offX + this.lastBox.minX * ux;
-      cy = g.offY + this.lastBox.minY * uy;
-      cw = (this.lastBox.maxX - this.lastBox.minX) * ux;
-      ch = (this.lastBox.maxY - this.lastBox.minY) * uy;
+      cx = g.offX + this.lastBox.minX * this.ux;
+      cy = g.offY + this.lastBox.minY * this.uy;
+      cw = (this.lastBox.maxX - this.lastBox.minX) * this.ux;
+      ch = (this.lastBox.maxY - this.lastBox.minY) * this.uy;
       /* margin 12% di keliling kartu */
       var px = cw * 0.12, py = ch * 0.12;
       cx -= px; cy -= py; cw += px * 2; ch += py * 2;
@@ -606,6 +658,6 @@
     void self;
   };
 
-  DocumentAutoCapture.VERSION = '4.1';
+  DocumentAutoCapture.VERSION = '5.0';
   global.DocumentAutoCapture = DocumentAutoCapture;
 })(window);

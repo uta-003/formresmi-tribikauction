@@ -10,7 +10,7 @@
 <title>Form Tribik Auction — Portal Pengajuan</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="./modal.js"></script>
-<script src="./doc-capture.js?v=5"></script>
+<script src="./doc-capture.js?v=6"></script>
 <style>
 :root{
   --primary:#ff5252; --primary-2:#a70000; --accent:#ff7b7b;
@@ -181,6 +181,7 @@ textarea{resize:vertical;min-height:54px}
 .cam-box{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .cam-preview{position:relative;width:100%;border-radius:13px;overflow:hidden;background:#06080f;display:none;border:1px solid var(--line)}
 .cam-preview video{width:100%;height:auto;display:block;max-height:340px;object-fit:contain;background:#05070d}
+.cam-preview{position:relative;min-height:220px}
 .cam-preview .cam-overlay{position:absolute;inset:0;width:100%;height:100%}
 .cam-controls{display:flex;gap:8px}
 .cam-controls .btn{flex:1;justify-content:center}
