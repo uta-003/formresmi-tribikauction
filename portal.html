@@ -2,10 +2,15 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="./logo.png?v=6" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+    <link rel="icon" href="./logo.png?v=9" type="image/png">
   <link rel="icon" href="./favicon.svg?v=6" type="image/svg+xml">
-  <meta name="theme-color" content="#ff5252">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
   <script>try{var _c=localStorage.getItem("tb_color");if(_c)document.documentElement.setAttribute("data-color",_c);}catch(e){}</script>
 <title>Form Tribik Auction — Portal Pengajuan</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,22 +18,24 @@
 <script src="./doc-capture.js?v=6"></script>
 <style>
 :root{
-  --primary:#ff5252; --primary-2:#a70000; --accent:#ff7b7b;
-  --bg:#0b1020; --card:rgba(255,255,255,.055); --ink:#e2e8f0; --muted:#94a3b8;
-  --line:rgba(255,255,255,.11); --ok:var(--accent); --warn:var(--primary); --err:#ff0000;
-  --ring:rgba(255,0,0,.34);
-  --shadow:0 8px 32px rgba(2,6,23,.5);
+  /* ================= TEMA DASAR PUTIH (LIGHT) ================= */
+  --primary:#ff5252; --primary-2:#a70000; --accent:#e11d48;
+  --bg:#ffffff; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+  --line:#e5e7eb; --ok:#16a34a; --warn:#ea580c; --err:#dc2626;
+  --ring:rgba(255,82,82,.22);
+  --shadow:0 6px 22px rgba(15,23,42,.08);
   --radius:18px;
   --tint:255,82,82; --tint2:167,0,0;
-  --glow1:rgba(255,82,82,.30); --glow2:rgba(255,0,0,.24); --glow3:rgba(255,123,123,.13);
-  --brandA:#ffbaba; --brandB:#ff7b7b;
+  --soft:#f8fafc; --soft2:#f1f5f9;
+  --glow1:rgba(255,82,82,.10); --glow2:rgba(255,0,0,.06); --glow3:rgba(255,123,123,.09);
+  --brandA:#b91c1c; --brandB:#ef4444;
 }
-/* ====== TEMA WARNA ====== */
-html[data-color="biru"]{--primary:#38bdf8;--primary-2:#1d4ed8;--accent:#7dd3fc;--tint:56,189,248;--tint2:29,78,216;--ring:rgba(56,189,248,.34);--bg:#081121;--glow1:rgba(56,189,248,.26);--glow2:rgba(29,78,216,.24);--glow3:rgba(125,211,252,.12);--brandA:#bae6fd;--brandB:#7dd3fc}
-html[data-color="hijau"]{--primary:#34d399;--primary-2:#047857;--accent:#6ee7b7;--tint:52,211,153;--tint2:4,120,87;--ring:rgba(52,211,153,.34);--bg:#071510;--glow1:rgba(52,211,153,.24);--glow2:rgba(4,120,87,.24);--glow3:rgba(110,231,183,.12);--brandA:#a7f3d0;--brandB:#6ee7b7}
-html[data-color="ungu"]{--primary:#a78bfa;--primary-2:#6d28d9;--accent:#c4b5fd;--tint:167,139,250;--tint2:109,40,217;--ring:rgba(167,139,250,.34);--bg:#100b21;--glow1:rgba(167,139,250,.26);--glow2:rgba(109,40,217,.26);--glow3:rgba(196,181,253,.12);--brandA:#ddd6fe;--brandB:#c4b5fd}
-html[data-color="oranye"]{--primary:#fb923c;--primary-2:#c2410c;--accent:#fdba74;--tint:251,146,60;--tint2:194,65,12;--ring:rgba(251,146,60,.34);--bg:#170f08;--glow1:rgba(251,146,60,.26);--glow2:rgba(194,65,12,.26);--glow3:rgba(253,186,116,.12);--brandA:#fed7aa;--brandB:#fdba74}
-html[data-color="tosca"]{--primary:#2dd4bf;--primary-2:#0f766e;--accent:#5eead4;--tint:45,212,191;--tint2:15,118,110;--ring:rgba(45,212,191,.34);--bg:#061413;--glow1:rgba(45,212,191,.24);--glow2:rgba(15,118,110,.26);--glow3:rgba(94,234,212,.12);--brandA:#99f6e4;--brandB:#5eead4}
+/* ====== TEMA WARNA (semua berbasis putih, hanya aksen yang berubah) ====== */
+html[data-color="biru"]{--primary:#0ea5e9;--primary-2:#1d4ed8;--accent:#0284c7;--tint:14,165,233;--tint2:29,78,216;--ring:rgba(14,165,233,.22);--glow1:rgba(14,165,233,.10);--glow2:rgba(29,78,216,.07);--glow3:rgba(56,189,248,.09);--brandA:#0369a1;--brandB:#1d4ed8}
+html[data-color="hijau"]{--primary:#10b981;--primary-2:#047857;--accent:#059669;--tint:16,185,129;--tint2:4,120,87;--ring:rgba(16,185,129,.22);--glow1:rgba(16,185,129,.10);--glow2:rgba(4,120,87,.07);--glow3:rgba(52,211,153,.09);--brandA:#047857;--brandB:#059669}
+html[data-color="ungu"]{--primary:#8b5cf6;--primary-2:#6d28d9;--accent:#7c3aed;--tint:139,92,246;--tint2:109,40,217;--ring:rgba(139,92,246,.22);--glow1:rgba(139,92,246,.10);--glow2:rgba(109,40,217,.07);--glow3:rgba(167,139,250,.09);--brandA:#6d28d9;--brandB:#7c3aed}
+html[data-color="oranye"]{--primary:#f97316;--primary-2:#c2410c;--accent:#ea580c;--tint:249,115,22;--tint2:194,65,12;--ring:rgba(249,115,22,.22);--glow1:rgba(249,115,22,.10);--glow2:rgba(194,65,12,.07);--glow3:rgba(253,186,116,.10);--brandA:#c2410c;--brandB:#ea580c}
+html[data-color="tosca"]{--primary:#14b8a6;--primary-2:#0f766e;--accent:#0d9488;--tint:20,184,166;--tint2:15,118,110;--ring:rgba(20,184,166,.22);--glow1:rgba(20,184,166,.10);--glow2:rgba(15,118,110,.07);--glow3:rgba(94,234,212,.09);--brandA:#0f766e;--brandB:#0d9488}
 /* pemilih tema (popover) */
 .theme-wrap{position:relative}
 .theme-pop{position:absolute;top:42px;right:0;display:none;flex-direction:column;gap:3px;background:rgba(10,14,32,.96);border:1px solid var(--line);border-radius:12px;padding:7px;min-width:176px;box-shadow:var(--shadow);z-index:80;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -69,7 +76,7 @@ a{color:var(--accent);text-decoration:none}
 .topbar-inner{max-width:1180px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;gap:14px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:.3px;background:linear-gradient(90deg,var(--brandA),var(--brandB));-webkit-background-clip:text;background-clip:text;color:transparent}
   .brand .flag{font-size:24px;filter:drop-shadow(0 2px 10px rgba(var(--tint),.6))}
-  .logo{width:36px;height:36px;display:block;object-fit:contain;flex-shrink:0}
+  .logo{height:34px;width:auto;aspect-ratio:412/204;max-width:136px;display:block;object-fit:contain;flex-shrink:0}
 .brand small{display:block;font-weight:600;font-size:10px;letter-spacing:2.2px;color:var(--muted);background:none;-webkit-text-fill-color:var(--muted)}
 .tabs{display:flex;gap:4px;margin-left:auto;background:rgba(255,255,255,.07);padding:4px;border-radius:12px;border:1px solid rgba(255,255,255,.07)}
 .tab{padding:7px 16px;border-radius:9px;background:transparent;color:var(--brandA);font-weight:600;font-size:13px;transition:.2s}
@@ -280,7 +287,7 @@ footer b{color:#cbd5e1}
   .wrap{margin:12px auto;padding:0 12px}
   .topbar-inner{padding:8px 12px}
   .brand{font-size:15px}
-  .logo{width:30px;height:30px}
+  .logo{height:27px;width:auto;aspect-ratio:412/204;max-width:104px}
   .brand .flag{font-size:21px}
   .clock{display:none}
   .page-head h1{font-size:20px;letter-spacing:-.2px}
@@ -324,6 +331,256 @@ footer b{color:#cbd5e1}
   .paper .ph h4{font-size:15px}
   .sigbox{height:160px}
 }
+
+/* ============================================================
+   TAMPILAN MOBILE (HANDPHONE) — dioptimalkan untuk layar sentuh
+   ============================================================ */
+.stepnav{display:none}
+@media (max-width:760px){
+  html{-webkit-text-size-adjust:100%}
+  *{-webkit-tap-highlight-color:transparent}
+  button,a,.chip,.cat,.tab{touch-action:manipulation}
+  body{font-size:15px}
+  /* font 16px = iOS tidak auto-zoom saat input difokuskan */
+  input[type=text],input[type=date],input[type=number],input[type=tel],select,textarea{
+    font-size:16px;min-height:50px;padding:13px 14px;border-radius:12px;
+  }
+  select[multiple]{min-height:160px}
+  label{font-size:13px}
+  .btn{min-height:48px;padding:13px 16px;font-size:14px;border-radius:12px}
+  .btn-sm{min-height:42px;font-size:13px}
+  .iconbtn{width:44px;height:44px;font-size:20px;border-radius:12px}
+  .tab{min-height:42px;padding:10px 16px}
+  .cat{padding:16px;border-radius:14px}
+  .cat:active{transform:scale(.985)}
+  .cat h3{font-size:15.5px}
+  .cat p{font-size:12.5px}
+  .add-row{min-height:52px;font-size:14px}
+  .row{padding:14px;gap:12px;border-radius:13px}
+  .row .btn-danger{min-height:44px;width:100%}
+  .chip{min-height:42px;padding:10px 14px}
+  .wrap{padding:0 12px calc(92px + env(safe-area-inset-bottom))}
+
+  /* navigasi cepat: lompat antar-poin form tanpa menggulir jauh */
+  .stepnav{
+    display:flex;gap:6px;position:sticky;top:var(--topbar-h,0px);z-index:45;
+    margin:0 -12px 12px;padding:8px 12px;overflow-x:auto;scrollbar-width:none;
+    background:rgba(11,16,32,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .stepnav::-webkit-scrollbar{display:none}
+  .stepnav button{
+    flex:1 0 auto;display:flex;align-items:center;gap:7px;min-height:44px;padding:9px 13px;
+    border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);
+    color:var(--brandA);font-weight:700;font-size:12.5px;white-space:nowrap;
+  }
+  .stepnav button span{width:21px;height:21px;border-radius:7px;background:rgba(var(--tint),.26);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+  .stepnav button.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(var(--tint),.4)}
+  .stepnav button.active span{background:rgba(255,255,255,.3)}
+  .card{scroll-margin-top:calc(var(--topbar-h,0px) + 62px)}
+
+  /* bar aksi lengket: tombol KIRIM selalu terjangkau ibu jari */
+  #view-form .card:last-of-type .actions{
+    position:sticky;bottom:0;z-index:30;
+    margin:16px -16px -16px;padding:11px 12px calc(11px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(11,16,32,.72),rgba(11,16,32,.97));
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border-top:1px solid var(--line);border-radius:0 0 16px 16px;row-gap:9px;
+  }
+  #view-form .card:last-of-type .actions .btn-primary{flex:1 1 100%;min-height:56px;font-size:15.5px;font-weight:800}
+  #view-form .card:last-of-type .actions .btn-ghost{flex:1 1 calc(50% - 5px)}
+
+  /* kamera KTP / ID Card: preview & tombol lebih besar */
+  .cam-preview video{max-height:44vh}
+  .cam-controls .btn{min-height:52px}
+  .cam-note{font-size:12px;line-height:1.5}
+  .ktp-thumb{max-width:100%}
+  .ktp-rm-row .btn{min-height:46px}
+
+  /* tanda tangan: area lebih tinggi supaya nyaman digores jari */
+  .sigbox{height:200px}
+  .sig-hint{font-size:12px}
+
+  /* tabel riwayat: teks membungkus sehingga tak perlu geser horizontal */
+  th,td{font-size:12.5px;white-space:normal;min-width:86px}
+  th:first-child,td:first-child{min-width:104px}
+
+  /* modal & PDF di HP */
+  .modal{max-height:94vh;border-radius:16px}
+  .modal-b{padding:13px}
+  .pdfTitle{font-size:13.5px}
+  .paper .sig-img{height:52px}
+  footer{padding:20px 12px calc(20px + env(safe-area-inset-bottom))}
+}
+
+/* HP kecil / layar sempit */
+@media (max-width:420px){
+  body{font-size:14.5px}
+  .brand small{display:none}
+  .page-head h1{font-size:19px}
+  .grid.g2{grid-template-columns:1fr !important}
+  .stepnav button{font-size:12px;padding:8px 11px}
+}
+
+/* ============================================================
+   OVERRIDE TEMA PUTIH — komponen yang semula dirancang untuk latar gelap
+   ============================================================ */
+.topbar{background:rgba(255,255,255,.88);box-shadow:0 6px 22px rgba(15,23,42,.06)}
+.brand small{color:var(--muted)}
+.tabs{background:var(--soft2);border-color:var(--line)}
+.tab{color:#475569}
+.tab:hover{color:#0f172a}
+.iconbtn{background:var(--soft2);border-color:var(--line);color:#334155}
+.iconbtn:hover{background:#e2e8f0}
+.clock{color:#475569}
+.theme-pop{background:#fff;border-color:var(--line);box-shadow:0 18px 50px rgba(15,23,42,.16)}
+.topt{color:#0f172a}
+.topt:hover{background:var(--soft2)}
+
+.page-head h1{background:linear-gradient(90deg,#0f172a,var(--brandA));-webkit-background-clip:text;background-clip:text}
+.page-head p{color:var(--muted)}
+
+.card{background:#fff;border-color:#e8ecf3;box-shadow:0 6px 20px rgba(15,23,42,.06)}
+.card:hover{border-color:#cbd5e1}
+.card h2{color:var(--brandA)}
+
+label{color:#334155}
+input[type=text],input[type=date],input[type=number],input[type=tel],select,textarea{
+  background:#fff;border-color:#cbd5e1;color:var(--ink);
+}
+input::placeholder,textarea::placeholder{color:#94a3b8}
+input:focus,select:focus,textarea:focus{background:#fff;border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
+select option{background:#fff;color:var(--ink)}
+
+.meta{background:var(--soft);border-color:#cbd5e1}
+.meta .m b{color:#0f172a}
+
+.cat{background:#fff;border-color:var(--line)}
+.cat h3{color:#0f172a}
+.cat p{color:var(--muted)}
+.cat:hover{box-shadow:0 12px 26px rgba(15,23,42,.10)}
+.cat.active{background:linear-gradient(160deg,rgba(var(--tint),.12),rgba(var(--tint2),.06))}
+.cat.active::after{color:var(--primary)}
+
+.row{background:var(--soft);border-color:var(--line)}
+.row:hover{border-color:#cbd5e1}
+.row-no{background:rgba(var(--tint),.14);color:var(--primary-2);border-color:rgba(var(--tint),.3)}
+
+.btn-ghost{background:var(--soft2);border-color:var(--line);color:#334155}
+.btn-ghost:hover{background:#e2e8f0;color:#0f172a}
+.btn-danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.btn-danger:hover{background:#fee2e2}
+.btn-primary{border-color:transparent}
+.add-row{background:rgba(var(--tint),.05);border-color:rgba(var(--tint),.35);color:var(--primary-2)}
+.add-row:hover{background:rgba(var(--tint),.10);color:var(--primary-2)}
+
+.terms{background:var(--soft);border-color:var(--line)}
+.terms h3{color:#0f172a}
+.terms ol{color:#475569}
+
+.filepill{border-color:#cbd5e1;background:var(--soft)}
+.filepill .t b{color:#0f172a}
+.filepill.has{background:rgba(var(--tint),.08)}
+.cam-type{background:var(--soft);color:var(--muted)}
+.cam-type:hover{color:#0f172a}
+
+.tbl-wrap{border-color:var(--line);background:#fff}
+th{background:var(--soft2);color:#475569}
+td{color:var(--ink)}
+tr:hover td{background:var(--soft)}
+
+.chip{background:var(--soft2);color:#475569;border-color:var(--line)}
+.chip:hover{color:#0f172a;border-color:#cbd5e1}
+
+.stat{background:var(--soft);border-color:var(--line)}
+.steps .st{background:var(--soft);border-color:var(--line)}
+.steps .st b{color:var(--brandA)}
+
+.modal-back{background:rgba(15,23,42,.45)}
+.modal{background:#fff;border-color:var(--line);box-shadow:0 26px 70px rgba(15,23,42,.28)}
+
+footer{background:var(--soft);border-top-color:var(--line)}
+footer b{color:#334155}
+::-webkit-scrollbar-thumb{background:rgba(15,23,42,.22)}
+
+/* elemen khusus mobile juga ikut putih */
+@media (max-width:760px){
+  .stepnav{background:rgba(255,255,255,.95);border-bottom-color:var(--line)}
+  .stepnav button{background:var(--soft2);border-color:var(--line);color:#334155}
+  #view-form .card:last-of-type .actions{
+    background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(255,255,255,.98));
+  }
+}
+
+/* ============================================================
+   RAPIKAN TATA LETAK MOBILE — jarak, kolom, dan daftar riwayat
+   ============================================================ */
+@media (max-width:760px){
+  /* header: 3 tab terbagi rata (tanpa perlu digeser) */
+  .topbar-inner{padding:8px 12px 6px;gap:8px 10px}
+  .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%;overflow:visible}
+  .tab{justify-content:center;text-align:center;font-size:12.5px;padding:9px 6px}
+
+  /* judul halaman lebih ringkas */
+  .page-head{margin-bottom:12px}
+  .page-head h1{font-size:19px;line-height:1.3}
+  .page-head p{font-size:12px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* kartu & judul section lebih rapi */
+  .card{padding:15px 14px;border-radius:14px;margin-bottom:14px}
+  .card h2{font-size:14.5px;margin-bottom:13px;gap:8px}
+
+  /* form: satu kolom penuh supaya tidak sesak */
+  .grid.g2,.grid.g3,.row.g2,.row.g3{grid-template-columns:1fr}
+
+  /* bar meta dokumen: 2 kolom, kategori melebar penuh */
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;padding:12px 13px}
+  .meta .m{min-width:0}
+  .meta .m:last-child{grid-column:1 / -1}
+  .meta .m b{font-size:13px;word-break:break-word}
+
+  /* navigasi cepat: 4 kolom rata, tanpa geser */
+  .stepnav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;overflow:visible}
+  .stepnav button{min-width:0;justify-content:center;padding:9px 4px;font-size:11.5px;gap:5px}
+  .stepnav button span{width:19px;height:19px;font-size:10.5px}
+
+  /* kartu kategori lebih ringkas, deskripsi dipangkas 2 baris */
+  .cat{padding:14px}
+  .cat h3{font-size:14.5px;margin:6px 0 4px}
+  .cat p{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* point 3: baris lebih rapi */
+  .row{padding:13px;gap:11px}
+  .row .rm{text-align:center}
+
+  /* ringkasan: 2 x 2 agar tidak terlalu panjang */
+  .grid.g3{grid-template-columns:1fr 1fr !important}
+  .stat{padding:15px 8px}
+  .stat .v{font-size:24px}
+  .stat .l{font-size:11.5px}
+
+  /* tabel riwayat -> daftar kartu berlabel (tidak perlu geser horizontal) */
+  .tbl-wrap{border:none;border-radius:0;overflow:visible}
+  .tbl-wrap table,.tbl-wrap tbody,.tbl-wrap tr,.tbl-wrap td{display:block;width:100%}
+  .tbl-wrap thead{display:none}
+  .tbl-wrap tbody tr{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px;box-shadow:0 4px 14px rgba(15,23,42,.05)}
+  .tbl-wrap td{border:none;padding:5px 0;display:flex;gap:10px;align-items:flex-start;font-size:13px;white-space:normal !important}
+  .tbl-wrap td::before{content:attr(data-label);flex:0 0 84px;color:var(--muted);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;padding-top:2px}
+  .tbl-wrap td.td-act{margin-top:8px;padding-top:10px;border-top:1px dashed var(--line);gap:8px}
+  .tbl-wrap td.td-act::before{flex:0 0 84px}
+  .tbl-wrap td.empty{display:block;text-align:center;padding:22px 10px}
+  .tbl-wrap td.empty::before{display:none}
+  .tbl-wrap tr.empty-row{background:transparent;border:none;box-shadow:none;padding:0;margin-bottom:0}
+
+  /* filterbar & chip lebih ringkas */
+  .filterbar{gap:7px}
+  .chip{padding:9px 13px;font-size:12px}
+}
+@media (max-width:420px){
+  .stepnav button{font-size:11px;padding:8px 3px}
+  .stepnav button span{width:17px;height:17px;font-size:10px}
+  .tbl-wrap td::before,.tbl-wrap td.td-act::before{flex:0 0 72px;font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -331,7 +588,7 @@ footer b{color:#cbd5e1}
 <!-- ================= HEADER ================= -->
 <header class="topbar">
   <div class="topbar-inner">
-        <div class="brand"><img class="logo" src="./logo.png?v=6" alt="Tribik Auction" width="36" height="36">
+        <div class="brand"><img class="logo" src="./logo.png?v=9" alt="Tribik Auction" width="69" height="34">
             <span>Form Tribik Auction<small>PORTAL PENGAJUAN</small></span>
     </div>
     <nav class="tabs">
@@ -361,12 +618,19 @@ footer b{color:#cbd5e1}
 
 <!-- ================= VIEW: BUAT FORM ================= -->
 <section class="view active" id="view-form">
+  <!-- Navigasi cepat (tampil di HP): lompat ke poin form tanpa menggulir jauh -->
+  <nav class="stepnav" id="stepNav" aria-label="Navigasi cepat form">
+    <button type="button" class="active" data-goto="card-1"><span>1</span>Kategori</button>
+    <button type="button" data-goto="card-2"><span>2</span>Detail</button>
+    <button type="button" data-goto="rowsCard"><span>3</span>Unit</button>
+    <button type="button" data-goto="card-4"><span>4</span>Kirim</button>
+  </nav>
   <div class="page-head">
     <h1>Portal Pengajuan Resmi Tribik Auction</h1>
     <p>Form Pengajuan Cek Unit, Pengambilan Barang &amp; Pengambilan Unit. Pengajuan akan terunduh otomatis dalam format PDF Resmi &amp; terkirim langsung ke WhatsApp.</p>
   </div>
 
-  <div class="card">
+  <div class="card" id="card-1">
     <h2><span class="num">1</span> Pilih Kategori Form</h2>
     <div class="cats">
       <button class="cat active" data-cat="cek"><div class="tag">KATEGORI 1</div><h3>🔍 Form Cek Unit Lelang</h3><p>Pengajuan inspeksi kelayakan &amp; kondisi fisik multi kendaraan unit lelang.</p></button>
@@ -375,7 +639,7 @@ footer b{color:#cbd5e1}
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="card-2">
     <h2><span class="num">2</span> Detail Pengajuan</h2>
     <div class="meta">
       <div class="m"><span>NO. DOKUMEN</span><b id="docNo">TRB-2026-0001</b></div>
@@ -436,7 +700,7 @@ footer b{color:#cbd5e1}
     <button class="add-row" id="addRowBtn">+ Tambah Nopol Kendaraan</button>
   </div>
 
-  <div class="card">
+  <div class="card" id="card-4">
     <h2><span class="num" id="sigNum">4</span> Verifikasi &amp; Tanda Tangan Digital</h2>
     <div class="terms">
       <h3>Ketentuan Tribik Auction:</h3>
@@ -803,6 +1067,8 @@ function setCat(cat){
   renderRows();
   refreshDocMeta();
   snd('click');
+  // di HP: langsung antar ke poin 2 (Detail Pengajuan) agar pengisian mengalir
+  if(isMobile()){ const t=$('card-2'); if(t) setTimeout(()=>t.scrollIntoView({behavior:'smooth',block:'start'}), 120); }
 }
 document.querySelectorAll('.cat').forEach(c=>c.addEventListener('click',()=>setCat(c.dataset.cat)));
 $('addRowBtn').addEventListener('click', addRow);
@@ -904,6 +1170,8 @@ async function openCam(){
     $('camPreview').style.display='block';
     $('camOpen').style.display='none';
     $('camControls').style.display='flex';
+    // di HP: geser otomatis ke panel kamera supaya pratinjau langsung terlihat
+    if(isMobile()) setTimeout(function(){ try{ $('camPreview').scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){} }, 160);
     ktpCam = new DocumentAutoCapture({
       video: $('camVideo'), overlay: $('camOverlay'),
       docType: camDocType, ratio: KTP_RATIO,
@@ -1109,9 +1377,18 @@ window.LOGO_PDF = null;
     const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
     c.getContext('2d').drawImage(im, 0, 0); window.LOGO_PDF = c.toDataURL('image/png');
   }catch(e){} };
-  im.src = './logo.png?v=6';
+  im.src = './logo.png?v=9';
 }catch(e){} })();
 
+function cleanKtpLabel(name){
+  if(!name) return 'KTP terlampir';
+  let s = String(name).trim();
+  // ganti tulisan teknis auto-capture / kamera KTP menjadi label formal
+  s = s.replace(/kamera\s*\([^)]*auto-capture[^)]*\)/gi, 'KTP terlampir');
+  s = s.replace(/kamera\s*\([^)]*\)/gi, 'KTP terlampir');
+  s = s.replace(/.*auto-capture.*/gi, 'KTP terlampir');
+  return s || 'KTP terlampir';
+}
 /* ============ PREVIEW & PDF (jsPDF + fallback print) ============ */
 let pdfWindow = null;
 
@@ -1126,7 +1403,7 @@ function paperHTML(d){
     +'<div'+zeb(false)+'><b>Nama Lengkap:</b><span>'+esc(d.nama)+'</span></div>'
     +'<div'+zeb(true)+'><b>NIK / SIM / ID:</b><span>'+esc(d.nik)+'</span></div>'
     +'<div'+zeb(false)+'><b>Perusahaan:</b><span>'+esc(d.perusahaan)+'</span></div>'
-    +'<div'+zeb(true)+'><b>KTP / ID:</b><span>'+(d.ktpName?esc(d.ktpName):'-')+(d.ktp?'<img src="'+d.ktp+'" alt="KTP/ID" style="display:block;max-width:210px;max-height:150px;object-fit:contain;border:1px solid #cbd5e1;border-radius:6px;margin-top:4px">':'')+'</span></div>'
+    +'<div'+zeb(true)+'><b>KTP / ID:</b><span>'+(d.ktpName?esc(cleanKtpLabel(d.ktpName)):'-')+(d.ktp?'<img src="'+d.ktp+'" alt="KTP/ID" style="display:block;max-width:210px;max-height:150px;object-fit:contain;border:1px solid #cbd5e1;border-radius:6px;margin-top:4px">':'')+'</span></div>'
     +'<h5>Daftar '+(d.cat==='barang'?'Item Barang':'Unit Kendaraan')+' ('+d.rows.length+')</h5>'+rowsHtml
     +'<h5>Verifikasi</h5>'
     +'<div class="sigline"><div class="s">Pemohon / Pengaju'+(d.signature?'<img class="sig-img" src="'+d.signature+'" alt="Tanda tangan pemohon">':'')+'<small>'+esc(d.nama||'-----------------')+'</small></div>'
@@ -1170,7 +1447,13 @@ function buildPdf(d){
       for(let sx=W-58;sx<W-6;sx+=10) doc.rect(sx,0,4.6,hh,'F');
       doc.setGState(new doc.GState({opacity:1})); }catch(e){}
     let tx = M+3;
-    if(window.LOGO_PDF){ try{ doc.addImage(window.LOGO_PDF,'PNG',M+1,7,16,16); tx=M+21; }catch(e){} }
+    if(window.LOGO_PDF){
+      try{
+        const lh = 13.5, lw = lh * (412 / 204); // presisi 412x204 (~27.3mm)
+        doc.addImage(window.LOGO_PDF,'PNG',M+1,8.2,lw,lh);
+        tx = Math.round(M + 1 + lw + 3.5);
+      }catch(e){}
+    }
     doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
     doc.text('FORM TRIBIK AUCTION', tx, 12.5);
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
@@ -1255,13 +1538,13 @@ function buildPdf(d){
       const imgW = portrait ? Math.round(84*ar) : 80;          // potret: tinggi tetap 84mm, lebar proporsional
       const imgH = portrait ? 84 : Math.round(80/ar);          // lanskap: lebar tetap 80mm, tinggi proporsional
       if(y + imgH + 16 > 252){ doc.addPage(); head(); }        // pindah halaman agar foto tidak menabrak bagian bawah
-      kv('Foto KTP / ID:', d.ktpName||'');
+      kv('Foto KTP / ID:', cleanKtpLabel(d.ktpName));
       doc.addImage(d.ktp, 'JPEG', M, y, imgW, imgH, undefined, 'FAST');
       doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.4);
       doc.roundedRect(M, y, imgW, imgH, 2, 2, 'S');
       y += imgH + 7;
-    }catch(e){ if(d.ktpName) kv('Foto KTP / ID:', d.ktpName); }
-  } else if(d.ktpName){ kv('Foto KTP / ID:', d.ktpName); }
+    }catch(e){ if(d.ktpName) kv('Foto KTP / ID:', cleanKtpLabel(d.ktpName)); }
+  } else if(d.ktpName){ kv('Foto KTP / ID:', cleanKtpLabel(d.ktpName)); }
   y += 3;
   sectionTitle(d.cat==='barang' ? 'DETAIL ITEM BARANG' : 'DAFTAR UNIT KENDARAAN');
   d.rows.forEach(function(r,i){
@@ -1380,7 +1663,7 @@ $('submitForm').addEventListener('click', async function(){
     + '*Nama Lengkap:* '+d.nama+'\n'
     + '*NIK / SIM / ID:* '+d.nik+'\n'
     + '*Nama Perusahaan:* '+d.perusahaan+'\n'
-    + '*Foto KTP / ID:* '+(d.ktpName||'-')+'\n\n'
+    + '*Foto KTP / ID:* '+(d.ktpName?cleanKtpLabel(d.ktpName):'-')+'\n\n'
     + '_'+(d.cat==='barang'?'DAFTAR ITEM BARANG ('+d.rows.length+')':'DAFTAR UNIT KENDARAAN ('+d.rows.length+')')+'_\n'
     + lines.join('\n')
     + '\n\n*Tanda Tangan:* '+(d.signature?'Sudah ditandatangani (digital)':'Belum ditandatangani')
@@ -1462,7 +1745,7 @@ function renderHistory(){
   const rows = db.filter(r=> state.filter==='all' || r.cat===state.filter);
   const tbody = $('histBody');
   if(rows.length===0){
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">Belum ada pengajuan tersimpan. Silakan buat form pengajuan baru.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6" class="empty">Belum ada pengajuan tersimpan. Silakan buat form pengajuan baru.</td></tr>';
     return;
   }
   tbody.innerHTML = rows.map((r,i)=>{
@@ -1470,14 +1753,14 @@ function renderHistory(){
       ? r.rows.map(x=>x.nama||'-').join('; ')
       : r.rows.map(x=>x.nopol||'-').join('; ');
     return '<tr>'
-      +'<td><b>'+esc(r.docNo)+'</b></td>'
-      +'<td>'+esc(r.date)+'</td>'
-      +'<td>'+esc(r.catName)+'</td>'
-      +'<td>'+esc(r.nama)+'<br><span style="color:var(--muted);font-size:11.5px">'+esc(r.perusahaan)+'</span></td>'
-      +'<td>'+esc(ident)+'</td>'
-      +'<td style="white-space:nowrap">'
+      +'<td data-label="No. Dokumen"><b>'+esc(r.docNo)+'</b></td>'
+      +'<td data-label="Tanggal">'+esc(r.date)+'</td>'
+      +'<td data-label="Kategori">'+esc(r.catName)+'</td>'
+      +'<td data-label="Pemohon">'+esc(r.nama)+'<br><span style="color:var(--muted);font-size:11.5px">'+esc(r.perusahaan)+'</span></td>'
+      +'<td data-label="Unit / Barang">'+esc(ident)+'</td>'
+      +'<td data-label="Aksi" class="td-act">'
       +'<button class="btn btn-sm btn-ghost" onclick="viewHist('+i+')">👁 Lihat</button> '
-      +'<button class="btn btn-sm btn-danger" onclick="delHist('+i+')">🗑</button>'
+      +'<button class="btn btn-sm btn-danger" onclick="delHist('+i+')">🗑 Hapus</button>'
       +'</td></tr>';
   }).join('');
 }
@@ -1516,6 +1799,51 @@ function renderSummary(){
 }
 
 
+/* ============ NAVIGASI CEPAT (KHUSUS HP) ============ */
+const isMobile = () => window.matchMedia('(max-width:760px)').matches;
+function syncTopbarH(){
+  const tb=document.querySelector('.topbar');
+  if(tb) document.documentElement.style.setProperty('--topbar-h', tb.offsetHeight+'px');
+}
+function initStepNav(){
+  const nav=$('stepNav'); if(!nav) return;
+  const btns=[...nav.querySelectorAll('button')];
+  const setActive=b=>btns.forEach(x=>x.classList.toggle('active', x===b));
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    const el=$(b.dataset.goto); if(!el) return;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    setActive(b); snd('click');
+  }));
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(es=>{
+      es.forEach(en=>{
+        if(!en.isIntersecting) return;
+        const b=btns.find(x=>x.dataset.goto===en.target.id);
+        if(b) setActive(b);
+      });
+    },{rootMargin:'-45% 0px -50% 0px'});
+    btns.forEach(b=>{ const el=$(b.dataset.goto); if(el) io.observe(el); });
+  }
+}
+function initMobileUX(){
+  syncTopbarH();
+  window.addEventListener('resize', syncTopbarH);
+  window.addEventListener('orientationchange', ()=>setTimeout(syncTopbarH, 250));
+  initStepNav();
+}
+
+/* Fallback konteks tidak aman (mis. dibuka dari HP lewat http://IP-LAN):
+   browser memblokir kamera (getUserMedia) di http:// non-localhost, jadi
+   tombol "Upload Foto KTP / ID Card" (galeri / kamera bawaan HP) dimunculkan lagi. */
+function initSecureFallback(){
+  if(window.isSecureContext) return;              // HTTPS / localhost -> kamera normal
+  const pill=$('ktpPill');
+  if(pill) pill.style.display='';                 // tampilkan kembali pilihan dari galeri
+  const note=document.querySelector('.cam-note');
+  if(note) note.innerHTML='Kamera aktif hanya lewat <b>https</b> atau <b>localhost</b>. Dari HP, gunakan <b>Upload Foto KTP / ID Card</b> (pilih dari galeri atau kamera bawaan HP).';
+  toast('Dibuka tanpa HTTPS — kamera nonaktif. Silakan pilih foto dari galeri.','warn',9000);
+}
+
 /* ============ INIT ============ */
 (function init(){
   $('soundBtn').addEventListener('click', toggleSound);
@@ -1550,6 +1878,11 @@ function renderSummary(){
   refreshDocMeta();
   renderHistory();
   renderSummary();
+
+  // Tampilan mobile: tinggi topbar + navigasi cepat antar-poin form
+  initMobileUX();
+  // Jika dibuka lewat http://IP-LAN (tanpa HTTPS): munculkan pilihan upload dari galeri
+  initSecureFallback();
 
   // Antrean sinkronisasi: kirim ulang data yang sebelumnya gagal masuk database
   setTimeout(flushPendingSync, 2500);

@@ -8,9 +8,17 @@ Cara menjalankan:
     python server.py            # port 8000, browser terbuka otomatis
     python server.py 5500       # port kustom
     python server.py 8000 --no-browser
+    python server.py --lan      # bisa dibuka dari HP (Wi-Fi sama) via IP komputer
+    python server.py 8000 --lan --no-browser
 
 URL utama:
-    http://localhost:8000/              -> halaman index (daftar ketiga form)
+    http://localhost:8000/              -> portal pengajuan (juga di /portal.html)
+
+Catatan kamera:
+    - Lewat localhost/HTTPS  : kamera langsung aktif (secure context).
+    - Lewat http://IP-LAN    : browser memblokir kamera; portal otomatis
+      menampilkan tombol "Upload Foto KTP / ID Card" (pilih dari galeri /
+      kamera bawaan HP) sebagai gantinya.
 """
 
 import os
@@ -63,7 +71,7 @@ INDEX_HTML = """<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-    <link rel="icon" href="./logo.png?v=6" type="image/png">
+    <link rel="icon" href="./logo.png?v=9" type="image/png">
     <link rel="icon" href="./favicon.svg?v=6" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tribik Auction - Lelang Mobil</title>
@@ -77,8 +85,8 @@ INDEX_HTML = """<!DOCTYPE html>
     color:#e2e8f0; padding:24px;
   }
   .wrap { max-width:920px; width:100%; text-align:center; }
-    .logo { width:96px; margin:0 auto 8px; display:block; }
-  .logo img { width:100%; height:auto; display:block; filter:drop-shadow(0 4px 14px rgba(var(--tint),.45)); }
+    .logo { width:206px; max-width:76vw; margin:0 auto 10px; display:block; aspect-ratio:412/204; }
+  .logo img { width:100%; height:auto; display:block; aspect-ratio:412/204; filter:drop-shadow(0 4px 14px rgba(var(--tint),.45)); }
   h1 { font-size:30px; margin:10px 0 6px; background:linear-gradient(90deg,var(--hA),var(--hB));
        -webkit-background-clip:text; background-clip:text; color:transparent; }
   .tagline { color:#94a3b8; margin-bottom:28px; font-size:14px; }
@@ -112,7 +120,7 @@ INDEX_HTML = """<!DOCTYPE html>
 </head>
 <body>
   <div class="wrap">
-        <div class="logo"><img src="./logo.png?v=6" alt="Tribik Auction"></div>
+        <div class="logo"><img src="./logo.png?v=9" alt="Tribik Auction" width="206" height="102"></div>
     <div class="cdots" id="cdots"></div>
     <h1>Tribik Auction - Pelelangan Mobil</h1>
     <p class="tagline">Pilih form pengajuan yang diperlukan</p>
@@ -299,50 +307,107 @@ def _serve(srv):
     srv.serve_forever()
 
 
+def _lan_ips():
+    """Daftar IP LAN komputer ini (untuk dibuka dari HP di Wi-Fi yang sama)."""
+    ips = []
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))          # tidak mengirim data, hanya cari rute
+        ip = s.getsockname()[0]
+        s.close()
+        if ip and not ip.startswith("127."):
+            ips.append(ip)
+    except Exception:
+        pass
+    if not ips:                              # fallback: semua alamat IPv4 lokal
+        try:
+            for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+                ip = info[4][0]
+                if ip and not ip.startswith("127.") and ip not in ips:
+                    ips.append(ip)
+        except Exception:
+            pass
+    return ips
+
+
 def main():
     port = 8000
     no_browser = False
+    lan = False
+    host_override = None
     for arg in sys.argv[1:]:
         if arg == "--no-browser":
             no_browser = True
+        elif arg in ("--lan", "--all", "--network"):
+            lan = True
+        elif arg.startswith("--host="):
+            host_override = arg.split("=", 1)[1].strip()
+            lan = True
         elif arg.isdigit():
             port = int(arg)
 
     handler = partial(Handler, directory=BASE_DIR)
     servers = []
 
-    # 1) IPv4 loopback  -> 127.0.0.1
-    try:
-        s4 = ThreadingHTTPServer(("127.0.0.1", port), handler)
-        servers.append(("http://127.0.0.1:%d/" % port, s4))
-    except OSError as e:
-        print("  IPv4 bind gagal: %s" % e)
+    if lan or host_override:
+        # MODE JARINGAN: bisa dibuka dari HP / komputer lain di Wi-Fi yang sama
+        bind_host = host_override or "0.0.0.0"
+        try:
+            s4 = ThreadingHTTPServer((bind_host, port), handler)
+            servers.append((bind_host, s4))
+        except OSError as e:
+            print("  Bind %s gagal: %s" % (bind_host, e))
+    else:
+        # MODE LOKAL (default): hanya komputer ini
+        # 1) IPv4 loopback  -> 127.0.0.1
+        try:
+            s4 = ThreadingHTTPServer(("127.0.0.1", port), handler)
+            servers.append(("127.0.0.1", s4))
+        except OSError as e:
+            print("  IPv4 bind gagal: %s" % e)
 
-    # 2) IPv6 loopback  -> ::1 (agar 'localhost' tetap jalan di Windows,
-    #    karena browser kadang me-resolve localhost ke ::1 terlebih dahulu)
-    try:
-        s6 = ThreadingHTTPServerV6(("::1", port), handler)
-        servers.append(("http://[::1]:%d/" % port, s6))
-    except OSError as e:
-        print("  IPv6 bind dilewati: %s" % e)
+        # 2) IPv6 loopback  -> ::1 (agar 'localhost' tetap jalan di Windows,
+        #    karena browser kadang me-resolve localhost ke ::1 terlebih dahulu)
+        try:
+            s6 = ThreadingHTTPServerV6(("::1", port), handler)
+            servers.append(("::1", s6))
+        except OSError as e:
+            print("  IPv6 bind dilewati: %s" % e)
 
     if not servers:
         print("  ERROR: tidak ada interface yang berhasil di-bind.")
         print("  Port %d mungkin sudah dipakai program lain." % port)
         sys.exit(1)
 
-    print("=" * 56)
-    print("  Tribik Auction - Local Server")
-    print("=" * 56)
-    print("  Lokasi file : %s" % BASE_DIR)
-    for url, _ in servers:
-        print("  URL index   : %s" % url)
-    print("  Localhost   : http://localhost:%d/" % port)
+    print("=" * 60)
+    print("  Tribik Auction - Web Server")
+    print("=" * 60)
+    print("  Lokasi file  : %s" % BASE_DIR)
+    print("  Mode         : %s" % ("JARINGAN (bisa dibuka dari HP)" if lan else "LOKAL (hanya komputer ini)"))
+    print("  Portal (PC)  : http://localhost:%d/" % port)
+    if lan:
+        ips = []
+        if host_override and host_override not in ("0.0.0.0", "::"):
+            ips = [host_override]
+        else:
+            ips = _lan_ips()
+        if ips:
+            print("  Portal (HP)  : http://%s:%d/" % (ips[0], port))
+            for extra in ips[1:]:
+                print("  Portal (alt) : http://%s:%d/" % (extra, port))
+            print("  Form (HP)    : http://%s:%d/portal.html" % (ips[0], port))
+        else:
+            print("  Portal (HP)  : http://<IP-komputer>:%d/   (IP tidak terdeteksi)" % port)
+        print("-" * 60)
+        print("  Buka dari HP : pastikan HP & komputer di Wi-Fi yang sama.")
+        print("  Kamera       : browser memblokir kamera pada http://IP-LAN,")
+        print("                 jadi portal otomatis menampilkan tombol")
+        print("                 'Upload Foto KTP / ID Card' (galeri/kamera HP).")
     for i, f in enumerate(FORMS, 1):
-        print("  Form %d      : http://localhost:%d/%s" % (i, port, f["file"]))
-    print("-" * 56)
+        print("  Form %d       : http://localhost:%d/%s" % (i, port, f["file"]))
+    print("-" * 60)
     print("  Tekan Ctrl+C untuk menghentikan server.")
-    print("=" * 56)
+    print("=" * 60)
 
     if not no_browser:
         threading.Timer(0.6, lambda: webbrowser.open("http://localhost:%d/" % port)).start()

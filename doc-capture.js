@@ -79,7 +79,7 @@
     if (!this.rotatable) this._orient = 'landscape';   // hanya jenis rotatable boleh portrait
     this.onCapture  = opts.onCapture || function () {};
     this.onStatus   = opts.onStatus || function () {};
-    this.auto       = opts.auto !== false;
+    this.auto       = false; /* auto-capture dinonaktifkan: foto diambil manual via tombol */
     this.snd        = opts.sound || function () {};
     this.stableFrames = Math.max(4, opts.stableFrames || 12);
     this.minHoldMs  = Math.max(250, opts.minHoldMs || 900);
@@ -615,23 +615,11 @@
     this.snd('shutter');
     var vw = this.video.videoWidth, vh = this.video.videoHeight;
     var cx, cy, cw, ch;
-
-    if (this.lastBox && !this._geom.fallback) {
-      /* work-piksel -> piksel video lewat geometri tampilan yang sebenarnya */
-      var g = this._geom;
-      cx = g.offX + this.lastBox.minX * this.ux;
-      cy = g.offY + this.lastBox.minY * this.uy;
-      cw = (this.lastBox.maxX - this.lastBox.minX) * this.ux;
-      ch = (this.lastBox.maxY - this.lastBox.minY) * this.uy;
-      /* margin 12% di keliling kartu */
-      var px = cw * 0.12, py = ch * 0.12;
-      cx -= px; cy -= py; cw += px * 2; ch += py * 2;
-    } else {
-      var FRf = this._frameRatio();
-      cw = vw; ch = vw / FRf;
-      if (ch > vh) { ch = vh; cw = vh * FRf; }
-      cx = (vw - cw) / 2; cy = (vh - ch) / 2;
-    }
+    /* crop SELALU persis area bingkai overlay -> hasil foto = yang dilihat di bingkai */
+    var FRf = this._frameRatio();
+    cw = vw; ch = vw / FRf;
+    if (ch > vh) { ch = vh; cw = vh * FRf; }
+    cx = (vw - cw) / 2; cy = (vh - ch) / 2;
     /* --- KUNCI RASIO bingkai aktif: crop dipaksa persis FR -> TIDAK gepeng --- */
     var FR = this._frameRatio();
     if (cw / ch > FR) { var nw = ch * FR; cx += (cw - nw) / 2; cw = nw; }
