@@ -123,6 +123,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0
 select option{background:#111b36;color:#e2e8f0}
 textarea{resize:vertical;min-height:54px}
 
+/* Penanda kolom yang belum diisi (validasi "semua isian wajib diisi") */
+input.invalid,select.invalid,textarea.invalid{
+  border-color:var(--err) !important;background:rgba(220,38,38,.07) !important;
+  box-shadow:0 0 0 4px rgba(220,38,38,.16) !important;
+}
+.row.invalid{border-color:var(--err) !important;box-shadow:0 0 0 4px rgba(220,38,38,.12) !important}
+.cam-box.invalid{
+  outline:1.5px dashed var(--err);outline-offset:8px;
+  box-shadow:0 0 0 4px rgba(220,38,38,.12);
+}
+.sigbox.invalid{border-color:var(--err) !important;box-shadow:0 0 0 4px rgba(220,38,38,.16) !important}
+
 /* meta document bar */
 .meta{display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:rgba(255,255,255,.045);border:1px dashed rgba(255,255,255,.18);padding:13px 16px;border-radius:13px;margin-bottom:6px}
 .meta .m{font-size:12.5px}
@@ -724,7 +736,7 @@ footer b{color:#334155}
   <!-- Dynamic rows per category (template dipasang via JS) -->
   <div class="card" id="rowsCard">
     <h2><span class="num" id="rowsNum">3</span> <span id="rowsTitle">Daftar Unit Kendaraan</span></h2>
-    <div class="rows-note">Wajib diisi — minimal satu baris data; kolom bertanda <span class="req">*</span> tidak boleh kosong.</div>
+    <div class="rows-note">Wajib diisi — minimal satu baris data; <b>semua kolom bertanda</b> <span class="req">*</span> harus lengkap dan baris yang masih kosong tidak bisa dikirim.</div>
     <div id="rowsArea"></div>
     <button class="add-row" id="addRowBtn">+ Tambah Nopol Kendaraan</button>
   </div>
@@ -746,7 +758,7 @@ footer b{color:#334155}
       <button class="btn btn-ghost" id="sigReset">🔄 Reset Tanda Tangan</button>
       <button class="btn btn-ghost" id="resetForm">Reset Form</button>
       <button class="btn btn-ghost" id="saveDraft">💾 Simpan Draft</button>
-      <button class="btn btn-primary" id="submitForm">🚀 Kirim Form PDF ke Google Sheets &amp; WhatsApp</button>
+      <button class="btn btn-primary" id="submitForm">🚀 Kirim Form PDF</button>
     </div>
   </div>
 </section>
@@ -1037,9 +1049,9 @@ function rowTemplate(cat, data, no){
       +'<div><label><span class="row-no">'+no+'</span> Nama / Rincian Barang <span class="req">*</span></label><input type="text" class="r-nama" value="'+(data.nama||'')+'" placeholder="cth: Dokumen STNK, kunci, dll"></div>'
       +'<div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
       +'<div><label>Jumlah <span class="req">*</span></label><input type="number" min="1" class="r-jml" value="'+(data.jml||1)+'"></div>'
-      +'<div><label>Satuan</label><input type="text" class="r-sat" value="'+(data.sat||'Pcs')+'" placeholder="cth: Pcs, unit, lbr"></div>'
+      +'<div><label>Satuan <span class="req">*</span></label><input type="text" class="r-sat" value="'+(data.sat||'Pcs')+'" placeholder="cth: Pcs, unit, lbr"></div>'
       +'</div>'
-      +'<div><label>Keterangan / Peruntukan</label><input type="text" class="r-ket" value="'+(data.ket||'')+'"></div>'
+      +'<div><label>Keterangan / Peruntukan <span class="req">*</span></label><input type="text" class="r-ket" value="'+(data.ket||'')+'" placeholder="cth: untuk keperluan servis berkala"></div>'
       +'<div class="rm"><button class="btn btn-danger btn-sm" onclick="delRow(this)">🗑 Hapus</button></div>'
       +'</div>';
   }
@@ -1122,7 +1134,7 @@ function initSig(){
     const t=(e.touches&&e.touches[0])||e;
     return { x:t.clientX-r.left, y:t.clientY-r.top };
   }
-  function down(e){ e.preventDefault(); drawing=true; const p=pos(e); last=p; sigDrawn=true; snd('shutter'); }
+  function down(e){ e.preventDefault(); drawing=true; const p=pos(e); last=p; sigDrawn=true; cv.classList.remove('invalid'); snd('shutter'); }
   function move(e){ if(!drawing) return; e.preventDefault(); const p=pos(e);
     sigCtx.beginPath(); sigCtx.moveTo(last.x,last.y); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); last=p; }
   function up(){ drawing=false; }
@@ -1154,7 +1166,10 @@ function camNoteText(){
 function showThumb(){
   const th=$('ktpThumb');
   const rm=$('ktpRemoveRow');
-  if(state.ktpData){ th.src=state.ktpData; th.style.display='block'; if(rm) rm.style.display='block'; }
+  if(state.ktpData){
+    th.src=state.ktpData; th.style.display='block'; if(rm) rm.style.display='block';
+    const cb=document.querySelector('.cam-box'); if(cb) cb.classList.remove('invalid');
+  }
   else { th.style.display='none'; if(rm) rm.style.display='none'; }
 }
 
@@ -1379,6 +1394,7 @@ function clearForm(){
   sigCtx&&sigCtx.clearRect(0,0,$('sigCanvas').width,$('sigCanvas').height);
   sigDrawn=false;
   state.rows=[{}]; renderRows(); refreshDocMeta();
+  clearInvalidMarks();
 }
 $('resetForm').addEventListener('click', async ()=>{ if(await Modal.confirm('Reset seluruh form?', { danger:true })){ clearForm(); toast('Form di-reset','ok'); snd('click'); } });
 $('saveDraft').addEventListener('click', ()=>{
@@ -1387,21 +1403,92 @@ $('saveDraft').addEventListener('click', ()=>{
   toast('Draft tersimpan di browser','ok'); snd('success');
 });
 
-/* ============ VALIDASI ============ */
+/* ============ VALIDASI ============
+   Aturan: SEMUA isian wajib diisi — data pemohon, foto KTP/ID, seluruh kolom
+   pada setiap baris point 3, dan tanda tangan. Bila ada satu saja yang kosong,
+   form TIDAK dikirim ke Google Sheets / WhatsApp dan PDF tidak dibuat.
+   Setiap kolom yang bermasalah diberi penanda merah (class .invalid). */
+function collectRowsRaw(){
+  return Array.from($('rowsArea').querySelectorAll('.row')).map(function(rowEl){
+    const f = n => rowEl.querySelector(n);
+    const g = n => { const el=f(n); return el ? el.value.trim() : ''; };
+    if(state.cat==='barang'){
+      return { el:rowEl,
+        f:{ nama:f('.r-nama'), jml:f('.r-jml'), sat:f('.r-sat'), ket:f('.r-ket') },
+        v:{ nama:g('.r-nama'), jml:g('.r-jml'), sat:g('.r-sat'), ket:g('.r-ket') } };
+    }
+    return { el:rowEl,
+      f:{ nopol:f('.r-nopol'), merk:f('.r-merk') },
+      v:{ nopol:g('.r-nopol'), merk:g('.r-merk') } };
+  });
+}
+function clearInvalidMarks(){
+  document.querySelectorAll('.invalid').forEach(el=>el.classList.remove('invalid'));
+}
 function validate(d){
+  clearInvalidMarks();
   const sec = rowsTitleOf(state.cat);
-  if(!d.nama) return 'Nama Lengkap wajib diisi';
-  if(!d.nik) return 'NIK / SIM / ID Karyawan wajib diisi';
-  if(!d.perusahaan) return 'Nama Perusahaan wajib diisi';
-  if(!d.ktp) return 'Foto KTP / ID Card wajib diunggah';
-  if(!sigDrawn) return 'Tanda tangan digital wajib diisi';
-  if(d.rows.length===0) return '"'+sec+'" wajib diisi — tambahkan minimal satu baris data';
-  for(const r of d.rows){
-    if(state.cat==='barang'){ if(!r.nama||!r.jml) return '"'+sec+'": lengkapi Nama/Rincian Barang & Jumlah pada setiap baris'; }
-    else if(!r.nopol||!r.merk) return '"'+sec+'": No. Polisi & Merk/Type wajib diisi pada setiap baris';
+  const bag = { n:0, msg:'', first:null };
+  function bad(el, msg){
+    if(el && el.classList) el.classList.add('invalid');
+    bag.n++;
+    if(!bag.msg){ bag.msg = msg; bag.first = el; }
   }
+
+  /* Point 2 — data pemohon */
+  if(!d.nama)       bad($('fNama'), 'Nama Lengkap wajib diisi');
+  if(!d.nik)        bad($('fNik'), 'NIK / SIM / ID Karyawan wajib diisi');
+  if(!d.perusahaan) bad($('fPerusahaan'), 'Nama Perusahaan wajib diisi');
+  if(!d.ktp)        bad(document.querySelector('.cam-box'), 'Foto KTP / ID Card wajib diambil atau diunggah');
+
+  /* Point 3 — semua kolom pada setiap baris */
+  const rows = collectRowsRaw();
+  if(rows.length===0) bad($('rowsArea'), '"'+sec+'" wajib diisi — minimal satu baris data');
+  rows.forEach(function(r,i){
+    const no = 'Baris '+(i+1)+': ';
+    const kosong = state.cat==='barang'
+      ? !r.v.nama && !r.v.jml && !r.v.sat && !r.v.ket
+      : !r.v.nopol && !r.v.merk;
+    if(kosong){
+      bad(r.el, 'Baris '+(i+1)+' masih kosong — lengkapi semua kolomnya'+(rows.length>1 ? ' atau hapus baris ini' : ''));
+      return;
+    }
+    if(state.cat==='barang'){
+      if(!r.v.nama)                bad(r.f.nama, no+'Nama / Rincian Barang wajib diisi');
+      if(!(parseFloat(r.v.jml)>0)) bad(r.f.jml , no+'Jumlah wajib diisi (angka minimal 1)');
+      if(!r.v.sat)                 bad(r.f.sat , no+'Satuan wajib diisi');
+      if(!r.v.ket)                 bad(r.f.ket , no+'Keterangan / Peruntukan wajib diisi');
+    }else{
+      if(!r.v.nopol) bad(r.f.nopol, no+'Nomor Polisi wajib diisi');
+      if(!r.v.merk)  bad(r.f.merk , no+'Merk / Type Kendaraan wajib diisi');
+    }
+  });
+
+  /* Point 4 — tanda tangan */
+  if(!sigDrawn) bad($('sigCanvas'), 'Tanda tangan digital wajib diisi');
+
+  if(bag.n) return bag;
   return null;
 }
+/* arahkan pengguna ke kolom pertama yang belum diisi */
+function focusInvalid(bag){
+  const el = bag && bag.first;
+  if(!el) return;
+  try{ el.scrollIntoView({behavior:'smooth', block:'center'}); }
+  catch(e){ try{ el.scrollIntoView(); }catch(e2){} }
+  const tag=(el.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='select'||tag==='textarea'){
+    try{ el.focus({preventScroll:true}); }catch(e){ try{ el.focus(); }catch(e2){} }
+  }
+}
+/* penanda merah otomatis hilang begitu kolom diperbaiki */
+function clearInvalidFrom(target){
+  if(!target || !target.closest) return;
+  const box = target.closest('.invalid');
+  if(box) box.classList.remove('invalid');
+}
+document.addEventListener('input', e=>clearInvalidFrom(e.target));
+document.addEventListener('change', e=>clearInvalidFrom(e.target));
 
 
 /* Logo untuk PDF (dimuat sekali saat halaman dibuka) */
@@ -1416,13 +1503,13 @@ window.LOGO_PDF = null;
 }catch(e){} })();
 
 function cleanKtpLabel(name){
-  if(!name) return 'KTP terlampir';
+  if(!name) return 'Dokumen Terlampir';
   let s = String(name).trim();
   // ganti tulisan teknis auto-capture / kamera KTP menjadi label formal
-  s = s.replace(/kamera\s*\([^)]*auto-capture[^)]*\)/gi, 'KTP terlampir');
-  s = s.replace(/kamera\s*\([^)]*\)/gi, 'KTP terlampir');
-  s = s.replace(/.*auto-capture.*/gi, 'KTP terlampir');
-  return s || 'KTP terlampir';
+  s = s.replace(/kamera\s*\([^)]*auto-capture[^)]*\)/gi, 'Dokumen Terlampir');
+  s = s.replace(/kamera\s*\([^)]*\)/gi, 'Dokumen Terlampir');
+  s = s.replace(/.*auto-capture.*/gi, 'Dokumen Terlampir');
+  return s || 'Dokumen Terlampir';
 }
 /* ============ PREVIEW & PDF (jsPDF + fallback print) ============ */
 let pdfWindow = null;
@@ -1663,7 +1750,14 @@ async function flushPendingSync(){
 $('submitForm').addEventListener('click', async function(){
   const d = collectForm();
   const err = validate(d);
-  if(err){ toast(err,'err'); snd('error'); return; }
+  if(err){
+    /* Semua isian wajib: berhenti di sini — tidak dikirim ke Google Sheets,
+       tidak diteruskan ke WhatsApp, dan PDF tidak dibuat. */
+    toast(err.msg + (err.n>1 ? ' (+'+(err.n-1)+' isian lain)' : ''), 'err', 7000);
+    focusInvalid(err);
+    snd('error');
+    return;
+  }
 
   /* Alokasikan No. Dokumen yang dijamin unik (aman walau beberapa tab/link dibuka
      bersamaan). Nomor lompat dipakai/tersimpan agar tidak pernah kembar. */
