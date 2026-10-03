@@ -71,8 +71,8 @@ INDEX_HTML = """<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-    <link rel="icon" href="./logo.png?v=9" type="image/png">
-    <link rel="icon" href="./favicon.svg?v=6" type="image/svg+xml">
+    <link rel="icon" href="./favicon.png?v=1" type="image/png" sizes="500x500">
+    <link rel="apple-touch-icon" href="./favicon.png?v=1" sizes="500x500">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tribik Auction - Lelang Mobil</title>
 <style>
