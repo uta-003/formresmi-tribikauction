@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
-    <link rel="icon" href="./logo.png?v=9" type="image/png">
-  <link rel="icon" href="./favicon.svg?v=6" type="image/svg+xml">
+    <link rel="icon" href="./favicon.png?v=1" type="image/png" sizes="500x500">
+  <link rel="apple-touch-icon" href="./favicon.png?v=1" sizes="500x500">
   <meta name="theme-color" content="#ffffff">
   <meta name="color-scheme" content="light">
   <script>try{var _c=localStorage.getItem("tb_color");if(_c)document.documentElement.setAttribute("data-color",_c);}catch(e){}</script>
@@ -19,16 +19,16 @@
 <style>
 :root{
   /* ================= TEMA DASAR PUTIH (LIGHT) ================= */
-  --primary:#ff5252; --primary-2:#a70000; --accent:#e11d48;
+  --primary:#b60001; --primary-2:#8a0001; --accent:#b60001;
   --bg:#ffffff; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
-  --line:#e5e7eb; --ok:#16a34a; --warn:#ea580c; --err:#dc2626;
-  --ring:rgba(255,82,82,.22);
+  --line:#e5e7eb; --ok:#16a34a; --warn:#ea580c; --err:#b60001;
+  --ring:rgba(182,0,1,.24);
   --shadow:0 6px 22px rgba(15,23,42,.08);
   --radius:18px;
-  --tint:255,82,82; --tint2:167,0,0;
+  --tint:182,0,1; --tint2:138,0,1;
   --soft:#f8fafc; --soft2:#f1f5f9;
-  --glow1:rgba(255,82,82,.10); --glow2:rgba(255,0,0,.06); --glow3:rgba(255,123,123,.09);
-  --brandA:#b91c1c; --brandB:#ef4444;
+  --glow1:rgba(182,0,1,.10); --glow2:rgba(138,0,1,.06); --glow3:rgba(230,64,66,.09);
+  --brandA:#b60001; --brandB:#e5383b;
 }
 /* ====== TEMA WARNA (semua berbasis putih, hanya aksen yang berubah) ====== */
 html[data-color="biru"]{--primary:#0ea5e9;--primary-2:#1d4ed8;--accent:#0284c7;--tint:14,165,233;--tint2:29,78,216;--ring:rgba(14,165,233,.22);--glow1:rgba(14,165,233,.10);--glow2:rgba(29,78,216,.07);--glow3:rgba(56,189,248,.09);--brandA:#0369a1;--brandB:#1d4ed8}
@@ -125,15 +125,15 @@ textarea{resize:vertical;min-height:54px}
 
 /* Penanda kolom yang belum diisi (validasi "semua isian wajib diisi") */
 input.invalid,select.invalid,textarea.invalid{
-  border-color:var(--err) !important;background:rgba(220,38,38,.07) !important;
-  box-shadow:0 0 0 4px rgba(220,38,38,.16) !important;
+  border-color:var(--err) !important;background:rgba(182,0,1,.07) !important;
+  box-shadow:0 0 0 4px rgba(182,0,1,.16) !important;
 }
-.row.invalid{border-color:var(--err) !important;box-shadow:0 0 0 4px rgba(220,38,38,.12) !important}
+.row.invalid{border-color:var(--err) !important;box-shadow:0 0 0 4px rgba(182,0,1,.12) !important}
 .cam-box.invalid{
   outline:1.5px dashed var(--err);outline-offset:8px;
-  box-shadow:0 0 0 4px rgba(220,38,38,.12);
+  box-shadow:0 0 0 4px rgba(182,0,1,.12);
 }
-.sigbox.invalid{border-color:var(--err) !important;box-shadow:0 0 0 4px rgba(220,38,38,.16) !important}
+.sigbox.invalid{border-color:var(--err) !important;box-shadow:0 0 0 4px rgba(182,0,1,.16) !important}
 
 /* meta document bar */
 .meta{display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:rgba(255,255,255,.045);border:1px dashed rgba(255,255,255,.18);padding:13px 16px;border-radius:13px;margin-bottom:6px}
@@ -247,7 +247,7 @@ tr:last-child td{border-bottom:none}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(24px);background:rgba(15,23,42,.92);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);color:#fff;padding:13px 22px;border-radius:13px;font-weight:600;font-size:13.5px;box-shadow:0 14px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.28s;z-index:300;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.ok{background:rgba(var(--tint2),.94);border-color:rgba(var(--tint),.4)}
-.toast.err{background:rgba(127,29,29,.94);border-color:rgba(var(--tint),.4)}
+.toast.err{background:rgba(122,0,1,.94);border-color:rgba(var(--tint),.4)}
 .modal-back{position:fixed;inset:0;background:rgba(3,7,18,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:250;padding:18px}
 .modal-back.show{display:flex;animation:fadeUp .28s ease}
 .modal{background:#fdfdf6;border-radius:18px;width:100%;max-width:600px;max-height:90vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12)}
@@ -512,7 +512,7 @@ select option{background:#fff;color:var(--ink)}
 
 .btn-ghost{background:var(--soft2);border-color:var(--line);color:#334155}
 .btn-ghost:hover{background:#e2e8f0;color:#0f172a}
-.btn-danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.btn-danger{background:#fef2f2;color:#b60001;border-color:#fecaca}
 .btn-danger:hover{background:#fee2e2}
 .btn-primary{border-color:transparent}
 .add-row{background:rgba(var(--tint),.05);border-color:rgba(var(--tint),.35);color:var(--primary-2)}
@@ -622,9 +622,54 @@ footer b{color:#334155}
   .stepnav button span{width:17px;height:17px;font-size:10px}
   .tbl-wrap td::before,.tbl-wrap td.td-act::before{flex:0 0 72px;font-size:10px}
 }
+/* ===== Pop-up "Cara Pemakaian" (tampil sebelum masuk halaman utama) ===== */
+.intro-back{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto;background:radial-gradient(1100px 640px at 50% -12%,rgba(182,0,1,.30),transparent 62%),rgba(6,10,20,.74);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.intro-back.show{display:flex;animation:fadeUp .3s ease}
+.intro{width:100%;max-width:560px;margin:auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.5);border:1px solid rgba(182,0,1,.18)}
+.intro-h{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;padding:18px 20px;display:flex;align-items:center;gap:12px}
+.intro-h .em{font-size:26px;line-height:1}
+.intro-h h3{font-size:16.5px;color:#fff}
+.intro-h p{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;opacity:.9;font-weight:700;margin-top:2px}
+.intro-b{padding:18px 20px 20px;max-height:64vh;overflow:auto}
+.intro-b .lead{font-size:13px;color:#334155;margin-bottom:13px}
+.intro-steps{display:flex;flex-direction:column;gap:9px;margin-bottom:15px}
+.intro-steps .st{display:flex;gap:11px;background:#f6f8fb;border:1px solid var(--line);border-radius:13px;padding:11px 13px}
+.intro-steps .st .n{width:28px;height:28px;flex:0 0 28px;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.intro-steps .st b{display:block;font-size:13.5px;color:var(--brandA)}
+.intro-steps .st p{color:#64748b;font-size:12.5px;margin-top:1px}
+.intro-note{font-size:12px;color:#334155;background:rgba(var(--tint),.07);border:1px dashed rgba(var(--tint),.35);border-radius:12px;padding:11px 13px;margin-bottom:15px}
+.intro-note .req{color:var(--err);font-weight:800}
+.intro .actions{margin-top:0}
+.intro .actions .btn{flex:1 1 auto;justify-content:center}
+@media (max-width:420px){.intro-h{padding:15px 16px}.intro-h h3{font-size:15px}.intro-b{padding:15px 16px 17px;max-height:70vh}.intro .actions .btn{flex:1 1 100%}}
 </style>
 </head>
 <body>
+
+<!-- ================= POP-UP CARA PEMAKAIAN (gerbang sebelum masuk halaman utama) ================= -->
+<div class="intro-back" id="introBack" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="intro">
+    <div class="intro-h">
+      <span class="em">📋</span>
+      <div><h3 id="introTitle">Cara Pemakaian Form</h3><p>Portal Pengajuan Tribik Auction</p></div>
+    </div>
+    <div class="intro-b">
+      <p class="lead">Ikuti langkah berikut agar pengajuan Anda berhasil dibuat dan terkirim:</p>
+      <div class="intro-steps">
+        <div class="st"><span class="n">1</span><div><b>Pilih Kategori Form</b><p>Pilih salah satu: Cek Unit Lelang, Pengambilan Barang, atau Pengambilan Unit.</p></div></div>
+        <div class="st"><span class="n">2</span><div><b>Isi Detail Pengajuan</b><p>Lengkapi Nama Lengkap, NIK / SIM / ID Karyawan, dan Nama Perusahaan.</p></div></div>
+        <div class="st"><span class="n">3</span><div><b>Foto KTP / ID Card</b><p>Ambil foto sesuai dengan ukuran bingkai yang ada. dilarang foto melebihi atau diluar bingkai yang telah disediakan.</p></div></div>
+        <div class="st"><span class="n">4</span><div><b>Isi Daftar Unit / Barang</b><p>Masukkan Nomor Polisi serta Merk/Type. Tambah baris sesuai jumlah unit.</p></div></div>
+        <div class="st"><span class="n">5</span><div><b>Tanda Tangan Digital</b><p>Goreskan tanda tangan pada kotak yang tersedia.</p></div></div>
+        <div class="st"><span class="n">6</span><div><b>Kirim Form PDF</b><p>Tekan tombol 🚀 Kirim Form PDF — dokumen resmi otomatis terunduh &amp; terkirim ke WhatsApp Tribik Auction.</p></div></div>
+      </div>
+      <div class="intro-note">⚠️ Semua kolom bertanda <span class="req">*</span> <b>wajib diisi</b>. Form tidak akan terkirim bila masih ada kolom yang kosong.</div>
+      <div class="actions">
+        <button class="btn btn-primary" id="introStart">✅ Mengerti, Mulai Isi Form</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ================= HEADER ================= -->
 <header class="topbar">
@@ -642,7 +687,7 @@ footer b{color:#334155}
       <div class="theme-wrap">
         <button class="iconbtn" id="themeBtn" title="Tema warna" aria-label="Pilih tema warna">🎨</button>
         <div class="theme-pop" id="themePop">
-          <button class="topt" data-color="merah"><i style="background:#ff5252"></i>Merah Tribik</button>
+          <button class="topt" data-color="merah"><i style="background:#b60001"></i>Merah Tribik</button>
           <button class="topt" data-color="biru"><i style="background:#38bdf8"></i>Biru Samudra</button>
           <button class="topt" data-color="hijau"><i style="background:#34d399"></i>Hijau Zamrud</button>
           <button class="topt" data-color="ungu"><i style="background:#a78bfa"></i>Ungu Nebula</button>
@@ -1160,7 +1205,9 @@ const DT_MODES = {
 let camDocType = 'ktp';
 function camNoteText(){
   const m = DT_MODES[camDocType] || DT_MODES.ktp;
-  return 'Mode <b>'+m.label+'</b>: arahkan '+m.label+' ke dalam bingkai sampai terkunci — rana otomatis menangkap saat kartu utuh &amp; stabil. Hasil dipotong presisi rasio ID-1 (85,60 × 53,98 mm): rapi &amp; tidak gepeng.';
+  /* ukuran hasil ikut jenis kartu: ID CARD tegak, KTP & SIM mendatar (semua ID-1 asli) */
+  const mm = camDocType==='idcard' ? '53,98 × 85,60 mm' : '85,60 × 53,98 mm';
+  return 'Mode <b>'+m.label+'</b>: arahkan '+m.label+' ke dalam bingkai sampai terkunci — rana otomatis menangkap saat kartu utuh &amp; stabil. Hasil dipotong presisi rasio ID-1 ('+mm+'): rapi &amp; tidak gepeng.';
 }
 
 function showThumb(){
@@ -1193,7 +1240,7 @@ function drawKtpFrame(canvas){
   ctx.strokeStyle='#fff'; ctx.lineWidth=1.6; ctx.setLineDash([7,6]);
   ctx.strokeRect(cx,cy,cw,ch);
   // sudut siku tegas (corner brackets)
-  ctx.setLineDash([]); ctx.lineWidth=3.4; ctx.strokeStyle='#ff5252';
+  ctx.setLineDash([]); ctx.lineWidth=3.4; ctx.strokeStyle='#b60001';
   const s=15;
   ctx.beginPath();
   ctx.moveTo(cx,cy+s); ctx.lineTo(cx,cy); ctx.lineTo(cx+s,cy);
@@ -1225,6 +1272,9 @@ async function openCam(){
     ktpCam = new DocumentAutoCapture({
       video: $('camVideo'), overlay: $('camOverlay'),
       docType: camDocType, ratio: KTP_RATIO,
+      /* ID CARD: bingkai mulai TEGAK (hasil 53,98 × 85,60 mm, sama seperti di PDF);
+         KTP & SIM mendatar (85,60 × 53,98 mm). Tombol ↻ tetap bisa membalik bingkai. */
+      orientation: camDocType === 'idcard' ? 'portrait' : 'landscape',
       rotatable: camDocType === 'idcard',   // hanya ID CARD: tombol putar bingkai
       sound: snd,
       onCapture: function(dataURL){
@@ -1334,9 +1384,12 @@ $('fKtp').addEventListener('change', function(e){
     const img=new Image();
     img.onload=()=>{
       const iw=img.naturalWidth||img.width, ih=img.naturalHeight||img.height;
-      const OUT_W=640, OUT_H=Math.round(OUT_W/KTP_RATIO);
+      // ID CARD dipotong TEGAK (53,98 × 85,60 mm); KTP & SIM MENDATAR (85,60 × 53,98 mm)
+      const pt=(camDocType==='idcard');
+      const OUT_W=pt?Math.round(640/KTP_RATIO):640, OUT_H=pt?640:Math.round(640/KTP_RATIO);
+      const CROP=OUT_W/OUT_H;                   // rasio crop = rasio kanvas → hasil pasti presisi
       // auto-detect card + fit to ID-1 → no stretched/gepeng result, even rotated/portrait photo
-      const box=fitCardBox(findCardBox(iw, ih, img), iw, ih, KTP_RATIO);
+      const box=fitCardBox(findCardBox(iw, ih, img), iw, ih, CROP);
       const c=document.createElement('canvas');
       c.width=OUT_W; c.height=OUT_H;
       const cx=c.getContext('2d');
@@ -1382,6 +1435,7 @@ function collectForm(){
     perusahaan: $('fPerusahaan').value.trim(),
     ktp: state.ktpData,
     ktpName: state.ktpName,
+    ktpType: camDocType,          /* jenis kartu (ktp/sim/idcard) — untuk keterangan ukuran di PDF */
     signature: getSigData(),
     rows: collectRows(),
   };
@@ -1493,13 +1547,16 @@ document.addEventListener('change', e=>clearInvalidFrom(e.target));
 
 /* Logo untuk PDF (dimuat sekali saat halaman dibuka) */
 window.LOGO_PDF = null;
+window.LOGO_PDF_R = 412 / 206;  /* rasio logo PDF (lebar/tinggi) */
 (function(){ try{
   const im = new Image();
   im.onload = function(){ try{
     const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
     c.getContext('2d').drawImage(im, 0, 0); window.LOGO_PDF = c.toDataURL('image/png');
+    if(im.naturalWidth && im.naturalHeight) window.LOGO_PDF_R = im.naturalWidth / im.naturalHeight;
   }catch(e){} };
-  im.src = './logo.png?v=9';
+  im.crossOrigin = 'anonymous';   /* gambar luar (imgur) butuh ini agar kanvas tidak "ternoda" -> toDataURL() tetap boleh */
+  im.src = 'https://i.imgur.com/pUFT4mA.png';
 }catch(e){} })();
 
 function cleanKtpLabel(name){
@@ -1544,7 +1601,7 @@ function closePdfModal(){ $('pdfModal').classList.remove('show'); pdfWindow=null
 function pdfTheme(){
   function v(n){ try{ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }catch(e){ return ''; } }
   function rgb(h){ h=String(h||'').replace('#','').trim(); if(h.length===3){ h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; }
-    return /^([0-9a-fA-F]{6})$/.test(h) ? [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)] : [255,82,82]; }
+    return /^([0-9a-fA-F]{6})$/.test(h) ? [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)] : [182,0,1]; }
   return { p:rgb(v('--primary')), p2:rgb(v('--primary-2')), acc:rgb(v('--accent')) };
 }
 function buildPdf(d){
@@ -1553,149 +1610,414 @@ function buildPdf(d){
   const doc = new jsPDF({ unit:'mm', format:'a4' });
   const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
   const M = 14, TH = pdfTheme();
-  const LINE=[226,232,240], INK=[15,23,42];
-  let y = 40;
-  function mix(a,b,t){ return [Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)]; }
-  function zebraBg(){
-    doc.setFillColor(243,246,250);
-    for(let z=0; z<H; z+=14) doc.rect(0,z,W,7,'F');
-    doc.setFillColor(TH.p[0],TH.p[1],TH.p[2]); doc.rect(0,0,3.2,H,'F');
-  }
+  /* ====== Palet & konstanta dokumen ======
+     Warna memakai konstanta tetap (#b60001 = Merah Tribik) agar tampilan PDF tidak berubah
+     walau pengguna memakai tema warna portal yang berbeda. */
+  const RED  = [182,0,1];
+  const REDD = [244,63,63];
+  const REDP = [143,0,1];                            /* merah pekat (aksen chip/ikon) */
+  const REDL = [255,214,214];                        /* merah muda untuk di atas latar gelap */
+  const INK=[15,23,42], INK2=[51,65,85], MUT=[100,116,139], LAB=[148,163,184];
+  const LINE=[226,232,240], HAIR=[237,241,246], DOT=[203,213,225];
+  const PANEL=[248,250,252], ROWALT=[252,253,255], WASH=[255,250,250];
+  const mix=(a,b,t)=>[Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)];
+  const tint=(a,t)=>mix(a,[255,255,255],t);          /* warna dipudarkan ke putih */
+  const SOFT=tint(RED,0.86), SUBT=tint(RED,0.62), PALE=tint(RED,0.45);
+  const HEAD_H=30, CY=15;                           // tinggi & garis tengah pita header
+  const BANDH=1.4, GAPB=6, pHID=17;                 // garis aksen pita, jarak & tinggi panel identitas
+  const YTOP = HEAD_H + BANDH + GAPB + pHID + 8;    // dasar konten pertama setelah head() (= 62,4 mm)
+  const LIMIT = H-16;                               // batas dasar konten (16 mm dari dasar kertas)
+  const capH=(s)=>s*0.3528*0.72;                    // 1pt = 0.3528 mm; 0.72 = tinggi huruf kapital
+  /* pembungkus text(): opsi lanjutan (charSpace) dipakai hanya bila didukung versi jsPDF */
+  const T=(txt,x,yy,opt)=>{ try{ doc.text(txt,x,yy,opt||{}); }catch(e){ doc.text(txt,x,yy); } };
+  /* Huruf berjarak (tracking) digambar per karakter, bukan lewat opsi charSpace jsPDF.
+     Dua masalah pada charSpace: (1) jarak yang benar-benar digambar ~3x nilai yang diminta,
+     (2) getTextWidth() tidak ikut menghitungnya, sehingga perataan center/right melenceng
+     ke kanan — label ikut bergeser dari titik pusat dan bahkan keluar margin (label kanan
+     header sampai 204mm dari 196mm). Di sini lebar total (teks + jarak antar huruf) dihitung
+     sendiri, jadi tracking presisi dan titik perataan benar-benar tepat. */
+  const sp=(txt,x,yy,cs,opt)=>{
+    txt=String(txt==null?'':txt);
+    if(!cs || txt.length<2){ T(txt,x,yy,opt); return; }
+    const gap=cs*0.3528;                             /* pt -> mm */
+    const tw=doc.getTextWidth(txt)+gap*(txt.length-1);
+    const al=(opt&&opt.align)||'left';
+    let cx = al==='center' ? x-tw/2 : (al==='right' ? x-tw : x);
+    for(let i=0;i<txt.length;i++){ const ch=txt.charAt(i); doc.text(ch,cx,yy); cx += doc.getTextWidth(ch)+gap; }
+  };
+  const fit=(txt,maxW)=>{                           // potong teks agar tidak melewati kolom
+    txt=String(txt==null||txt===''?'-':txt);
+    if(doc.getTextWidth(txt)<=maxW) return txt;
+    let t=txt; while(t.length>1 && doc.getTextWidth(t+'.')>maxW) t=t.slice(0,-1);
+    return t+'.';
+  };
+  let y = HEAD_H + 13;
+  /* Pindah halaman bila unit berikut tidak muat utuh. Batasnya SAMA (LIMIT) untuk semua unit,
+     dan dipanggil SEBELUM menggambar, sehingga pita merah/bingkai panel tidak pernah terbelah
+     maupun tertinggal di halaman sebelumnya. */
+  function ensureRoom(need){ if(y + need > LIMIT){ doc.addPage(); head(); } }
+  /* --- HERO HEADER: pita gradien brand + logo & judul pada satu garis tengah --- */
   function head(){
-    zebraBg();
-    const hh=30, steps=56, sw=W/steps;
-    for(let i=0;i<steps;i++){ const c=mix(TH.p,TH.p2,i/(steps-1)); doc.setFillColor(c[0],c[1],c[2]); doc.rect(i*sw,0,sw+0.4,hh,'F'); }
-    try{ doc.setGState(new doc.GState({opacity:0.15})); doc.setFillColor(255,255,255);
-      for(let sx=W-58;sx<W-6;sx+=10) doc.rect(sx,0,4.6,hh,'F');
+    const hh=HEAD_H, cy=CY, steps=90, sw=W/steps;
+    for(let i=0;i<steps;i++){ const c=mix(RED,REDD,i/(steps-1)); doc.setFillColor(c[0],c[1],c[2]); doc.rect(i*sw,0,sw+0.5,hh,'F'); }
+    /* tekstur garis diagonal halus supaya pita tidak terasa datar */
+    try{ doc.setGState(new doc.GState({opacity:0.045})); doc.setFillColor(255,255,255);
+      for(let sx=-hh;sx<W;sx+=13){ for(let k=0;k<5;k++) doc.rect(sx+k*2.1,0,1.05,hh,'F'); }
       doc.setGState(new doc.GState({opacity:1})); }catch(e){}
-    let tx = M+3;
+    /* garis aksen bawah: merah -> merah muda (efek glow) */
+    const bh=BANDH, bs=60, bw=W/bs;
+    for(let i=0;i<bs;i++){ const c=mix(REDP,REDL,i/(bs-1)); doc.setFillColor(c[0],c[1],c[2]); doc.rect(i*bw,hh,bw+0.5,bh,'F'); }
+    /* blok judul dipusatkan pada garis tengah cy (sama dengan pusat logo) */
+    const FS1=17, FS2=8, GAP=6.4;
+    const ht=capH(FS1), blokH=ht+GAP, ty1=cy-blokH/2+ht, ty2=ty1+GAP;
+    let tx=M+3;
     if(window.LOGO_PDF){
       try{
-        const lh = 13.5, lw = lh * (412 / 204); // presisi 412x204 (~27.3mm)
-        doc.addImage(window.LOGO_PDF,'PNG',M+1,8.2,lw,lh);
-        tx = Math.round(M + 1 + lw + 3.5);
+        const ratio=window.LOGO_PDF_R || (412/206);
+        const lh=15.5, lw=lh*ratio;
+        doc.addImage(window.LOGO_PDF,'PNG', M, cy-lh/2, lw, lh);
+        tx=Math.round(M+lw+6);
       }catch(e){}
     }
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
-    doc.text('FORM TRIBIK AUCTION', tx, 12.5);
-    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
-    doc.text('PORTAL PENGAJUAN LELANG MOBIL', tx, 18.5);
-    doc.setFillColor(255,255,255);
-    doc.roundedRect(W-M-58, 9.5, 58, 9, 4.5, 4.5, 'F');
-    doc.setTextColor(TH.p2[0],TH.p2[1],TH.p2[2]); doc.setFont('helvetica','bold'); doc.setFontSize(9);
-    doc.text('No. '+d.docNo, W-M-29, 15.2, {align:'center'});
-    doc.setTextColor(INK[0],INK[1],INK[2]);
-    y = 38;
-  }
-  function sectionTitle(t){
-    doc.setFillColor(TH.p[0],TH.p[1],TH.p[2]);
-    doc.roundedRect(M, y, 68, 7.2, 3.6, 3.6, 'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9.3);
-    doc.text(t, M+34, y+4.8, {align:'center'});
-    doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.5);
-    doc.line(M+72, y+3.6, W-M, y+3.6);
-    doc.setTextColor(INK[0],INK[1],INK[2]);
-    y += 12;
-  }
-  function metaCards(){
-    const items=[['NO. DOKUMEN',d.docNo],['TANGGAL',d.date],['KATEGORI',d.catName]];
-    const gw=(W-M*2-6)/3;
-    items.forEach(function(it,i){
-      const x=M+i*(gw+3);
-      doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
-      doc.roundedRect(x,y,gw,13,2.2,2.2,'FD');
-      doc.setFont('helvetica','bold'); doc.setFontSize(6.3); doc.setTextColor(148,163,184);
-      doc.text(it[0],x+3.5,y+5);
-      doc.setFontSize(9.2); doc.setTextColor(TH.p2[0],TH.p2[1],TH.p2[2]);
-      doc.text(String(it[1]),x+3.5,y+10.2);
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(FS1);
+    T('FORM TRIBIK AUCTION', tx, ty1);
+    doc.setTextColor(REDL[0],REDL[1],REDL[2]); doc.setFont('helvetica','normal'); doc.setFontSize(FS2);
+    sp('PORTAL PENGAJUAN LELANG MOBIL', tx, ty2, 0.9);
+    /* nomor dokumen di sisi kanan */
+    doc.setTextColor(REDL[0],REDL[1],REDL[2]); doc.setFont('helvetica','bold'); doc.setFontSize(6.6);
+    sp('NO. DOKUMEN', W-M, cy-2.8, 0.8, {align:'right'});
+    doc.setTextColor(255,255,255); doc.setFontSize(12.5);
+    T(String(d.docNo), W-M, cy+4.9, {align:'right'});
+    /* panel identitas putih melayang di bawah pita */
+    /* Jarak pita merah -> panel identitas (GAPB) supaya panel tidak menempel pada
+       pita: garis aksen di bawah pita jadi terlihat utuh sebagai pemisah dan
+       jarak antar bagian (pita/panel/kartu/panel 01) seragam 8mm. */
+    const pTop=hh+bh+GAPB, pW=(W-M*2)/3;
+    doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.4);
+    doc.roundedRect(M, pTop, W-M*2, pHID, 3.4, 3.4, 'FD');
+    doc.setDrawColor(HAIR[0],HAIR[1],HAIR[2]); doc.setLineWidth(0.35);
+    doc.line(M+pW, pTop+4, M+pW, pTop+pHID-4);
+    doc.line(M+pW*2, pTop+4, M+pW*2, pTop+pHID-4);
+    [['TANGGAL', d.date],['KATEGORI', d.catName],['NO. DOKUMEN', d.docNo]].forEach(function(it,i){
+      const x=M+i*pW+pW/2;
+      doc.setFont('helvetica','bold'); doc.setFontSize(6.2); doc.setTextColor(LAB[0],LAB[1],LAB[2]);
+      /* label & nilai dipusatkan optis di tinggi panel: celah atas 4.0mm = bawah 4.1mm */
+      sp(it[0], x, pTop+5.6, 0.9, {align:'center'});
+      doc.setFontSize(9.6); doc.setTextColor(i===2?RED[0]:INK[0], i===2?RED[1]:INK[1], i===2?RED[2]:INK[2]);
+      T(fit(String(it[1]), pW-10), x, pTop+12.9, {align:'center'});
     });
-    y+=17;
+    doc.setTextColor(INK[0],INK[1],INK[2]);
+    y = YTOP;               /* = pTop + pHID + 8 -> jarak seragam ke 3 kartu ringkas di bawahnya */
   }
+  /* --- judul bagian: chip nomor + label uppercase + garis tipis; varian gelap saat di dalam panel --- */
+  function sectionTitle(t, note, dark){
+    /* catatan: pindah halaman ditangani ensureRoom() pada pemanggil (pita merah tak terbelah) */
+    if(dark){
+      /* semua dasar teks dihitung dari pusat pita (y+6.2): dasar = pusat + 1/2 tinggi
+         huruf kapital, sehingga nomor/judul/catatan benar-benar terpusat di pita. */
+      doc.setFillColor(255,255,255); doc.roundedRect(M+5.5, y+2.6, 7.2, 7.2, 2.2, 2.2, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(RED[0],RED[1],RED[2]);
+      T(t.idx, M+9.1, y+7.34, {align:'center'});
+      doc.setTextColor(255,255,255); doc.setFontSize(9.6);
+      sp(t.title, M+16, y+7.42, 0.9);
+      if(t.note){ doc.setFont('helvetica','normal'); doc.setFontSize(7.4); doc.setTextColor(REDL[0],REDL[1],REDL[2]);
+        sp(t.note, W-M-8, y+7.14, 0.6, {align:'right'}); }
+      y += 13.4;
+      return;
+    }
+    doc.setFillColor(RED[0],RED[1],RED[2]);
+    doc.roundedRect(M, y, 2.6, 5.4, 1.3, 1.3, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9.6); doc.setTextColor(INK[0],INK[1],INK[2]);
+    sp(t, M+5.4, y+4.4, 0.9);
+    if(note){ doc.setFont('helvetica','normal'); doc.setFontSize(7.6); doc.setTextColor(LAB[0],LAB[1],LAB[2]);
+      T(note, W-M, y+4.4, {align:'right'}); }
+    doc.setDrawColor(HAIR[0],HAIR[1],HAIR[2]); doc.setLineWidth(0.35);
+    doc.line(M, y+8.4, W-M, y+8.4);
+    y += 13;
+  }
+  /* --- strip kepala bagian merah (mandiri, dipakai saat daftar mengalir) --- */
+  function sectionBand(idx, title, note){
+    doc.setFillColor(RED[0],RED[1],RED[2]);
+    doc.roundedRect(M, y, W-M*2, 12.4, 3.6, 3.6, 'F');
+    sectionTitle({idx:idx, title:title, note:note}, null, true);
+  }
+  /* --- panel putih membulat + kepala bagian merah di dalamnya --- */
+  function panelTop(idx, title, note, hgt){
+    ensureRoom(hgt);                                 /* bingkai panel tak pernah terpotong halaman */
+    doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.4);
+    doc.roundedRect(M, y, W-M*2, hgt, 3.6, 3.6, 'FD');
+    sectionBand(idx, title, note);
+  }
+  /* --- 3 kartu pesan ringkas di bawah hero --- */
+  function hiCards(list){
+    const gap=4.5, cw=(W-M*2-gap*2)/3, hgt=16;
+    doc.setFont('helvetica','bold');
+    list.forEach(function(c,i){
+      const x=M+i*(cw+gap), base=tint(RED,c.t), ac=REDP;
+      doc.setFillColor(base[0],base[1],base[2]);
+      doc.roundedRect(x, y, cw, hgt, 3, 3, 'F');
+      /* bulatan inisial: dasar huruf = pusat bulatan + 1/2 tinggi huruf kapital (tepat di tengah) */
+      doc.setFillColor(ac[0],ac[1],ac[2]); doc.circle(x+8, y+hgt/2, 3.6, 'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(6.6);
+      T(c.lab.charAt(0), x+8, y+hgt/2+capH(6.6)/2, {align:'center'});
+      /* blok label + nilai dipusatkan pada kartu setinggi 16mm: celah atas & bawah 4.5mm
+         (label: dasar 6.0mm = 4.5 + tinggi huruf kapital 1.47mm; nilai: 16 - 4.5 = 11.5mm) */
+      doc.setFontSize(5.8); doc.setTextColor(ac[0],ac[1],ac[2]);
+      sp(c.lab, x+14.4, y+6.0, 0.7);
+      doc.setFontSize(8.4); doc.setTextColor(INK[0],INK[1],INK[2]);
+      T(fit(c.val, cw-17), x+14.4, y+11.5);
+    });
+    y += hgt + 8;           /* jarak seragam ke panel 01 */
+  }
+  /* --- baris label / nilai di dalam panel: label uppercase, hanya dipisah garis tipis --- */
+  let kvRight = null;                              /* pembatas kanan (saat ada foto di kolom kanan) */
   function kv(label, value){
-    doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
-    doc.roundedRect(M, y, W-M*2, 7, 1.8, 1.8, 'FD');
-    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(71,85,105);
-    doc.text(label, M+3.5, y+4.8);
-    doc.setFont('helvetica','normal'); doc.setTextColor(INK[0],INK[1],INK[2]);
-    doc.text(String(value==null?'':value), M+50, y+4.8);
-    y += 9.2;
+    ensureRoom(13.7);                               /* tinggi baris 11 mm + garis pemisah di bawahnya */
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.2); doc.setTextColor(LAB[0],LAB[1],LAB[2]);
+    sp(String(label).toUpperCase(), M+7, y+4.6, 0.6);
+    doc.setFont('helvetica','bold'); doc.setFontSize(10.2); doc.setTextColor(INK[0],INK[1],INK[2]);
+    const vx=M+48, vr=kvRight||(W-M-6);
+    T(fit(String(value==null||value===''?'-':value), vr-4-vx), vx, y+4.6);
+    y += 11;
+    doc.setDrawColor(HAIR[0],HAIR[1],HAIR[2]); doc.setLineWidth(0.3);
+    doc.line(M+6, y-2.7, vr, y-2.7);
   }
-  function rowItem(i, txt){
-    if(y > 252){ doc.addPage(); head(); }
-    /* kartu baris bernomor — border presisi sama seperti baris kv (Nama Lengkap, NIK/SIM/ID, Perusahaan) */
-    doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
-    doc.roundedRect(M, y, W-M*2, 7, 1.8, 1.8, 'FD');
-    doc.setFillColor(TH.p[0],TH.p[1],TH.p[2]);
-    doc.circle(M+5.5, y+3.5, 2.4, 'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
-    doc.text(String(i+1), M+5.5, y+4.5, {align:'center'});
-    doc.setFontSize(9.5); doc.setFont('helvetica','normal'); doc.setTextColor(INK[0],INK[1],INK[2]);
-    doc.text(txt, M+11, y+4.9);
-    y += 9.2;
+  /* --- kepala tabel: bar pita merah gelap + label kolom putih --- */
+  function tableHead(){
+    const hgt=9.2;
+    const steps=40, sw=(W-M*2-12)/steps, x0=M+6;
+    for(let i=0;i<steps;i++){ const c=mix(REDP,RED,i/(steps-1)); doc.setFillColor(c[0],c[1],c[2]); doc.rect(x0+i*sw, y, sw+0.4, hgt, 'F'); }
+    doc.setFillColor(REDP[0],REDP[1],REDP[2]);
+    doc.roundedRect(x0, y, 2.2, hgt, 1.1, 1.1, 'F');     /* penutup sudut kiri */
+    doc.roundedRect(W-M-6-2.2, y, 2.2, hgt, 1.1, 1.1, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(6.4); doc.setTextColor(255,255,255);
+    const cols = d.cat==='barang'
+      ? [['NO.',M+10],['NAMA ITEM',M+20],['JUMLAH',M+96],['SATUAN',M+120],['KETERANGAN',M+142]]
+      : [['NO.',M+10],['NOMOR POLISI',M+20],['MERK / TYPE',M+82]];
+    cols.forEach(function(c){ sp(c[0], c[1], y+6, 0.8); });
+    y += hgt + 2;
   }
+  /* --- baris tabel: zebra lembut di dalam area konten panel --- */
+  let contTitle = null;                            /* judul "lanjutan" saat daftar mengalir antar halaman */
+  function rowItem(i, cells, last){
+    const hgt=9.4, x0=M+6, iw=W-M*2-12;
+    if(y + hgt > LIMIT){ doc.addPage(); head();      /* baris tak muat -> halaman baru + kepala kolom */
+      if(contTitle) sectionBand(contTitle.idx, contTitle.title, contTitle.note);
+      tableHead(); }
+    doc.setFillColor(i%2===1?ROWALT[0]:WASH[0], i%2===1?ROWALT[1]:WASH[1], i%2===1?ROWALT[2]:WASH[2]);
+    doc.rect(x0, y, iw, hgt, 'F');
+    doc.setFillColor(SOFT[0],SOFT[1],SOFT[2]);
+    doc.roundedRect(M+8.6, y+2.4, 7, 4.6, 1.6, 1.6, 'F');
+    doc.setTextColor(REDP[0],REDP[1],REDP[2]); doc.setFont('helvetica','bold'); doc.setFontSize(7);
+    T(String(i+1), M+12.1, y+5.7, {align:'center'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.4); doc.setTextColor(INK[0],INK[1],INK[2]);
+    cells.forEach(function(c){ T(c[2], c[0], y+5.8); });
+    if(!last){
+      doc.setDrawColor(HAIR[0],HAIR[1],HAIR[2]); doc.setLineWidth(0.3);
+      doc.line(x0, y+hgt, x0+iw, y+hgt);
+    }
+    y += hgt;
+  }
+  function drawRow(i, last){
+    const r = d.rows[i];
+    if(d.cat==='barang'){
+      rowItem(i, [[M+22,70,fit(r.nama,70)],[M+96,20,fit(r.jml,20)],[M+120,20,fit(r.sat,20)],[M+142,36,fit(r.ket,36)]], last);
+    }else{
+      rowItem(i, [[M+22,54,fit(r.nopol,54)],[M+82,96,fit(r.merk,96)]], last);
+    }
+  }
+  /* --- footer: pita merah gelap di bawah + nomor halaman --- */
   function footerAll(){
     const n=doc.getNumberOfPages();
     for(let i=1;i<=n;i++){
       doc.setPage(i);
-      doc.setFillColor(TH.p2[0],TH.p2[1],TH.p2[2]); doc.rect(0,H-7,W,7,'F');
-      doc.setTextColor(255,255,255); doc.setFont('helvetica','normal'); doc.setFontSize(7);
-      doc.text('Dokumen dibuat otomatis oleh Sistem Tribik Auction  •  '+d.docNo+'  •  '+d.date, M, H-2.7);
-      doc.setFont('helvetica','bold');
-      doc.text('Hal. '+i+'/'+n, W-M, H-2.7, {align:'right'});
+      const fh=11.6, fy=H-fh;
+      doc.setFillColor(RED[0],RED[1],RED[2]); doc.rect(0, fy, W, fh, 'F');
+      doc.setFillColor(REDD[0],REDD[1],REDD[2]); doc.rect(0, fy, W, 0.9, 'F');
+      doc.setTextColor(REDL[0],REDL[1],REDL[2]); doc.setFont('helvetica','normal'); doc.setFontSize(6.6);
+      doc.text('Dokumen dibuat otomatis oleh Sistem Tribik Auction', M, fy+4.6);
+      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(6.8);
+      doc.text(String(d.docNo)+'   •   '+String(d.date), M, fy+8.8);
+      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7.4);
+      doc.text('Hal. '+i+' / '+n, W-M, fy+6.6, {align:'right'});
     }
   }
+  /* --- dua kartu tanda tangan: kepala strip, watermark logo, garis ttd putus-putus --- */
+  function signCards(list){
+    const gap=7, pw=(W-M*2-gap)/2, phh=34, py=y;
+    list.forEach(function(pp,i){
+      const x=M+i*(pw+gap);
+      doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.4);
+      doc.roundedRect(x, py, pw, phh, 3.4, 3.4, 'FD');
+      /* kepala strip merah muda */
+      doc.setFillColor(SOFT[0],SOFT[1],SOFT[2]);
+      doc.roundedRect(x, py, pw, 8.2, 3.4, 3.4, 'F');
+      doc.rect(x, py+4.8, pw, 3.4, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(6.8); doc.setTextColor(REDP[0],REDP[1],REDP[2]);
+      /* dasar teks = pusat strip (y+4.1) + 1/2 tinggi huruf kapital */
+      sp(pp[0], x+pw/2, py+5.0, 0.8, {align:'center'});
+      /* watermark logo samar */
+      if(pp[4] && window.LOGO_PDF){
+        try{ doc.setGState(new doc.GState({opacity:0.07}));
+          doc.addImage(window.LOGO_PDF,'PNG', x+pw/2-16, py+9.4, 32, 16, undefined, 'FAST');
+          doc.setGState(new doc.GState({opacity:1})); }catch(e){}
+      }
+      if(pp[3]){ try{ doc.addImage(pp[3],'PNG',x+pw/2-23,py+9.8,46,12,undefined,'FAST'); }catch(e){} }
+      doc.setDrawColor(DOT[0],DOT[1],DOT[2]); doc.setLineWidth(0.4);
+      try{ doc.setLineDashPattern([1.3,1.2],0); }catch(e){}
+      doc.line(x+11, py+phh-11, x+pw-11, py+phh-11);
+      try{ doc.setLineDashPattern([],0); }catch(e){}
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.6); doc.setTextColor(INK[0],INK[1],INK[2]);
+      T(fit(String(pp[1]), pw-16), x+pw/2, py+phh-6, {align:'center'});
+      if(pp[2]){ doc.setFont('helvetica','italic'); doc.setFontSize(6.4); doc.setTextColor(LAB[0],LAB[1],LAB[2]);
+        T(String(pp[2]), x+pw/2, py+phh-2.4, {align:'center'}); }
+    });
+    y = py + phh + 8;
+  }
+  /* ================= ALUR DOKUMEN ================= */
   head();
-  sectionTitle(CATS[d.cat].pdf);
-  metaCards();
-  sectionTitle('DATA PEMOHON');
-  kv('Nama Lengkap:', d.nama);
-  kv('NIK / SIM / ID:', d.nik);
-  kv('Perusahaan:', d.perusahaan);
-  if(d.ktp){
+  hiCards([
+    {lab:'STATUS',   val:String(d.status||'Menunggu Verifikasi'), t:0.95},
+    {lab:'KATEGORI', val:String(d.catName),     t:0.88},
+    {lab:'JUMLAH',   val:d.rows.length+(d.cat==='barang'?' item':' unit'), t:0.81}
+  ]);
+  /* ---- PANEL 01 — DATA PEMOHON + FOTO IDENTITAS (ukuran fisik 1:1) ----
+     Foto KTP / SIM / ID Card digambar SEUKURAN KARTU ASLINYA memakai standar ID-1 (CR80):
+       KTP     -> 85,60 × 53,98 mm (mendatar)
+       SIM     -> 85,60 × 53,98 mm (mendatar)
+       ID CARD -> 53,98 × 85,60 mm (tegak)
+     Ukuran ditentukan JENIS kartu (bukan rasio foto), jadi hasilnya taat asas: cetakan
+     bisa ditumpuk langsung ke kartu nyata untuk memeriksa ukurannya. Foto dari kamera /
+     upload sudah terkunci rasio ID-1 sehingga mengisi bingkai PENUH tanpa gepeng; bila
+     rasionya beda jauh, isinya tetap utuh (contain) agar tidak terpotong. Kalau foto
+     justru berorientasi sebaliknya (mis. ID Card difoto mendatar), bingkai dibalik 90°
+     supaya ukurannya tetap ID-1 asli & isi kartu tidak terpangkas 60%.
+     Lebar kartu (85,6 mm) tidak sebaris dengan kolom data (bikin teks data terkompresi),
+     jadi blok foto diletakkan di bawah baris data, terpusat. */
+  const ktpOn = !!d.ktp;
+  const CARD_W = 85.60, CARD_H = 53.98;            /* mm — standar ID-1 (KTP / SIM / ID Card) */
+  /* jenis kartu: dari pemilih mode; catatan lama tanpa ktpType ditebak dari nama foto */
+  let kDoc = ({ktp:'KTP', sim:'SIM', idcard:'ID CARD'})[String(d.ktpType||'')] || '';
+  if(!kDoc){
+    const nm = String(d.ktpName||'').toUpperCase();
+    if(nm.indexOf('ID CARD')>=0 || nm.indexOf('IDCARD')>=0) kDoc='ID CARD';
+    else if(nm.indexOf('SIM')>=0) kDoc='SIM';
+    else if(nm.indexOf('KTP')>=0) kDoc='KTP';
+  }
+  if(!kDoc) kDoc = 'KTP / SIM / ID CARD';
+  /* orientasi baku per jenis: ID CARD tegak (53,98 × 85,60), KTP & SIM mendatar (85,60 × 53,98) */
+  let kLands = (kDoc !== 'ID CARD'), kAR = KTP_RATIO, kSrcLands = null;
+  if(ktpOn){
     try{
-      /* orientasi foto mengikuti gambar asli — hasil kamera ID CARD potret tampil POTRET di PDF */
-      let ar = KTP_RATIO;
-      try{ const pr = doc.getImageProperties(d.ktp); if(pr && pr.width && pr.height) ar = pr.width/pr.height; }catch(e2){}
-      const portrait = ar < 1;
-      const imgW = portrait ? Math.round(84*ar) : 80;          // potret: tinggi tetap 84mm, lebar proporsional
-      const imgH = portrait ? 84 : Math.round(80/ar);          // lanskap: lebar tetap 80mm, tinggi proporsional
-      if(y + imgH + 16 > 252){ doc.addPage(); head(); }        // pindah halaman agar foto tidak menabrak bagian bawah
-      kv('Foto KTP / ID:', cleanKtpLabel(d.ktpName));
-      doc.addImage(d.ktp, 'JPEG', M, y, imgW, imgH, undefined, 'FAST');
+      const pr = doc.getImageProperties(d.ktp);
+      if(pr && pr.width && pr.height){ kAR = pr.width/pr.height; kSrcLands = pr.width >= pr.height; }
+    }catch(e2){}
+    if(!isFinite(kAR) || kAR <= 0){ kAR = KTP_RATIO; kSrcLands = null; }
+  }
+  /* jaga-jaga: foto jelas berorientasi berlawanan → balik bingkai (ukuran tetap ID-1) */
+  if(ktpOn && kSrcLands !== null){
+    const want = kLands ? CARD_W/CARD_H : CARD_H/CARD_W;
+    const alt  = kLands ? CARD_H/CARD_W : CARD_W/CARD_H;
+    if(Math.abs(Math.log(kAR/alt)) < Math.abs(Math.log(kAR/want)) - 0.05) kLands = !kLands;
+  }
+  const kw = kLands ? CARD_W : CARD_H;             /* lebar bingkai = 85,60 mm (datar) / 53,98 mm (tegak) */
+  const kh = kLands ? CARD_H : CARD_W;             /* tinggi bingkai = 53,98 mm (datar) / 85,60 mm (tegak) */
+  const kvH = 4*11;                                /* 4 baris label/nilai (tinggi baris 11mm) */
+  const cardGap = ktpOn ? 6.5 : 0;                 /* jarak baris terakhir → keterangan foto */
+  const capGap  = ktpOn ? 5   : 0;                 /* tinggi baris keterangan foto */
+  /* Tinggi panel = 13.4 (pita kepala) + isi nyata + padding bawah 4.1mm. Isi nyata = dasar
+     konten yang paling bawah: garis pemisah baris terakhir (kvH-2.7) atau dasar kartu. Padding
+     4.1mm sama dengan jarak pita merah ke label pertama sehingga atas & bawah panel seimbang. */
+  const baseH = Math.max(kvH-2.7, ktpOn ? (kvH + cardGap + capGap + kh) : 0);
+  const H1 = 13.4 + baseH + 4.1;
+  ensureRoom(H1);                                 /* panel 01 selalu utuh dalam satu halaman */
+  panelTop('01','DATA PEMOHON',null,H1);
+  const y0 = y;
+  kv('Nama Lengkap', d.nama);
+  kv('NIK / SIM / ID', d.nik);
+  kv('Perusahaan', d.perusahaan);
+  kv('Foto KTP / ID', cleanKtpLabel(d.ktpName));
+  if(ktpOn){
+    /* garis pemisah halus antara data pemohon & blok foto identitas */
+    doc.setDrawColor(HAIR[0],HAIR[1],HAIR[2]); doc.setLineWidth(0.35);
+    doc.line(M+6, y0+kvH+1.4, W-M-6, y0+kvH+1.4);
+    /* keterangan: nama blok di kiri (sebut jenis kartunya), acuan ukuran fisik di kanan */
+    doc.setFont('helvetica','bold'); doc.setFontSize(6.6); doc.setTextColor(LAB[0],LAB[1],LAB[2]);
+    sp('FOTO ' + kDoc + ' - UKURAN ASLI', M+7, y0+kvH+cardGap, 0.6);
+    sp('ID-1  ' + (kLands ? '85,60 x 53,98' : '53,98 x 85,60') + ' MM', W-M-6, y0+kvH+cardGap, 0.6, {align:'right'});
+    const px = M + (W-M*2-kw)/2, py = y0 + kvH + cardGap + capGap;   /* kartu terpusat di panel */
+    /* Isi bingkai: foto yang rasionya sudah terkunci ID-1 (deviasi <=2%) digambar PENUH
+       tepat ukuran asli; bila rasio aslinya beda jauh, foto digambar proporsional
+       (contain) supaya seluruh isi kartu tetap terlihat & tidak gepeng/melar. */
+    let iw = kw, ih = kh;
+    if(Math.abs(kAR - kw/kh) / (kw/kh) > 0.02){
+      if(kAR > kw/kh) ih = kw/kAR; else iw = kh*kAR;
+    }
+    try{
+      doc.setFillColor(PANEL[0],PANEL[1],PANEL[2]);
+      doc.roundedRect(px, py, kw, kh, 2.5, 2.5, 'F');
+      doc.addImage(d.ktp, 'JPEG', px+(kw-iw)/2, py+(kh-ih)/2, iw, ih, undefined, 'FAST');
       doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.4);
-      doc.roundedRect(M, y, imgW, imgH, 2, 2, 'S');
-      y += imgH + 7;
-    }catch(e){ if(d.ktpName) kv('Foto KTP / ID:', cleanKtpLabel(d.ktpName)); }
-  } else if(d.ktpName){ kv('Foto KTP / ID:', cleanKtpLabel(d.ktpName)); }
-  y += 3;
-  sectionTitle(d.cat==='barang' ? 'DETAIL ITEM BARANG' : 'DAFTAR UNIT KENDARAAN');
-  d.rows.forEach(function(r,i){
-    const line = d.cat==='barang'
-      ? (r.nama||'-')+'  x'+(r.jml||'-')+' '+(r.sat||'Pcs')+(r.ket?'  ('+r.ket+')':'')
-      : (r.nopol||'-')+'  —  '+(r.merk||'-');
-    rowItem(i, line);
-  });
-  y += 6;
-  if(y > 205){ doc.addPage(); head(); }
-  sectionTitle('VERIFIKASI & PERSETUJUAN');
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.6); doc.setTextColor(100,116,139);
-  doc.text('Tanda tangan pemohon menandakan data di atas adalah benar dan disetujui untuk diproses.', M, y+2);
-  const pw=82, phh=36, py=y+7;
-  [[M,'PEMOHON / PENGAJU', d.nama||'-----------------', d.signature, null],
-   [W-M-pw,'PENGAWAS / DISETUJUI OLEH','Supervisor Operasional Lelang', null,'[ Terverifikasi Sistem Lelang ]']
-  ].forEach(function(pp){
-    doc.setFillColor(255,255,255); doc.setDrawColor(LINE[0],LINE[1],LINE[2]); doc.setLineWidth(0.3);
-    doc.roundedRect(pp[0],py,pw,phh,2.5,2.5,'FD');
-    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(148,163,184);
-    doc.text(pp[1],pp[0]+pw/2,py+5.5,{align:'center'});
-    if(pp[3]){ try{ doc.addImage(pp[3],'PNG',pp[0]+pw/2-24,py+8.5,48,13,undefined,'FAST'); }catch(e){} }
-    doc.setDrawColor(30,41,59); doc.setLineWidth(0.35);
-    doc.line(pp[0]+8,py+phh-8.5,pp[0]+pw-8,py+phh-8.5);
-    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(51,65,85);
-    doc.text(String(pp[2]),pp[0]+pw/2,py+phh-4.6,{align:'center'});
-    if(pp[4]){ doc.setFont('helvetica','italic'); doc.setFontSize(6.2); doc.setTextColor(148,163,184);
-      doc.text(pp[4],pp[0]+pw/2,py+phh-1.4,{align:'center'}); }
-  });
+      doc.roundedRect(px, py, kw, kh, 2.5, 2.5, 'S');
+    }catch(e){}
+  }
+  y = y0 + baseH + 4.1;      /* kursor = tepi bawah panel 01 (kesenjangan antar panel seragam) */
+  /* ---- PANEL 02 — DAFTAR UNIT / BARANG ----
+     Selalu diusahakan berbentuk panel utuh (bingkai + pita merah). Bila daftar terlalu panjang
+     untuk dimuat utuh dalam satu halaman, dipakai mode aliran: baris mengalir ke halaman
+     berikutnya & kepala kolom diulang. Rincian keputusan ada pada blok di bawah ini. */
+  const P2N = d.cat==='barang' ? 'DETAIL ITEM BARANG' : 'DAFTAR UNIT KENDARAAN';
+  const P2Note = d.rows.length+(d.cat==='barang'?' item':' unit');
+  const H2 = 13.4 + 11.2 + d.rows.length*9.4 + 6;
+  const H3 = 13.4 + 7 + 34 + 7;
+  /* ---- Panel 02 SELALU diusahakan berbentuk panel utuh (bingkai putih + pita merah di
+     dalamnya) supaya pita merahnya tidak terbelah antar halaman. Urutan keputusan:
+       1) muat di halaman ini -> digambar di sini (jarak baku 10 mm);
+       2) tidak muat di sini, TAPI panel 02 dan panel 03 muat utuh di halaman baru -> pindah
+          halaman dulu: jumlah halaman tidak bertambah & kedua panel tetap berbentuk panel;
+       3) daftar terlalu panjang (tak muat utuh dalam satu halaman) -> mode aliran: baris
+          mengalir ke halaman berikutnya & kepala kolom diulang (tanpa bingkai panel).
+     Jarak antar panel baku 10 mm; menyusut bersama (min 4 mm, sehingga jarak 01->02 dan
+     02->03 tetap simetris) HANYA bila itu membuat panel 02 & 03 tetap muat satu halaman. */
+  const GAPP = 10, GAPMIN = 4;
+  const avail = LIMIT - y;                             /* ruang sisa di halaman ini */
+  const spare = avail - H2 - H3;                       /* sisa setelah panel 02 & panel 03 */
+  const gSym  = Math.floor(spare / 2);                 /* jarak simetris agar 02 & 03 sama-sama muat */
+  const gP    = (spare >= 2 * GAPP || gSym < GAPMIN) ? GAPP : gSym;
+  const gHere = Math.min(gP, avail - H2);              /* jarak yang benar-benar bisa dipakai di sini */
+  const p2Here = gHere >= GAPMIN;                      /* (1) panel 02 utuh muat di halaman ini */
+  const gNew   = Math.min(GAPP, (LIMIT - YTOP) - H2);  /* jarak bila panel 02 pindah halaman */
+  const p2Next = !p2Here && gNew >= GAPMIN && (YTOP + gNew + H2 + GAPP + H3) <= LIMIT;   /* (2) */
+  const lastRow = d.rows.length-1;
+  let gAfter = GAPP;                                   /* jarak panel 02 -> panel 03 */
+  if(p2Here || p2Next){
+    if(p2Here){ y += gHere; }else{ doc.addPage(); head(); y += gNew; }
+    gAfter = p2Here ? gP : GAPP;
+    panelTop('02', P2N, P2Note, H2);
+    tableHead();
+    d.rows.forEach(function(r,i){ drawRow(i, i===lastRow); });
+    y += 6;
+  }else{
+    y += GAPP;
+    ensureRoom(12.4 + 11.2 + 9.4);                       /* pita + kepala kolom + 1 baris wajib utuh */
+    contTitle = {idx:'02', title:P2N+'  —  lanjutan', note:P2Note};
+    sectionBand('02', P2N, P2Note);
+    tableHead();
+    d.rows.forEach(function(r,i){ drawRow(i, i===lastRow); });
+    contTitle = null;
+    y += 4;
+  }
+  y += gAfter;
+  /* ---- PANEL 03 — VERIFIKASI & PERSETUJUAN ---- */
+  ensureRoom(H3);                                 /* panel 03 (tanda tangan) selalu utuh */
+  panelTop('03','VERIFIKASI & PERSETUJUAN',null,H3);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.2); doc.setTextColor(MUT[0],MUT[1],MUT[2]);
+  T('Tanda tangan pemohon menandakan data di atas benar dan disetujui untuk diproses.', M+6, y+4.2);
+  y += 7;
+  signCards([
+    ['PEMOHON / PENGAJU', d.nama||'-----------------', null, d.signature, true],
+    ['PENGAWAS / DISETUJUI OLEH','Supervisor Operasional Lelang','Terverifikasi Sistem Lelang', null, false]
+  ]);
   footerAll();
   return doc;
 }
@@ -2065,7 +2387,7 @@ function initSecureFallback(){
 (function(){
   var pop=document.getElementById('themePop'),btn=document.getElementById('themeBtn');
   if(!pop||!btn)return;
-  var MAP={merah:'#ff5252',biru:'#38bdf8',hijau:'#34d399',ungu:'#a78bfa',oranye:'#fb923c',tosca:'#2dd4bf'};
+  var MAP={merah:'#b60001',biru:'#38bdf8',hijau:'#34d399',ungu:'#a78bfa',oranye:'#fb923c',tosca:'#2dd4bf'};
   function apply(c){
     document.documentElement.setAttribute('data-color',c);
     try{localStorage.setItem('tb_color',c)}catch(e){}
@@ -2078,6 +2400,34 @@ function initSecureFallback(){
   pop.addEventListener('click',function(e){var b=e.target.closest('.topt');if(b){apply(b.getAttribute('data-color'));pop.classList.remove('show');}});
   var saved='merah';try{saved=localStorage.getItem('tb_color')||'merah'}catch(e){}
   apply(saved);
+})();
+</script>
+<script>
+/* ====== Pop-up "Cara Pemakaian" — gerbang sebelum masuk halaman utama ====== */
+(function(){
+  var back=document.getElementById('introBack');
+  if(!back) return;
+  var startBtn=document.getElementById('introStart');
+  function openIntro(){
+    back.classList.add('show');
+    document.body.style.overflow='hidden';
+    if(startBtn) setTimeout(function(){
+      var sc=back.querySelector('.intro-b');
+      try{ startBtn.focus({preventScroll:true}); }catch(e){}
+      if(sc) sc.scrollTop=0;                       /* tetap mulai dari langkah 1 */
+    },80);
+  }
+  function closeIntro(){
+    back.classList.remove('show');
+    document.body.style.overflow='';
+  }
+  if(startBtn) startBtn.addEventListener('click', closeIntro);
+  back.addEventListener('click', function(e){ if(e.target===back) closeIntro(); });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape' && back.classList.contains('show')) closeIntro();
+  });
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', openIntro);
+  else openIntro();
 })();
 </script>
 </body>
