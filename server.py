@@ -27,8 +27,10 @@ import sys
 import json
 import time
 import socket
+import datetime
 import webbrowser
 import threading
+from urllib.parse import urlparse, parse_qs
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
@@ -41,6 +43,57 @@ except Exception:
     pass
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# ===== NO. DOKUMEN anti-kembar (sumber nomor tunggal di server) =====
+# Counter per tahun disimpan permanen di doc_seq.json. DOC_SEQ_LOCK (threading)
+# menjamin dua request yang datang bersamaan TIDAK PERNAH mendapat nomor sama;
+# penyimpanan atomik (tmp + os.replace) membuat restart server pun tidak
+# mengulang nomor yang sudah dikeluarkan.
+DOC_SEQ_FILE = os.path.join(BASE_DIR, "doc_seq.json")
+DOC_SEQ_LOCK = threading.Lock()
+
+
+def _as_int(v, default=0):
+    try:
+        return int(str(v).strip())
+    except Exception:
+        return default
+
+
+def _load_doc_seq():
+    try:
+        with open(DOC_SEQ_FILE, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+            if isinstance(data, dict):
+                return data
+    except Exception:
+        pass
+    return {}
+
+
+def _save_doc_seq(data):
+    tmp = DOC_SEQ_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(data, fh)
+    os.replace(tmp, DOC_SEQ_FILE)   # atomik: aman walau server mati mendadak
+
+
+def doc_no_peek(year, minimum=0):
+    """Nomor berikutnya TANPA memakai (pratinjau NO. DOKUMEN di meta form)."""
+    with DOC_SEQ_LOCK:
+        base = max(_as_int(_load_doc_seq().get(str(year)), 0), _as_int(minimum, 0))
+        return base + 1
+
+
+def doc_no_reserve(year, minimum=0):
+    """Bukukan nomor berikutnya — sekali pakai, tidak pernah dikeluarkan lagi."""
+    with DOC_SEQ_LOCK:
+        data = _load_doc_seq()
+        key = str(year)
+        base = max(_as_int(data.get(key), 0), _as_int(minimum, 0))
+        data[key] = base + 1
+        _save_doc_seq(data)
+        return data[key]
 
 # Form yang akan ditampilkan di halaman index
 FORMS = [
@@ -268,6 +321,21 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         route = self.path.split("?", 1)[0].split("#", 1)[0]
+
+        # NO. DOKUMEN anti-kembar: counter atomik per tahun (dipakai portal.html).
+        # mode=peek   -> nomor berikutnya tanpa dipakai (pratinjau)
+        # mode=reserve-> nomor resmi yang DIJAMIN unik (sekali pakai)
+        if route == "/api/doc-no":
+            q = parse_qs(urlparse(self.path).query)
+            mode = (q.get("mode") or ["peek"])[0] or "peek"
+            year = _as_int((q.get("year") or [""])[0], 0) or datetime.date.today().year
+            minimum = _as_int((q.get("min") or ["0"])[0], 0)
+            try:
+                n = doc_no_reserve(year, minimum) if mode == "reserve" else doc_no_peek(year, minimum)
+                self._send_json(200, {"ok": True, "n": n, "mode": mode})
+            except Exception as e:
+                self._send_json(500, {"ok": False, "error": str(e)})
+            return
 
         # Endpoint Sheets aktif (dibaca dari portal.html) — untuk fix-sheet.html
         if route == "/api/sheet-info":

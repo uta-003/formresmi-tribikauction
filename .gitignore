@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 _*.py
 _*.ps1
+doc_seq.json*

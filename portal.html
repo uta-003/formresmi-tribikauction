@@ -82,8 +82,19 @@ a{color:var(--accent);text-decoration:none}
 .tab{padding:7px 16px;border-radius:9px;background:transparent;color:var(--brandA);font-weight:600;font-size:13px;transition:.2s}
 .tab:hover{color:#fff}
 .tab.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 4px 16px rgba(var(--tint),.45)}
-.top-right{display:flex;align-items:center;gap:10px}
-.clock{font-variant-numeric:tabular-nums;font-size:14px;font-weight:700;color:var(--brandA)}
+.top-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+/* Jam top bar: pil kaki-kaki rapi — jam besar berkedip di atas, tanggal di bawah */
+.clock{display:flex;flex-direction:column;align-items:flex-end;line-height:1;
+  padding:6px 12px;border-radius:13px;background:var(--soft2);border:1px solid var(--line);
+  box-shadow:0 3px 10px rgba(15,23,42,.07)}
+.clock-t{font-variant-numeric:tabular-nums;font-size:16.5px;font-weight:800;letter-spacing:.6px;
+  white-space:nowrap;background:linear-gradient(90deg,var(--brandA),var(--brandB));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.clock-t i{font-style:normal;animation:clockBlink 1s steps(2,start) infinite}
+.clock-d{margin-top:3px;font-size:9.5px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);white-space:nowrap}
+@keyframes clockBlink{50%{opacity:.18}}
+@media (prefers-reduced-motion:reduce){.clock-t i{animation:none}}
 .iconbtn{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s}
 .iconbtn:hover{background:rgba(255,255,255,.18);transform:translateY(-1px)}
 
@@ -301,7 +312,9 @@ footer b{color:#cbd5e1}
   .brand{font-size:15px}
   .logo{height:27px;width:auto;aspect-ratio:412/204;max-width:104px}
   .brand .flag{font-size:21px}
-  .clock{display:none}
+  .clock{padding:5px 10px}
+  .clock-t{font-size:14.5px}
+  .clock-d{font-size:9px;letter-spacing:1.1px}
   .page-head h1{font-size:20px;letter-spacing:-.2px}
   .page-head p{font-size:12.5px;line-height:1.55}
   .card{padding:16px;border-radius:16px}
@@ -677,25 +690,11 @@ footer b{color:#334155}
         <div class="brand"><img class="logo" src="./logo.png?v=9" alt="Tribik Auction" width="69" height="34">
             <span>Form Tribik Auction<small>PORTAL PENGAJUAN</small></span>
     </div>
-    <nav class="tabs">
-      <button class="tab active" data-view="form">Buat Form</button>
-      <button class="tab" data-view="daftar">Daftar</button>
-      <button class="tab" data-view="ringkasan">Ringkasan</button>
-    </nav>
     <div class="top-right">
-      <span class="clock" id="clock">--:--:--</span>
-      <div class="theme-wrap">
-        <button class="iconbtn" id="themeBtn" title="Tema warna" aria-label="Pilih tema warna">🎨</button>
-        <div class="theme-pop" id="themePop">
-          <button class="topt" data-color="merah"><i style="background:#b60001"></i>Merah Tribik</button>
-          <button class="topt" data-color="biru"><i style="background:#38bdf8"></i>Biru Samudra</button>
-          <button class="topt" data-color="hijau"><i style="background:#34d399"></i>Hijau Zamrud</button>
-          <button class="topt" data-color="ungu"><i style="background:#a78bfa"></i>Ungu Nebula</button>
-          <button class="topt" data-color="oranye"><i style="background:#fb923c"></i>Oranye Senja</button>
-          <button class="topt" data-color="tosca"><i style="background:#2dd4bf"></i>Tosca Segar</button>
-        </div>
+      <div class="clock" id="clock" title="Waktu sekarang">
+        <span class="clock-t" id="clockT">--<i>:</i>--<i>:</i>--</span>
+        <span class="clock-d" id="clockD">&nbsp;</span>
       </div>
-      <button class="iconbtn" id="soundBtn" title="Suara">🔊</button>
     </div>
   </div>
 </header>
@@ -711,10 +710,6 @@ footer b{color:#334155}
     <button type="button" data-goto="rowsCard"><span>3</span>Unit</button>
     <button type="button" data-goto="card-4"><span>4</span>Kirim</button>
   </nav>
-  <div class="page-head">
-    <h1>Portal Pengajuan Resmi Tribik Auction</h1>
-    <p>Form Pengajuan Cek Unit, Pengambilan Barang &amp; Pengambilan Unit. Pengajuan akan terunduh otomatis dalam format PDF Resmi &amp; terkirim langsung ke WhatsApp.</p>
-  </div>
 
   <div class="card" id="card-1">
     <h2><span class="num">1</span> Pilih Kategori Form</h2>
@@ -748,7 +743,7 @@ footer b{color:#334155}
             <canvas class="cam-overlay" id="camOverlay"></canvas>
           </div>
           <div class="cam-types" id="camTypes" role="tablist">
-            <button type="button" class="cam-type active" data-dt="ktp">🪪 KTP</button>
+            <button type="button" class="cam-type active" data-dt="ktp">💳 KTP</button>
             <button type="button" class="cam-type" data-dt="sim">🚗 SIM</button>
             <button type="button" class="cam-type" data-dt="idcard">🆔 ID Card</button>
           </div>
@@ -758,7 +753,7 @@ footer b{color:#334155}
                  Elemen dipertahankan (style="display:none") agar seluruh handler JS tetap aman;
                  untuk mengaktifkan kembali, hapus saja style tersebut. -->
             <label class="filepill" for="fKtp" id="ktpPill" style="display:none">
-              <span class="ic">🪪</span>
+              <span class="ic">💳</span>
               <span class="t"><b id="ktpName">Upload Foto KTP / ID Card...</b><span>Klik untuk memilih file</span></span>
               <input type="file" id="fKtp" accept="image/*">
             </label>
@@ -767,7 +762,7 @@ footer b{color:#334155}
             <button type="button" class="btn btn-primary" id="camCapture">📸 Ambil Foto</button>
             <button type="button" class="btn btn-ghost" id="camCancel">🗙 Batal</button>
           </div>
-          <div class="cam-note" id="camNote">Mode <b>KTP</b>: arahkan kartu ke dalam bingkai sampai terkunci — rana otomatis menangkap saat kartu utuh &amp; stabil. Hasil dipotong presisi rasio ID-1 (85,60 × 53,98 mm): rapi &amp; tidak gepeng.</div>
+          <div class="cam-note" id="camNote">Mode <b>KTP</b>: arahkan KTP ke dalam bingkai agar hasilnya lebih maksimal.</div>
         </div>
         <img class="ktp-thumb" id="ktpThumb" alt="Preview KTP" style="display:none">
         <div class="ktp-rm-row" id="ktpRemoveRow" style="display:none">
@@ -802,7 +797,6 @@ footer b{color:#334155}
     <div class="actions">
       <button class="btn btn-ghost" id="sigReset">🔄 Reset Tanda Tangan</button>
       <button class="btn btn-ghost" id="resetForm">Reset Form</button>
-      <button class="btn btn-ghost" id="saveDraft">💾 Simpan Draft</button>
       <button class="btn btn-primary" id="submitForm">🚀 Kirim Form PDF</button>
     </div>
   </div>
@@ -895,7 +889,7 @@ const state = {
   ktpName: '',
   ktpData: '',
   draft: null,
-  sound: true,
+  myDocN: 0,   // No. Dokumen yang sudah DIBUKUKAN untuk form ini (0 = belum ada)
   filter: 'all',
 };
 let sigDrawn = false;
@@ -918,40 +912,24 @@ function deviceToken(){
 }
 
 
-/* ============ SOUND ENGINE (Web Audio) ============ */
-let audioCtx = null;
-function ac(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return audioCtx; }
-function tone(freq, dur, when){ try{
-  const c=ac(); if(!c) return;
-  const o=c.createOscillator(), g=c.createGain();
-  o.type='sine'; o.frequency.value=freq;
-  const t=c.currentTime+(when||0);
-  g.gain.setValueAtTime(0.001,t);
-  g.gain.linearRampToValueAtTime(0.14,t+0.01);
-  g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-  o.connect(g); g.connect(c.destination);
-  o.start(t); o.stop(t+dur+0.02);
-}catch(e){} }
-function snd(kind){
-  if(!state.sound) return;
-  if(kind==='click') tone(1568,.04);
-  else if(kind==='open'){ tone(440,.1); tone(660,.1,.05); }
-  else if(kind==='shutter'){ tone(880,.06); tone(440,.08,.04); }
-  else if(kind==='success'){ tone(660,.08); tone(880,.08,.06); tone(1100,.1,.12); }
-  else if(kind==='error'){ tone(220,.12); tone(174,.14,.08); }
-}
-function toggleSound(){
-  state.sound=!state.sound;
-  $('soundBtn').textContent = state.sound?'🔊':'🔇';
-  $('soundBtn').style.opacity = state.sound?'1':'.5';
-  if(state.sound) snd('success');
-}
+/* ============ SOUND — DIMATIKAN TOTAL ============
+   Semua suara form ini dihilangkan: klik, kamera/shutter, sukses, error —
+   tidak ada AudioContext yang dibuat sama sekali. snd() dipertahankan sebagai
+   fungsi kosong agar ratusan pemanggilan lama tetap aman. */
+function snd(){ /* sengaja kosong — form ini harus senyap */ }
+
 
 /* ============ CLOCK ============ */
 function pad(n){ return n<10?'0'+n:''+n; }
 function tickClock(){
   const d=new Date();
-  $('clock').textContent = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  const t = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  const elT = $('clockT');
+  if(elT) elT.innerHTML = t.slice(0,2)+'<i>:</i>'+t.slice(3,5)+'<i>:</i>'+t.slice(6);
+  const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const BULN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const elD = $('clockD');
+  if(elD) elD.textContent = HARI[d.getDay()]+', '+d.getDate()+' '+BULN[d.getMonth()]+' '+d.getFullYear();
 }
 setInterval(tickClock,1000); tickClock();
 
@@ -964,23 +942,6 @@ function toast(msg, type){
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>{ t.className='toast'; },3200);
 }
-
-/* ============ TABS ============ */
-document.querySelectorAll('.tab').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    snd('click');
-    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    $('view-'+btn.dataset.view).classList.add('active');
-    /* posisi TTD bisa berubah saat pindah tampilan -> hitung ulang visibilitas bar aksi */
-    if(typeof syncSigActions==='function'){
-      const onForm = btn.dataset.view==='form';
-      if(onForm) startSigActionsWatch(); else stopSigActionsWatch();
-      syncSigActions();
-    }
-  });
-});
 
 /* ============ DATE & DOC NUMBER (anti-kembar) ============ */
 function fmtDate(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear(); }
@@ -1000,7 +961,7 @@ function docNumberFormat(n){
    Beda device/PC/tab/pembukaan => kombinasi kode berbeda, ditambahkan DI
    BELAKANG No. Dokumen (contoh: TRB/2026/0001/FCUL-A7K3M9PQ).
    - devCode() : 4 huruf stabil per browser/device (localStorage)
-   - openCode(): 4 huruf stabil per sesi pembukaan form (sessionStorage)
+   - openCode(): 4 huruf BARU tiap halaman dibuka/di-refresh (sessionStorage)
    - Ditambah serial urutan yang selalu naik  => praktis mustahil kembar. */
 function randDocCode(len){
   len = len || 6;
@@ -1029,36 +990,95 @@ function openCode(){
   if(!v || !/^[A-Z2-9]{4}$/.test(v)){ v = randDocCode(4); try{ sessionStorage.setItem(k,v); }catch(e2){} }
   return v;
 }
-
-/* Pratinjau nomor berikutnya (meta form). TIDAK menaikkan urutan — hanya tampilan.
-   Sudah memuat kode unik perangkat+sesi sehingga tiap pembuka melihat nomornya sendiri. */
-function nextDocNo(){
-  return docNumberFormat(docSeq()+1)+'-'+devCode()+openCode();
+/* --- Kode unik ikut BERUBAH tiap form dibuka / di-refresh / setelah kirim ---
+   Dibuat ulang saat halaman dimuat (F5 = kode baru) dan saat clearForm sesudah
+   tombol Kirim Form PDF, sehingga NO. DOKUMEN selalu baru sepenuhnya:
+   nomor seri dari server + kode acak yang berbeda-beda tiap kesempatan. */
+function regenOpenCode(){
+  const v = randDocCode(4);
+  try{ sessionStorage.setItem('tribik_open_code', v); }catch(e){}
+  return v;
 }
-/* Alokasikan nomor berikutnya SEPENUHNYA UNIK untuk disubmit.
-   Dipakai sekali-per-request lewat Web Locks API sehingga dua tab/dua link yang
-   dibuka bersamaan tetap mendapat nomor berbeda (tidak pernah kembar), lalu
-   naikkan & simpan urutan, dan pastikan tidak bertabrakan dengan nomor lama.
-   Setiap nomor juga diberi sufiks kode unik dibelakangnya agar device/PC yang
-   berbeda tidak pernah menghasilkan nomor dokumen yang sama. */
+regenOpenCode();   // tiap pembukaan / refresh halaman: kode unik baru
+
+/* --- NO. DOKUMEN anti-kembar: server = SATU-SATUNYA sumber nomor ---
+   server.py menyimpan counter per tahun (doc_seq.json + threading.Lock), sehingga
+   SEMUA browser/tab/pembukaan pada mesin ini — kapan pun & di mana pun — tidak
+   pernah bisa mendapat nomor yang sama:
+   - setiap pembukaan form MEMBUKUKAN (reserve) nomornya sendiri, jadi pratinjau
+     di dua tab yang dibuka bersamaan dijamin berbeda;
+   - submit memakai nomor yang sudah dibukukan itu (sekali pakai);
+   - setelah kirim/reset, nomor baru dibukukan — nomor lama tidak pernah
+     dipakai ulang, dan tetap dicek terhadap riwayat + antrean.
+   Fallback lokal (Web Locks + urutan localStorage) hanya bila server tak terjangkau. */
+function docNoText(n){ return docNumberFormat(n)+'-'+devCode()+openCode(); }
+function fetchDocNo(mode){
+  const y = new Date().getFullYear();
+  return fetch('/api/doc-no?mode='+mode+'&year='+y+'&min='+docSeq(), {cache:'no-store'})
+    .then(function(r){ return (r && r.ok) ? r.json() : null; })
+    .then(function(j){ return (j && j.ok && typeof j.n==='number') ? j.n : null; })
+    .catch(function(){ return null; });        // server mati -> null -> fallback lokal
+}
+/* Pratinjau di meta form: nomor yang sudah dibukukan untuk form ini. */
+function nextDocNo(){ return docNoText(state.myDocN || docSeq()+1); }
+/* Bukukan nomor BARU dari server — dipanggil saat form dibuka & setiap reset. */
+function reserveMyDocNo(){
+  return fetchDocNo('reserve').then(function(n){
+    if(!n) return null;
+    state.myDocN = n;
+    if(docSeq() < n) setSeq(n);
+    const el = $('docNo'); if(el) el.textContent = docNoText(n);
+    return n;
+  });
+}
+/* Nomor resmi saat menekan Kirim: pakai nomor milik form ini; bila belum ada
+   (server sempat mati saat form dibuka), bukukan sekarang; nomor lama di riwayat/
+   antrean dilewati. Dilindungi Web Locks agar antar-tab tetap bergiliran. */
 function nextUniqueDocNumber(){
   return new Promise(function(resolve){
-    function allocate(){
-      let used = usedDocNumbers();
-      let n = docSeq();
-      let cand;
-      for(let it=0; it<200; it++){          // lompati semua nomor yang sudah dipakai
-        n += 1;
-        cand = docNumberFormat(n)+'-'+devCode()+openCode();
-        if(!used.has(cand)) break;
-        used.add(cand);                     // tandai tiap kandidat agar tidak dipakai ulang
+    let settled = false;
+    function finish(cand){ if(settled) return; settled = true; resolve(cand); }
+    /* inti alokasi — galat ditangkap di allocate() agar submit tidak menggantung */
+    async function allocateCore(){
+      const used = usedDocNumbers();
+      let n = state.myDocN || (await fetchDocNo('reserve')) || 0;
+      if(n){
+        let cand = docNoText(n);
+        for(let it=0; it<200 && used.has(cand); it++){   // lewati nomor lama
+          used.add(cand);
+          n = (await fetchDocNo('reserve')) || (n + 1);
+          cand = docNoText(n);
+        }
+        state.myDocN = n;
+        if(docSeq() < n) setSeq(n);
+        finish(cand);
+        return;
       }
-      setSeq(n);
-      resolve(cand);
+      /* fallback: server tak terjangkau — urutan lokal, tetap anti-kembar antar-tab */
+      let n2 = docSeq(), cand2;
+      for(let it=0; it<200; it++){
+        n2 += 1;
+        cand2 = docNoText(n2);
+        if(!used.has(cand2)) break;
+        used.add(cand2);
+      }
+      setSeq(n2);
+      finish(cand2);
+    }
+    async function allocate(){
+      try{ await allocateCore(); }
+      catch(e){ /* galat tak terduga: tetap selesaikan agar submit tidak menggantung */
+        try{ finish(docNoText(docSeq() + 1)); }catch(e2){ finish('TRB/ERROR'); }
+      }
     }
     if(typeof navigator!=='undefined' && navigator.locks && navigator.locks.request){
       // serentak antar-tab pada origin yang sama (localhost): jalankan satu-per-satu
-      navigator.locks.request('tribik_doc_no_allocator', allocate);
+      try{ navigator.locks.request('tribik_doc_no_allocator', allocate).catch(function(){}); }
+      catch(e){ allocate(); return; }
+      /* Jaring pengaman: bila pemberian lock tertahan (browser sibuk / headless),
+         alokasi dijalankan langsung — nomor tidak mungkin kembar karena server
+         adalah sumber tunggal; dampaknya hanya lompat nomor, bukan nomor sama. */
+      setTimeout(function(){ if(!settled) allocate(); }, 1500);
     } else {
       allocate();   // fallback: browser tanpa Web Locks — masih aman utk satu browser
     }
@@ -1091,7 +1111,8 @@ function rowTemplate(cat, data, no){
   no = no || 1;
   if(cat==='barang'){
     return '<div class="row g3">'
-      +'<div><label><span class="row-no">'+no+'</span> Nama / Rincian Barang <span class="req">*</span></label><input type="text" class="r-nama" value="'+(data.nama||'')+'" placeholder="cth: Dokumen STNK, kunci, dll"></div>'
+      +'<div><label><span class="row-no">'+no+'</span> Nomor Polisi <span class="req">*</span></label><input type="text" class="r-nopol" value="'+(data.nopol||'')+'" placeholder="cth: B 1234 XYZ"></div>'
+      +'<div><label>Nama / Rincian Barang <span class="req">*</span></label><input type="text" class="r-nama" value="'+(data.nama||'')+'" placeholder="cth: Dokumen STNK, kunci, dll"></div>'
       +'<div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
       +'<div><label>Jumlah <span class="req">*</span></label><input type="number" min="1" class="r-jml" value="'+(data.jml||1)+'"></div>'
       +'<div><label>Satuan <span class="req">*</span></label><input type="text" class="r-sat" value="'+(data.sat||'Pcs')+'" placeholder="cth: Pcs, unit, lbr"></div>'
@@ -1126,8 +1147,8 @@ function syncRowsFromDOM(){
   state.rows = els.map(r=>{
     const g=n=>{ const el=r.querySelector(n); return el?el.value.trim():''; };
     if(state.cat==='barang'){
-      const nama=g('.r-nama'), jml=g('.r-jml'), sat=g('.r-sat'), ket=g('.r-ket');
-      return (nama||jml||sat||ket) ? {nama,jml,sat,ket} : {};
+      const nopol=g('.r-nopol'), nama=g('.r-nama'), jml=g('.r-jml'), sat=g('.r-sat'), ket=g('.r-ket');
+      return (nopol||nama||jml||sat||ket) ? {nopol,nama,jml,sat,ket} : {};
     }
     const nopol=g('.r-nopol'), merk=g('.r-merk');
     return (nopol||merk) ? {nopol,merk} : {};
@@ -1205,9 +1226,8 @@ const DT_MODES = {
 let camDocType = 'ktp';
 function camNoteText(){
   const m = DT_MODES[camDocType] || DT_MODES.ktp;
-  /* ukuran hasil ikut jenis kartu: ID CARD tegak, KTP & SIM mendatar (semua ID-1 asli) */
-  const mm = camDocType==='idcard' ? '53,98 × 85,60 mm' : '85,60 × 53,98 mm';
-  return 'Mode <b>'+m.label+'</b>: arahkan '+m.label+' ke dalam bingkai sampai terkunci — rana otomatis menangkap saat kartu utuh &amp; stabil. Hasil dipotong presisi rasio ID-1 ('+mm+'): rapi &amp; tidak gepeng.';
+  /* kalimat singkat & tetap per jenis kartu: sebut langsung nama jenisnya (KTP / SIM / ID CARD) */
+  return 'Mode <b>'+m.label+'</b>: arahkan '+m.label+' ke dalam bingkai agar hasilnya lebih maksimal.';
 }
 
 function showThumb(){
@@ -1413,11 +1433,11 @@ function collectRows(){
   return Array.from($('rowsArea').querySelectorAll('.row')).map(r=>{
     const g=n=>{ const el=r.querySelector(n); return el?el.value.trim():''; };
     if(state.cat==='barang'){
-      return { nama:g('.r-nama'), jml:g('.r-jml'), sat:(g('.r-sat')||'Pcs'), ket:g('.r-ket') };
+      return { nopol:g('.r-nopol'), nama:g('.r-nama'), jml:g('.r-jml'), sat:(g('.r-sat')||'Pcs'), ket:g('.r-ket') };
     }
     return { nopol:g('.r-nopol'), merk:g('.r-merk') };
   }).filter(r=>{
-    if(state.cat==='barang') return r.nama||r.jml||r.sat||r.ket;
+    if(state.cat==='barang') return r.nopol||r.nama||r.jml||r.sat||r.ket;
     return r.nopol||r.merk;
   });
 }
@@ -1447,15 +1467,14 @@ function clearForm(){
   showThumb(); stopCam();
   sigCtx&&sigCtx.clearRect(0,0,$('sigCanvas').width,$('sigCanvas').height);
   sigDrawn=false;
-  state.rows=[{}]; renderRows(); refreshDocMeta();
+  state.rows=[{}]; renderRows();
+  state.myDocN = 0;          // nomor sebelumnya (sudah terpakai) dibuang
+  regenOpenCode();           // kode unik ikut diganti — kirim/reset = nomor & kode baru
+  refreshDocMeta();          // tampil instan dari urutan lokal (n+1)...
+  reserveMyDocNo();          // ...lalu diganti nomor BARU hasil bukuan server
   clearInvalidMarks();
 }
 $('resetForm').addEventListener('click', async ()=>{ if(await Modal.confirm('Reset seluruh form?', { danger:true })){ clearForm(); toast('Form di-reset','ok'); snd('click'); } });
-$('saveDraft').addEventListener('click', ()=>{
-  const d=collectForm();
-  localStorage.setItem('tribik_draft', JSON.stringify(d));
-  toast('Draft tersimpan di browser','ok'); snd('success');
-});
 
 /* ============ VALIDASI ============
    Aturan: SEMUA isian wajib diisi — data pemohon, foto KTP/ID, seluruh kolom
@@ -1468,8 +1487,8 @@ function collectRowsRaw(){
     const g = n => { const el=f(n); return el ? el.value.trim() : ''; };
     if(state.cat==='barang'){
       return { el:rowEl,
-        f:{ nama:f('.r-nama'), jml:f('.r-jml'), sat:f('.r-sat'), ket:f('.r-ket') },
-        v:{ nama:g('.r-nama'), jml:g('.r-jml'), sat:g('.r-sat'), ket:g('.r-ket') } };
+        f:{ nopol:f('.r-nopol'), nama:f('.r-nama'), jml:f('.r-jml'), sat:f('.r-sat'), ket:f('.r-ket') },
+        v:{ nopol:g('.r-nopol'), nama:g('.r-nama'), jml:g('.r-jml'), sat:g('.r-sat'), ket:g('.r-ket') } };
     }
     return { el:rowEl,
       f:{ nopol:f('.r-nopol'), merk:f('.r-merk') },
@@ -1501,13 +1520,14 @@ function validate(d){
   rows.forEach(function(r,i){
     const no = 'Baris '+(i+1)+': ';
     const kosong = state.cat==='barang'
-      ? !r.v.nama && !r.v.jml && !r.v.sat && !r.v.ket
+      ? !r.v.nopol && !r.v.nama && !r.v.jml && !r.v.sat && !r.v.ket
       : !r.v.nopol && !r.v.merk;
     if(kosong){
       bad(r.el, 'Baris '+(i+1)+' masih kosong — lengkapi semua kolomnya'+(rows.length>1 ? ' atau hapus baris ini' : ''));
       return;
     }
     if(state.cat==='barang'){
+      if(!r.v.nopol)               bad(r.f.nopol, no+'Nomor Polisi wajib diisi');
       if(!r.v.nama)                bad(r.f.nama, no+'Nama / Rincian Barang wajib diisi');
       if(!(parseFloat(r.v.jml)>0)) bad(r.f.jml , no+'Jumlah wajib diisi (angka minimal 1)');
       if(!r.v.sat)                 bad(r.f.sat , no+'Satuan wajib diisi');
@@ -1575,7 +1595,7 @@ function paperHTML(d){
   // zebra striping: alternate kv rows (SECTION DATA + panel rows)
   const zeb = (z)=>' class="kv'+(z?' zebra':'')+'"';
   let rowsHtml = d.rows.map((r,i)=>{
-    if(d.cat==='barang') return '<div'+zeb(i%2===1)+'><b>Item '+(i+1)+':</b><span>'+esc(r.nama||'-')+' — '+esc(r.jml||'-')+' '+esc(r.sat||'Pcs')+(r.ket?' ('+esc(r.ket)+')':'')+'</span></div>';
+    if(d.cat==='barang') return '<div'+zeb(i%2===1)+'><b>Item '+(i+1)+':</b><span>'+esc(r.nopol||'-')+' • '+esc(r.nama||'-')+' — '+esc(r.jml||'-')+' '+esc(r.sat||'Pcs')+(r.ket?' ('+esc(r.ket)+')':'')+'</span></div>';
     return '<div'+zeb(i%2===1)+'><b>Unit '+(i+1)+':</b><span>'+esc(r.nopol||'-')+' — '+esc(r.merk||'-')+'</span></div>';
   }).join('');
   return '<div class="ph"><h4>TRIBIK AUCTION</h4><p>'+CATS[d.cat].pdf+'</p><p>No. '+esc(d.docNo)+' &nbsp;•&nbsp; '+esc(d.date)+'</p></div>'
@@ -1792,7 +1812,7 @@ function buildPdf(d){
     doc.roundedRect(W-M-6-2.2, y, 2.2, hgt, 1.1, 1.1, 'F');
     doc.setFont('helvetica','bold'); doc.setFontSize(6.4); doc.setTextColor(255,255,255);
     const cols = d.cat==='barang'
-      ? [['NO.',M+10],['NAMA ITEM',M+20],['JUMLAH',M+96],['SATUAN',M+120],['KETERANGAN',M+142]]
+      ? [['NO.',M+10],['NOMOR POLISI',M+20],['NAMA / RINCIAN BARANG',M+52],['JUMLAH',M+98],['SATUAN',M+118],['KETERANGAN',M+140]]
       : [['NO.',M+10],['NOMOR POLISI',M+20],['MERK / TYPE',M+82]];
     cols.forEach(function(c){ sp(c[0], c[1], y+6, 0.8); });
     y += hgt + 2;
@@ -1821,7 +1841,7 @@ function buildPdf(d){
   function drawRow(i, last){
     const r = d.rows[i];
     if(d.cat==='barang'){
-      rowItem(i, [[M+22,70,fit(r.nama,70)],[M+96,20,fit(r.jml,20)],[M+120,20,fit(r.sat,20)],[M+142,36,fit(r.ket,36)]], last);
+      rowItem(i, [[M+20,30,fit(r.nopol,30)],[M+52,44,fit(r.nama,44)],[M+98,16,fit(r.jml,16)],[M+118,18,fit(r.sat,18)],[M+140,36,fit(r.ket,36)]], last);
     }else{
       rowItem(i, [[M+22,54,fit(r.nopol,54)],[M+82,96,fit(r.merk,96)]], last);
     }
@@ -2102,7 +2122,7 @@ $('submitForm').addEventListener('click', async function(){
   // 2) Teruskan ke WhatsApp
   const lines = d.rows.map(function(r,i){
     if(d.cat==='barang'){
-      return (i+1)+'. Nama: '+(r.nama||'-')+' | Jumlah: '+(r.jml||'-')+' '+(r.sat||'Pcs')+(r.ket?' | Keterangan: '+r.ket:'');
+      return (i+1)+'. No. Polisi: '+(r.nopol||'-')+' | Nama: '+(r.nama||'-')+' | Jumlah: '+(r.jml||'-')+' '+(r.sat||'Pcs')+(r.ket?' | Keterangan: '+r.ket:'');
     }
     return (i+1)+'. No. Polisi: '+(r.nopol||'-')+' | Merk/Type: '+(r.merk||'-');
   });
@@ -2125,9 +2145,12 @@ $('submitForm').addEventListener('click', async function(){
   snd('success');
   openPdfModal(d);
   autoDownloadPdf(d);
-  refreshDocMeta();
   renderHistory();
   renderSummary();
+  /* 4) RESET OTOMATIS — begitu Kirim (PDF + WhatsApp) selesai, form dikosongkan
+     dan NO. DOKUMEN langsung berganti ke nomor BARU hasil bukuan server, jadi
+     tidak pernah kembar walau form dibuka bersamaan di tab/browser lain. */
+  clearForm();
 });
 
 /* ========== SINKRONIZASI PARALEL: GOOGLE SHEETS (Apps Script web-app) ========== */
@@ -2138,7 +2161,7 @@ async function saveToSheet(d){
   /* bangun teks penuh untuk kolom “Daftar Barang / Unit” */
   const rowsText = (d.rows||[]).map((r,i)=>{
     if(d.cat==='barang'){
-      return (i+1)+'. '+r.nama+' | Jumlah: '+(r.jml||0)+' '+(r.sat||'Pcs')+(r.ket?' | Keterangan: '+r.ket:'');
+      return (i+1)+'. No. Polisi: '+(r.nopol||'-')+' | '+r.nama+' | Jumlah: '+(r.jml||0)+' '+(r.sat||'Pcs')+(r.ket?' | Keterangan: '+r.ket:'');
     }
     return (i+1)+'. '+r.nopol+' | Merk/Type: '+(r.merk||'-');
   }).join(NL);
@@ -2201,7 +2224,7 @@ function renderHistory(){
   }
   tbody.innerHTML = rows.map((r,i)=>{
     const ident = r.cat==='barang'
-      ? r.rows.map(x=>x.nama||'-').join('; ')
+      ? r.rows.map(x=>(x.nopol?x.nopol+' • ':'')+(x.nama||'-')).join('; ')
       : r.rows.map(x=>x.nopol||'-').join('; ');
     return '<tr>'
       +'<td data-label="No. Dokumen"><b>'+esc(r.docNo)+'</b></td>'
@@ -2277,7 +2300,7 @@ function initStepNav(){
   }
 }
 /* ============ BAR AKSI DI BAWAH TANDA TANGAN (KHUSUS HP) ============
-   Tombol (reset TTD, reset form, simpan draft, kirim PDF) duduk di alur normal
+   Tombol (reset TTD, reset form, kirim PDF) duduk di alur normal
    tepat di bawah kotak tanda tangan, tapi baru ditampilkan setelah pengguna
    menggulir turun mendekati area tanda tangan — supaya tidak menutupi layar
    saat pengguna masih mengerjakan poin 1-3. */
@@ -2340,7 +2363,7 @@ function initSecureFallback(){
 
 /* ============ INIT ============ */
 (function init(){
-  $('soundBtn').addEventListener('click', toggleSound);
+
   document.querySelector('.modal-back').addEventListener('click', e=>{ if(e.target===$('pdfModal')) closePdfModal(); });
   window.closePdfModal = closePdfModal;
   window.downloadPdf = downloadPdf;
@@ -2370,6 +2393,7 @@ function initSecureFallback(){
   initSig();
   renderRows();
   refreshDocMeta();
+  reserveMyDocNo();      // buka form = bukukan NO. DOKUMEN sendiri (anti-kembar)
   renderHistory();
   renderSummary();
 
@@ -2382,26 +2406,7 @@ function initSecureFallback(){
   setTimeout(flushPendingSync, 2500);
 })();
 </script>
-<script>
-/* ====== Pemilih Tema Warna ====== */
-(function(){
-  var pop=document.getElementById('themePop'),btn=document.getElementById('themeBtn');
-  if(!pop||!btn)return;
-  var MAP={merah:'#b60001',biru:'#38bdf8',hijau:'#34d399',ungu:'#a78bfa',oranye:'#fb923c',tosca:'#2dd4bf'};
-  function apply(c){
-    document.documentElement.setAttribute('data-color',c);
-    try{localStorage.setItem('tb_color',c)}catch(e){}
-    var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',MAP[c]||MAP.merah);
-    var it=pop.querySelectorAll('.topt');
-    for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-color')===c);
-  }
-  btn.addEventListener('click',function(e){e.stopPropagation();pop.classList.toggle('show');});
-  document.addEventListener('click',function(e){if(!pop.contains(e.target)&&e.target!==btn)pop.classList.remove('show');});
-  pop.addEventListener('click',function(e){var b=e.target.closest('.topt');if(b){apply(b.getAttribute('data-color'));pop.classList.remove('show');}});
-  var saved='merah';try{saved=localStorage.getItem('tb_color')||'merah'}catch(e){}
-  apply(saved);
-})();
-</script>
+
 <script>
 /* ====== Pop-up "Cara Pemakaian" — gerbang sebelum masuk halaman utama ====== */
 (function(){
